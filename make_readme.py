@@ -23,8 +23,8 @@ import re
 
 
 NBVIEWER = 'https://nbviewer.jupyter.org/urls'
-REPO = 'bitbucket.org/midoss/analysis-rachael/raw/default'
-REPO_DIR = 'notebooks'
+REPO = 'bitbucket.org/midoss/analysis-ashutosh/raw/default'
+REPO_DIR = ' '
 TITLE_PATTERN = re.compile('#{1,6} ?')
 
 
