@@ -5,7 +5,7 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[plot_salinity.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/ /plot_salinity.ipynb)  
+* ##[plot_salinity.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//plot_salinity.ipynb)  
     
 
 ##License
