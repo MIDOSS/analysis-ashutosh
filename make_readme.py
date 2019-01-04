@@ -24,7 +24,7 @@ import re
 
 NBVIEWER = 'https://nbviewer.jupyter.org/urls'
 REPO = 'bitbucket.org/midoss/analysis-ashutosh/raw/default'
-REPO_DIR = ' '
+REPO_DIR = './'
 TITLE_PATTERN = re.compile('#{1,6} ?')
 
 
