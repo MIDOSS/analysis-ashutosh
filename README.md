@@ -7,6 +7,10 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[plot_salinity.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//plot_salinity.ipynb)  
     
+* ##[wind_speed_jan.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_speed_jan.ipynb)  
+    
+    **This script calculates wind speed **  
+
 
 ##License
 
