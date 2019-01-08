@@ -11,6 +11,12 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **This script calculates wind speed **  
 
+* ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
+    
+    **Land Mask**  
+
+* ##[landmask_hdrps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask_hdrps.ipynb)  
+    
 
 ##License
 
