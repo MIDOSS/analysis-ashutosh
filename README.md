@@ -15,6 +15,10 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Land Mask**  
 
+* ##[wind_climatology_maps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_climatology_maps.ipynb)  
+    
+    **Wind Climatology Maps**  
+
 * ##[landmask_hdrps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask_hdrps.ipynb)  
     
 
