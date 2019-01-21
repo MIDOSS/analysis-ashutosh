@@ -15,6 +15,8 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **This script calculates wind speed **  
 
+* ##[SpringNeapTide.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//SpringNeapTide.ipynb)  
+    
 * ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
     
     **Land Mask**  
