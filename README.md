@@ -5,10 +5,6 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[Compare_ssh_currents.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_ssh_currents.ipynb)  
-    
-    **Comparing tides with currents**  
-
 * ##[River_plume.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//River_plume.ipynb)  
     
 * ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
@@ -38,6 +34,10 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[WindSpeedTimeseries.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//WindSpeedTimeseries.ipynb)  
     
     **Wind Speed Time Series**  
+
+* ##[Compare_ssh_currents_winds.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_ssh_currents_winds.ipynb)  
+    
+    **Comparing tides with currents**  
 
 * ##[landmask_hdrps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask_hdrps.ipynb)  
     
