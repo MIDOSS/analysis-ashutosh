@@ -6,16 +6,22 @@ Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
 * ##[River_plume.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//River_plume.ipynb)  
+
+
     
 * ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
     
 * ##[plot_salinity.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//plot_salinity.ipynb)  
+
+    **Freshet analysis**  
     
 * ##[wind_speed_jan.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_speed_jan.ipynb)  
     
-    **This script calculates wind speed **  
+    **This script calculates wind speed over full grid**  
 
 * ##[SpringNeapTide.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//SpringNeapTide.ipynb)  
+
+    **Trends in spring and neap tides at three points**  
     
 * ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
     
@@ -27,6 +33,8 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Pick grid points.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Pick grid points.ipynb)  
     
+    **Locate grid points on NEMO and HRDPS grids**  
+
 * ##[wind_climatology_maps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_climatology_maps.ipynb)  
     
     **Wind Climatology Maps**  
