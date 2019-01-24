@@ -7,13 +7,10 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[River_plume.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//River_plume.ipynb)  
 
-
+    **Freshet analysis**  
     
 * ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
     
-* ##[plot_salinity.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//plot_salinity.ipynb)  
-
-    **Freshet analysis**  
     
 * ##[wind_speed_jan.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_speed_jan.ipynb)  
     
