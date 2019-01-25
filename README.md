@@ -7,6 +7,8 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[River_plume.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//River_plume.ipynb)  
     
+    **Freshet analysis**  
+
 * ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
     
 * ##[wind_speed_jan.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_speed_jan.ipynb)  
@@ -15,6 +17,10 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[SpringNeapTide.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//SpringNeapTide.ipynb)  
     
+* ##[Salinity_Regression.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Salinity_Regression.ipynb)  
+    
+    **Discharge Vs Salinity in SoG**  
+
 * ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
     
     **Land Mask**  
@@ -39,7 +45,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Compare_ssh_currents_winds.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_ssh_currents_winds.ipynb)  
     
-    **Comparing tides with currents amd winds**  
+    **Comparing tides with currents and winds**  
 
 * ##[landmask_hdrps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask_hdrps.ipynb)  
     
