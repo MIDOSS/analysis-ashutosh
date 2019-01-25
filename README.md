@@ -6,19 +6,14 @@ Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
 * ##[River_plume.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//River_plume.ipynb)  
-
-    **Freshet analysis**  
     
 * ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
     
-    
 * ##[wind_speed_jan.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_speed_jan.ipynb)  
     
-    **This script calculates wind speed over full grid**  
+    **This script calculates wind speed **  
 
 * ##[SpringNeapTide.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//SpringNeapTide.ipynb)  
-
-    **Trends in spring and neap tides at three points**  
     
 * ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
     
@@ -28,10 +23,12 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Current Analysis**  
 
+* ##[Buoyancy_correlation.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Buoyancy_correlation.ipynb)  
+    
+    **Buoyancy Correlation**  
+
 * ##[Pick grid points.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Pick grid points.ipynb)  
     
-    **Locate grid points on NEMO and HRDPS grids**  
-
 * ##[wind_climatology_maps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_climatology_maps.ipynb)  
     
     **Wind Climatology Maps**  
@@ -42,7 +39,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Compare_ssh_currents_winds.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_ssh_currents_winds.ipynb)  
     
-    **Comparing tides with currents**  
+    **Comparing tides with currents amd winds**  
 
 * ##[landmask_hdrps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask_hdrps.ipynb)  
     
