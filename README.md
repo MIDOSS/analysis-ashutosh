@@ -33,6 +33,10 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Buoyancy Correlation**  
 
+* ##[Drifter Locations.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Drifter Locations.ipynb)  
+    
+    **Drifter Relase Locations on Nemo Grid**  
+
 * ##[Pick grid points.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Pick grid points.ipynb)  
     
 * ##[wind_climatology_maps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_climatology_maps.ipynb)  
