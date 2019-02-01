@@ -66,8 +66,8 @@ def generate_paths_NEMO(timestart, timeend, path, outpath):
             if exc.errno != errno.EEXIST:
                 raise
     for line in [shell_U, shell_V, shell_W, shell_T]:
-        print(line)
-        #os.system(line)
+        #print(line)
+        os.system(line)
 
 
 def generate_paths_HRDPS(timestart, timeend, path, outpath):
@@ -98,8 +98,8 @@ def generate_paths_HRDPS(timestart, timeend, path, outpath):
         except OSError as exc:
             if exc.errno != errno.EEXIST:
                 raise
-    print(shell_wind)
-    #os.system(shell_wind)
+    #print(shell_wind)
+    os.system(shell_wind)
 
 def generate_paths_WW3(timestart, timeend, path, outpath):
     months = {1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5 : 'may', 6: 'jun', 7: 'jul', 8: 'aug', 9 : 'sep', 10: 'oct', 11 :'nov',12: 'dec' }
@@ -128,8 +128,8 @@ def generate_paths_WW3(timestart, timeend, path, outpath):
         except OSError as exc:
             if exc.errno != errno.EEXIST:
                 raise
-    print(shell_wave)
-    #os.system(shell_wave)
+    #print(shell_wave)
+    os.system(shell_wave)
 
 
 timestart = input('Enter the start time in the format |year month day| e.g. 2015 Jan 1:\n')
