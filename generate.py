@@ -128,31 +128,32 @@ def generate_paths_WW3(timestart, timeend, path, outpath):
         except OSError as exc:
             if exc.errno != errno.EEXIST:
                 raise
+    
     #print(shell_wave)
     os.system(shell_wave)
 
 
-timestart = input('Enter the start time in the format |year month day| e.g. 2015 Jan 1:\n')
-timeend = input('Enter the end time in the format |year month day| e.g. 2015 Jan 1:\n')
-runs = int(input('Run: \n1) All \n2) NEMO ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n'))
+timestart = input('\nEnter the start time in the format |year month day| e.g. 2015 Jan 1:\n--> ')
+timeend = input('\nEnter the end time in the format |year month day| e.g. 2015 Jan 1:\n--> ')
+runs = int(input('\nRun: \n1) All \n2) NEMO ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n--> '))
 runsdict = {1: 'All', 2: 'NEMO ONLY', 3: 'HRDPS ONLY', 4: 'WW3 ONLY'}
-ask = input(f'Proceed with concatenating {runsdict[runs]} from {timestart} to {timeend}?\n')
+ask = input(f'\nProceed with concatenating {runsdict[runs]} from {timestart} to {timeend}?\n--> ')
 beganat = time.time()
 if ask in ['y', 'yes', 'YES', 'Y']:
     if runs == 1:
         generate_paths_NEMO(timestart,timeend, nemoinput, outpath)
         nemotime = time.time() - beganat
-        print('NEMO done\n')
-        print('Time elapsed: {}\n'.format(conv_time(nemotime)))
+        print('\n\nNEMO done\n')
+        print('Time elapsed: {}\n\n'.format(conv_time(nemotime)))
         generate_paths_HRDPS(timestart,timeend, hdinput, outpath)
         hdtime = time.time() - beganat
-        print('HRDPS done\n')
+        print('\nHRDPS done\n')
         print('Time elapsed: {}\n'.format(conv_time(hdtime-nemotime)))
-        print('Total time elapsed: {}\n'.format(conv_time(hdtime)))
+        print('Total time elapsed: {}\n\n'.format(conv_time(hdtime)))
         generate_paths_WW3(timestart,timeend, hdinput, outpath)
         wwtime = time.time() - beganat
-        print('WW3 done')
-        print('Time elapsed: {}'.format(conv_time(wwtime-hdtime)))
+        print('\nWW3 done\n')
+        print('Time elapsed: {}\n'.format(conv_time(wwtime-hdtime)))
         print('Total time elapsed: {}\n'.format(conv_time(wwtime)))
     if runs == 2:
         generate_paths_NEMO(timestart,timeend, nemoinput, outpath)
