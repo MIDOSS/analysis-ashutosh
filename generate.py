@@ -151,7 +151,7 @@ if ask in ['y', 'yes', 'YES', 'Y']:
         print('Total time elapsed: {}\n'.format(conv_time(hdtime)))
         generate_paths_WW3(timestart,timeend, hdinput, outpath)
         wwtime = time.time() - beganat
-        print('HRDPS done')
+        print('WW3 done')
         print('Time elapsed: {}'.format(conv_time(wwtime-hdtime)))
         print('Total time elapsed: {}\n'.format(conv_time(wwtime)))
     if runs == 2:
