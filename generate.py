@@ -18,7 +18,7 @@ hdinput = '/results/forcing/atmospheric/GEM2.5/operational/'
 geminput = '/opp/wwatch3/nowcast/'
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
-beganat = time.time()
+
 
 def conv_time(time):
     hours = int(time/3600)
@@ -90,8 +90,8 @@ def generate_paths_HRDPS(timestart, timeend, path, outpath):
     for file in wind_files:
         shell_wind = shell_wind + file + ' '
     #folder = f'{timestart}-{timeend}'.replace(" ", "")
-    shell_wind = shell_wind +  f'{outpath}hdrps/{folder}/'  + 'GEM.nc'
-    dirname = f'{outpath}hdrps/{folder}/'
+    shell_wind = shell_wind +  f'{outpath}hrdps/{folder}/'  + 'GEM.nc'
+    dirname = f'{outpath}hrdps/{folder}/'
     if not os.path.exists(os.path.dirname(dirname)):
         try:
             os.makedirs(os.path.dirname(dirname))
@@ -137,6 +137,7 @@ timeend = input('Enter the end time in the format |year month day| e.g. 2015 Jan
 runs = int(input('Run: \n1) All \n2) NEMO ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n'))
 runsdict = {1: 'All', 2: 'NEMO ONLY', 3: 'HRDPS ONLY', 4: 'WW3 ONLY'}
 ask = input(f'Proceed with concatenating {runsdict[runs]} from {timestart} to {timeend}?\n')
+beganat = time.time()
 if ask in ['y', 'yes', 'YES', 'Y']:
     if runs == 1:
         generate_paths_NEMO(timestart,timeend, nemoinput, outpath)
