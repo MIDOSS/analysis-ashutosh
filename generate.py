@@ -42,7 +42,7 @@ def conv_time(time):
     """Give time in HH:MM:SS format.
 
     :arg time: time elapsed in seconds
-    :type array: :py:class:'int'
+    :type integer: :py:class:'int'
 
     :returns: time elapsed in HH:MM:SS format
     :rtype: :py:class:`str'
@@ -57,16 +57,16 @@ def generate_paths_NEMO(timestart, timeend, path, outpath):
     """Concatenate NEMO U, V, W and T files for MOHID.
 
     :arg timestart: date from when to start concatenating
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg timeend: date at which to stop concatenating
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg path: path of input files
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg outpath: path for output files
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :returns: None
     :rtype: :py:class:`NoneType'
@@ -136,16 +136,16 @@ def generate_paths_HRDPS(timestart, timeend, path, outpath):
     """Concatenate HRDPS files for MOHID.
 
     :arg timestart: date from when to start concatenating
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg timeend: date at which to stop concatenating
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg path: path of input files
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg outpath: path for output files
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :returns: None
     :rtype: :py:class:`NoneType'
@@ -192,16 +192,16 @@ def generate_paths_WW3(timestart, timeend, path, outpath):
     """Concatenate WW3 files for MOHID.
 
     :arg timestart: date from when to start concatenating
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg timeend: date at which to stop concatenating
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg path: path of input files
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :arg outpath: path for output files
-    :type array: :py:class:'str'
+    :type string: :py:class:'str'
 
     :returns: None
     :rtype: :py:class:`NoneType'
