@@ -1,8 +1,20 @@
-#########################################################
-# Generate netdcf files for MOHID runs
-# 	->Run script in shell
-# 		->Input Parameters
-#########################################################
+# Copyright 2013-2016 The Salish Sea MEOPAR contributors
+# and The University of British Columbia
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Locates and concatenates datafiles needed for MOHID based on user input time range
+"""
 
 import os
 from datetime import datetime, timedelta
@@ -27,16 +39,38 @@ outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 ## Integer -> String
 ## consumes time in seconds and outputs a string that gives the time in HH:MM:SS format
 def conv_time(time):
+    """Give time in HH:MM:SS format.
+
+    :arg time: time elapsed in seconds
+    :type array: :py:class:'int'
+
+    :returns: time elapsed in HH:MM:SS format
+    :rtype: :py:class:`str'
+    """
     hours = int(time/3600)
     mins = int((time - (hours*3600))/60)
     secs = int((time - (3600 * hours) - (mins *60)))
     return '{}:{}:{}'.format(hours, mins, secs)
 
 
-## String String String String -> 
-## consumes a start time, end time, input file path and output file path and runs shell scripts to concatenate NEMO datasets to the output folder using ncr
-## timeend is day after required range as the upper bound is not included
 def generate_paths_NEMO(timestart, timeend, path, outpath):
+    """Concatenate NEMO U, V, W and T files for MOHID.
+
+    :arg timestart: date from when to start concatenating
+    :type array: :py:class:'str'
+
+    :arg timeend: date at which to stop concatenating
+    :type array: :py:class:'str'
+
+    :arg path: path of input files
+    :type array: :py:class:'str'
+
+    :arg outpath: path for output files
+    :type array: :py:class:'str'
+
+    :returns: None
+    :rtype: :py:class:`NoneType'
+    """
     # generate list of dates from daterange given
     daterange = [parse(t) for t in [timestart, timeend]]
     U_files = []
@@ -95,13 +129,27 @@ def generate_paths_NEMO(timestart, timeend, path, outpath):
     for line in [shell_U, shell_V, shell_W, shell_T]:
         #print(line) # to test
         os.system(line)
+    return None
 
-
-## String String String String -> 
-## consumes a start time, end time, input file path and output file path and runs shell scripts to concatenate HRDPS datasets to the output folder using ncr
-## timeend is day after required range as the upper bound is not included
 
 def generate_paths_HRDPS(timestart, timeend, path, outpath):
+    """Concatenate HRDPS files for MOHID.
+
+    :arg timestart: date from when to start concatenating
+    :type array: :py:class:'str'
+
+    :arg timeend: date at which to stop concatenating
+    :type array: :py:class:'str'
+
+    :arg path: path of input files
+    :type array: :py:class:'str'
+
+    :arg outpath: path for output files
+    :type array: :py:class:'str'
+
+    :returns: None
+    :rtype: :py:class:`NoneType'
+    """
     # generate list of dates from daterange given
     daterange = [parse(t) for t in [timestart, timeend]]
     wind_files = []
@@ -137,12 +185,27 @@ def generate_paths_HRDPS(timestart, timeend, path, outpath):
     #print(shell_wind) # to test 
     # run shell script to concatenate netcdf files
     os.system(shell_wind)
+    return None
 
 
-## String String String String -> 
-## consumes a start time, end time, input file path and output file path and runs shell scripts to concatenate WW3 datasets to the output folder using ncr
-## timeend is day after required range as the upper bound is not included
 def generate_paths_WW3(timestart, timeend, path, outpath):
+    """Concatenate WW3 files for MOHID.
+
+    :arg timestart: date from when to start concatenating
+    :type array: :py:class:'str'
+
+    :arg timeend: date at which to stop concatenating
+    :type array: :py:class:'str'
+
+    :arg path: path of input files
+    :type array: :py:class:'str'
+
+    :arg outpath: path for output files
+    :type array: :py:class:'str'
+
+    :returns: None
+    :rtype: :py:class:`NoneType'
+    """
     # generate list of dates from daterange given
     months = {1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5 : 'may', 6: 'jun', 7: 'jul', 8: 'aug', 9 : 'sep', 10: 'oct', 11 :'nov',12: 'dec' }
     daterange = [parse(t) for t in [timestart, timeend]]
@@ -177,6 +240,7 @@ def generate_paths_WW3(timestart, timeend, path, outpath):
     #print(shell_wave)
     # run shell script to concatenate netcdf files
     os.system(shell_wave)
+    return None
 
 # input start time
 timestart = input('\nEnter the start time in the format |year month day| e.g. 2015 Jan 1:\n--> ')
