@@ -25,6 +25,18 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Discharge Vs Salinity in SoG**  
 
+* ##[Read_hdf5.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Read_hdf5.ipynb)  
+    
+    <h1>This notebook is an exploration of the structure of the forcing files used for MOHID<h1>  
+        <ol>  
+            <li>  
+                <a href="#winds">Winds</a>  
+            </li>  
+            <li>  
+                <a href="#currents">Currents</a>  
+            </li>  
+        </ol>  
+
 * ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
     
     **Land Mask**  
