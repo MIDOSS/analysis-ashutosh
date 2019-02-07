@@ -22,6 +22,8 @@ from dateutil.parser import parse
 import numpy as np
 import errno
 import time
+import shlex
+import subprocess
 
 # NEMO input files directory
 nemoinput = '/results2/SalishSea/nowcast-green.201806/'
@@ -126,9 +128,19 @@ def generate_paths_NEMO(timestart, timeend, path, outpath):
             if exc.errno != errno.EEXIST:
                 raise
     # run shell scripts to concatenate netcdf files
-    for line in [shell_U, shell_V, shell_W, shell_T]:
-        #print(line) # to test
-        os.system(line)
+    processes = []
+    for cmd in (shell_U, shell_V, shell_W, shell_T):
+        p = subprocess.Popen(shlex.split(cmd))
+        # make a list of the processes we have just launched
+        processes.append(p)
+    while processes:
+        for p in processes:
+            if p.poll():
+                # poll() Returns None if the process is still running, otherwise the process returns code
+                # so if the process is done, we will remove it from the list
+                processes.remove(p)
+        # wait for 5 seconds before we check again
+        time.sleep
     return None
 
 
