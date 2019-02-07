@@ -5,6 +5,10 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
+* ##[downscale_winds.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//downscale_winds.ipynb)  
+    
+    **Exploration of different ways of downscaling GEM to NEMO**  
+
 * ##[River_plume.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//River_plume.ipynb)  
     
     **Freshet analysis**  
