@@ -35,6 +35,15 @@ Descriptions under the links below are from the first cell of the notebooks
             <li>  
                 <a href="#currents">Currents</a>  
             </li>  
+            <li>  
+                <a href="#createwind">Create Wind Input file Structure</a>  
+            </li>  
+            <li>  
+                <a href="#createcurrents">Create Current Input file Structure</a>  
+            </li>  
+            <li>  
+                <a href="#compare">Compare Stuctures</a>  
+            </li>  
         </ol>  
 
 * ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
@@ -44,6 +53,10 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[current_analysis.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//current_analysis.ipynb)  
     
     **Current Analysis**  
+
+* ##[Hdf_to_nc.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Hdf_to_nc.ipynb)  
+    
+    **Compare Shihan Currents netcdf to Nowcast Green**  
 
 * ##[Buoyancy_correlation.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Buoyancy_correlation.ipynb)  
     
