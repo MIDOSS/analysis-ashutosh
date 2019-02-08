@@ -140,7 +140,7 @@ def generate_paths_NEMO(timestart, timeend, path, outpath):
                 # so if the process is done, we will remove it from the list
                 processes.remove(p)
         # wait for 5 seconds before we check again
-        time.sleep
+        time.sleep(5)
     return None
 
 
