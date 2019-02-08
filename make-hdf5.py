@@ -113,7 +113,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
             return
         T_files.append(T_path)
         
-        
+    print('\nAll source files found')
     # string: output folder name with date ranges used. end date will be lower by a day than timeend because datasets only go until midnight
     folder = str(datetime(parse(timestart).year, parse(timestart).month, parse(timestart).day).strftime('%d%b%y').lower()) + '-' + str(datetime(parse(timeend).year, parse(timeend).month, parse(timeend).day-1).strftime('%d%b%y').lower())
     # create output directory
@@ -124,7 +124,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         except OSError as exc:
             if exc.errno != errno.EEXIST:
                 raise
-                
+    print(f'\nOutput directory {dirname} created\n')
     # create hdf5 file and create tree structure
     f = h5py.File(f'{dirname}foocurrents.hdf5', 'w')
     times = f.create_group('Time')
@@ -132,6 +132,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
     velocity_v = f.create_group('/Results/velocity V')
     water_level = f.create_group('/Results/water level')
     
+    attr_counter = 0
     number_of_files = len(U_files)
     bar = utilities.statusbar('Creating currents forcing file ...')
     for file_index in bar(range(number_of_files)):
@@ -139,10 +140,10 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         V_raw = xr.open_dataset(V_files[file_index])
         T_raw = xr.open_dataset(T_files[file_index])
         # assume all files have same time_counter markers
-        datelist = U_raw.time_counter.values.astype('datetime64[s]').astype(datetime.datetime)
+        datelist = U_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
         # unstagger to move U, V to center of grid square
         U  = viz_tools.unstagger_xarray(U_raw.vozocrtx, 'x')
-        V  = viz_tools.unstagger_xarray(V_raw.vomecrty, 'y').values[...,:,1:897:,1:397]
+        V  = viz_tools.unstagger_xarray(V_raw.vomecrty, 'y')
         # convert xarrays to numpy arrays and cut off grid edges
         U = U.values[...,:,1:897:,1:397]
         V = V.values[...,:,1:897:,1:397]
@@ -168,14 +169,14 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
             datearrays.append(np.array([date.year, date.month, date.day, date.hour, date.minute, date.second]).astype('float64'))
         # write u wind values to hdf5
         for i in range(current_u.shape[0]):
-            velocity_attr = 'velocity U_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            velocity_attr = 'velocity U_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = velocity_u.create_dataset(velocity_attr, shape = (40, 396, 896), data = current_u[i],chunks=(40, 396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([5.]), 'Minimum' : np.array([-5.]), 'Units' : b'm/s'}
             dset.attrs.update(metadata)
     
         # write v wind values to hdf5
         for i in range(current_v.shape[0]):
-            velocity_attr = 'velocity V_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            velocity_attr = 'velocity V_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = velocity_v.create_dataset(velocity_attr, shape = (40, 396, 896), data = current_v[i],chunks=(40, 396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([5.]), 'Minimum' : np.array([-5.]), 'Units' : b'm/s'}
             dset.attrs.update(metadata)
@@ -183,7 +184,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         # write  water level values to hdf5
 
         for i in range(sea_surface.shape[0]):
-            level_attr = 'water level_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            level_attr = 'water level_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = water_level.create_dataset(level_attr, shape = (396, 896), data = sea_surface[i],chunks=(396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([5.]), 'Minimum' : np.array([-5.]), 'Units' : b'm'}
             dset.attrs.update(metadata)
@@ -191,11 +192,11 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         # write time values to hdf5
 
         for i in range(len(datearrays)):
-            time_attr = 'Time_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            time_attr = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(time_attr, shape = (6,), data = datearrays[i],chunks=(6,), compression = 'gzip', compression_opts = compression_level)
             metadata = {'Maximum' : np.array([2016.]), 'Minimum' : np.array([-0.]), 'Units' : b'YYYY/MM/DD HH:MM:SS'} # !!!
             dset.attrs.update(metadata)
-            
+        attr_counter = attr_counter + current_u.shape[0]
     f.close()
     return
 
