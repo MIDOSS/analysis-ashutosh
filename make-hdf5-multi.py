@@ -61,7 +61,7 @@ def conv_time(time):
 
 
 def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level = 1):
-    """Renerate current forcing HDF5 input file MOHID.
+    """Provide paths, groups and parameters for multiprocessing
 
     :arg timestart: date from when to start concatenating
     :type string: :py:class:'str'
@@ -78,8 +78,32 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
     :arg compression_level: compression level for output file (Integer[1,9])
     :type integer: :py:class:'int'
 
-    :returns: None
-    :rtype: :py:class:`NoneType'
+    :returns f: <HDF5 file (mode r+)>
+    :rtype: :py:class:`File'
+    
+    :returns U_files: listofString: U parameter file paths
+    :rtype: :py:class:`list'
+    
+    :returns V_files: listofString: V parameter file paths
+    :rtype: :py:class:`list'
+    
+    :returns T_files: listofString: T parameter file paths
+    :rtype: :py:class:`list'
+    
+    :returns times: HDF5 group for time
+    :rtype: :py:class:`Group'
+    
+    :returns velocity_u: HDF5 group for U velocities
+    :rtype: :py:class:`Group'
+    
+    :returns velocity_v: HDF5 group for V velocities
+    :rtype: :py:class:`Group'
+    
+    :returns water_level: HDF5 group for sea surface heights
+    :rtype: :py:class:`Group'
+
+    :returns compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
     """
     
     # generate list of dates from daterange given
@@ -127,16 +151,38 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
                 raise
     print(f'\nOutput directory {dirname} created\n')
     # create hdf5 file and create tree structure
-    f = h5py.File(f'{dirname}foocurrents.hdf5', 'w')
-    times = f.create_group('Time')
-    velocity_u = f.create_group('/Results/velocity U')
-    velocity_v = f.create_group('/Results/velocity V')
-    water_level = f.create_group('/Results/water level')
-    return f, U_files, V_files, T_files, times, velocity_u, velocity_v, water_level, compression_level
+
+    return U_files, V_files, T_files, dirname, compression_level
     
 #for file_index in bar(range(number_of_files)):
-def write_currents (f, U_files, V_files, T_files, times, velocity_u, velocity_v, water_level, compression_level, file_index):
-    attr_counter = file_index * len(U_files)
+def write_currents (U_files, V_files, T_files, compression_level, file_index):
+    """"   
+    :arg U_files: listofString: U parameter file paths
+    :type: :py:class:`list'
+    
+    :arg V_files: listofString: V parameter file paths
+    :type: :py:class:`list'
+    
+    :arg T_files: listofString: T parameter file paths
+    :type: :py:class:`list'
+    
+    :arg times: HDF5 group for time
+    :type: :py:class:`Group'
+    
+    :arg velocity_u: HDF5 group for U velocities
+    :type: :py:class:`Group'
+    
+    :arg velocity_v: HDF5 group for V velocities
+    :type: :py:class:`Group'
+    
+    :arg water_level: HDF5 group for sea surface heights
+    :type: :py:class:`Group'
+
+    :arg compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
+    """
+    global times, velocity_u, velocity_v, water_level
+    
     U_raw = xr.open_dataset(U_files[file_index])
     V_raw = xr.open_dataset(V_files[file_index])
     T_raw = xr.open_dataset(T_files[file_index])
@@ -164,6 +210,7 @@ def write_currents (f, U_files, V_files, T_files, times, velocity_u, velocity_v,
     current_u = np.nan_to_num(current_u).astype('float64')
     current_v = np.nan_to_num(current_v).astype('float64')
     sea_surface = np.nan_to_num(sea_surface).astype('float64')
+    attr_counter = file_index * current_u.shape[0]
     # make list of time arrays
     datearrays = []
     for date in datelist:
@@ -193,10 +240,12 @@ def write_currents (f, U_files, V_files, T_files, times, velocity_u, velocity_v,
     # write time values to hdf5
 
     for i in range(len(datearrays)):
+        print(i + attr_counter + 1)
         time_attr = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
         dset = times.create_dataset(time_attr, shape = (6,), data = datearrays[i],chunks=(6,), compression = 'gzip', compression_opts = compression_level)
         metadata = {'Maximum' : np.array([datearrays[i][0].astype('float64')]), 'Minimum' : np.array([-0.]), 'Units' : b'YYYY/MM/DD HH:MM:SS'} # !!!
         dset.attrs.update(metadata)
+    return
     
 def manage_queue(current, remaining, workers):
     if len(current) != 0:
@@ -226,16 +275,20 @@ def manage_queue(current, remaining, workers):
 
                 
 if __name__ == '__main__':
-
     beganat = time.time()
     timestart = '1 Feb 2019'
     timeend = '8 Feb 2019'
-    f, U_files, V_files, T_files, times, velocity_u, velocity_v, water_level, compression_level = generate_currents_hdf5(timestart, timeend, nemoinput, outpath, compression_level = 1)
+    U_files, V_files, T_files, dirname,compression_level = generate_currents_hdf5(timestart, timeend, nemoinput, outpath, compression_level = 1)
+    f = h5py.File(f'temp/foocurrents.hdf5', driver = 'sec2')
+    times = f.create_group('Time')
+    velocity_u = f.create_group('/Results/velocity U')
+    velocity_v = f.create_group('/Results/velocity V')
+    water_level = f.create_group('/Results/water level')
     processes= []
     #multiprocessing.set_start_method('spawn')
     for i in range(len(U_files)):
-        p = multiprocessing.Process(target = write_currents, args = (f, U_files, V_files, T_files, times, velocity_u, velocity_v, water_level, compression_level, i))
+        p = multiprocessing.Process(target = write_currents, args = (U_files, V_files, T_files, compression_level, i))
         processes.append(p)
-    manage_queue([], processes, 4)
+    manage_queue([], processes, 2)
     f.close()
     print('Time elapsed: {}'.format(conv_time(time.time()-beganat)))
