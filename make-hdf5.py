@@ -59,7 +59,7 @@ def conv_time(time):
 
 
 def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level = 1):
-    """Renerate current forcing HDF5 input file MOHID.
+    """Generate current forcing HDF5 input file MOHID.
 
     :arg timestart: date from when to start concatenating
     :type string: :py:class:'str'
@@ -126,7 +126,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
                 raise
     print(f'\nOutput directory {dirname} created\n')
     # create hdf5 file and create tree structure
-    f = h5py.File(f'{dirname}foocurrents.hdf5', 'w')
+    f = h5py.File(f'{dirname}currents.hdf5', 'w')
     times = f.create_group('Time')
     velocity_u = f.create_group('/Results/velocity U')
     velocity_v = f.create_group('/Results/velocity V')
@@ -194,11 +194,122 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         for i in range(len(datearrays)):
             time_attr = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(time_attr, shape = (6,), data = datearrays[i],chunks=(6,), compression = 'gzip', compression_opts = compression_level)
-            metadata = {'Maximum' : np.array([2016.]), 'Minimum' : np.array([-0.]), 'Units' : b'YYYY/MM/DD HH:MM:SS'} # !!!
+            metadata = {'Maximum' : np.array(datearrays[i][0]), 'Minimum' : np.array([-0.]), 'Units' : b'YYYY/MM/DD HH:MM:SS'} 
             dset.attrs.update(metadata)
         attr_counter = attr_counter + current_u.shape[0]
     f.close()
     return
+
+def generate_paths_HRDPS(timestart, timeend, path, outpath):
+    """Generate wind forcing HDF5 input file MOHID.
+
+    :arg timestart: date from when to start concatenating
+    :type string: :py:class:'str'
+
+    :arg timeend: date at which to stop concatenating
+    :type string: :py:class:'str'
+
+    :arg path: path of input files
+    :type string: :py:class:'str'
+
+    :arg outpath: path for output files
+    :type string: :py:class:'str'
+
+    :arg compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
+
+    :returns: None
+    :rtype: :py:class:`NoneType'
+    """
+    # generate list of dates from daterange given
+    daterange = [parse(t) for t in [timestart, timeend]]
+    wind_files = []
+
+    # append all filename strings within daterange to list
+    for day in range(np.diff(daterange)[0].days):
+        datestamp = daterange[0] + timedelta(days=day)
+        datestr1 = datestamp.strftime('%d%b%y').lower()
+        month = datestamp.month
+        if month < 10:
+            month = f'0{str(month)}'
+        day = datestamp.day
+        if day < 10:
+            day = f'0{str(day)}'
+        year = str(datestamp.year)
+        wind_path = f'{path}ops_y{year}m{month}d{day}.nc'
+        wind_files.append(f'{path}ops_y{year}m{month}d{day}.nc')
+        if not os.path.exists(wind_path):
+        print(f'File {wind_path} not found. Check Directory and/or Date Range.')
+        return
+    print('\nAll source files found')
+    # string: output folder name with date ranges used. end date will be lower by a day than timeend because datasets only go until midnight
+    folder = str(datetime(parse(timestart).year, parse(timestart).month, parse(timestart).day).strftime('%d%b%y').lower()) + '-' + str(datetime(parse(timeend).year, parse(timeend).month, parse(timeend).day-1).strftime('%d%b%y').lower())
+    dirname = f'{outpath}hrdps/{folder}/'
+    if not os.path.exists(os.path.dirname(dirname)):
+        try:
+            os.makedirs(os.path.dirname(dirname))
+        except OSError as exc:
+            if exc.errno != errno.EEXIST:
+                raise
+    print(f'\nOutput directory {dirname} created\n')
+    # create hdf5 file and create tree structure
+    f = h5py.File(f'{dirname}winds.hdf5', 'w')
+    results = f.create_group('Results')
+    times = f.create_group('Time')
+    windu = f.create_group('/Results/wind velocity X')
+    windx = f.create_group('/Results/wind velocity Y')
+    attr_counter = 0
+    number_of_files = len(U_files)
+    bar = utilities.statusbar('Creating winds forcing file ...')
+    for file_index in bar(range(number_of_files)):
+        GEM = xr.open_dataset(wind_files[file_index])
+        # lat lon data
+        GEM_grid = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaAtmosphereGridV1')
+        NEMO_grid = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02')
+        # GEM data coordinates
+        points = np.array([GEM_grid.latitude.values.ravel(), GEM_grid.longitude.values.ravel()-360]).T
+        # NEMO lat lon grids tuple
+        xi = (NEMO_grid.latitude.values, NEMO_grid.longitude.values)
+        # GEM Data
+        GEM_u = GEM.u_wind.values
+        GEM_v = GEM.v_wind.values
+        # create an interpolated array of the 1st slice so you can stack it onto the rest
+        u_wind = np.expand_dims(griddata(points, GEM_u[0].ravel(), xi, method='cubic'),0)
+        v_wind = np.expand_dims(griddata(points, GEM_v[0].ravel(), xi, method='cubic'),0)
+        # create an interpolated array for the rest of the values
+        for grid in range(1, GEM_u.shape[0]):
+            interp_u = griddata(points, GEM_u[grid].ravel(), xi, method='cubic')
+            u_wind = np.vstack((u_wind, np.expand_dims(interp_u,0)))
+            interp_v = griddata(points, GEM_v[grid].ravel(), xi, method='cubic')
+            v_wind = np.vstack((v_wind, np.expand_dims(interp_v,0)))
+        u_wind = u_wind[...,:,1:897:,1:397]
+        v_wind = v_wind[...,:,1:897:,1:397]
+        u_wind = np.transpose(u_wind, [0,2,1])
+        v_wind = np.transpose(v_wind, [0,2,1])
+        u_wind = u_wind.astype('float64')
+        v_wind = v_wind.astype('float64')
+        datelist = GEM.time_counter.values.astype('datetime64[s]').astype(datetime.datetime)
+        datearrays = []
+        for date in datelist:
+            datearrays.append(np.array([date.year, date.month, date.day, date.hour, date.minute, date.second]).astype('float64'))
+        for i in range(len(datearrays)):
+            time_attr = 'Time_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            dset = times.create_dataset(time_attr, shape = (6,), data = datearrays[i],chunks=(6,), compression = 'gzip', compression_opts = 1)
+            metadata = {'Maximum' : np.array([float(datearrays[i][0])]), 'Minimum' : np.array([-0.]), 'Units' : b'YYYY/MM/DD HH:MM:SS'} # !!!
+            dset.attrs.update(metadata)
+        for i in bar(range(u_wind.shape[0])):
+            velocity_attr = 'wind velocity X_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            dset = windu.create_dataset(velocity_attr, shape = (396, 896), data = u_wind2[i],chunks=(396, 896), compression = 'gzip', compression_opts = 1)
+            metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([100.]), 'Minimum' : np.array([-100.]), 'Units' : b'm/s'}
+            dset.attrs.update(metadata)
+        for i in bar(range(v_wind.shape[0])):
+            velocity_attr = 'wind velocity Y_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            dset =  windx.create_dataset(velocity_attr, shape = (396, 896), data = v_wind2[i],chunks=(396, 896), compression = 'gzip', compression_opts = 1)
+            metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([100.]), 'Minimum' : np.array([-100.]), 'Units' : b'm/s'}
+            dset.attrs.update(metadata)
+        attr_counter = attr_counter + u_wind.shape[0]
+        f.close()
+        return
 
 
 # input start time
