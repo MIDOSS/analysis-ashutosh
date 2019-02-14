@@ -32,24 +32,6 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[Read_hdf5.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Read_hdf5.ipynb)  
     
     <h1>This notebook is an exploration of the structure of the forcing files used for MOHID<h1>  
-        <ol>  
-            <li>  
-                <a href="#winds">Winds</a>  
-            </li>  
-            <li>  
-                <a href="#currents">Currents</a>  
-            </li>  
-            <li>  
-                <a href="#createwind">Create Wind Input file Structure</a>  
-            </li>  
-            <li>  
-                <a href="#createcurrents">Create Current Input file Structure</a>  
-            </li>  
-            <li>  
-                <a href="#compare">Compare Stuctures</a>  
-            </li>  
-        </ol>  
-
 * ##[landmask.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask.ipynb)  
     
     **Land Mask**  
@@ -86,6 +68,9 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[landmask_hdrps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//landmask_hdrps.ipynb)  
     
+* ##[compare_lagrangian.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//compare_lagrangian.ipynb)
+
+    **Comparing MOHID Lagrangian Output files**
 
 ##License
 
