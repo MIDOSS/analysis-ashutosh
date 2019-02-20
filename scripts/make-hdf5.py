@@ -43,21 +43,19 @@ outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
 ## Integer -> String
 ## consumes time in seconds and outputs a string that gives the time in HH:MM:SS format
-def conv_time(time):
-    """Give time in HH:MM:SS format.
+def timer(func):
+    def f(*args, **kwargs):
+        beganat = time.time()
+        rv = func(*args, *kwargs):
+        elapsed = time.time() - beganat
+        hours = int(time/3600)
+        mins = int((time - (hours*3600))/60)
+        secs = int((time - (3600 * hours) - (mins *60)))
+        print('Time elapsed: {}:{}:{}'.format(hours, mins, secs))
+        return rv
+    return f
 
-    :arg time: time elapsed in seconds
-    :type integer: :py:class:'int'
-
-    :returns: time elapsed in HH:MM:SS format
-    :rtype: :py:class:`str'
-    """
-    hours = int(time/3600)
-    mins = int((time - (hours*3600))/60)
-    secs = int((time - (3600 * hours) - (mins *60)))
-    return '{}:{}:{}'.format(hours, mins, secs)
-
-
+@timer
 def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level = 1):
     """Generate current forcing HDF5 input file MOHID.
 
@@ -153,10 +151,11 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         # unstagger to move U, V to center of grid square
         U  = viz_tools.unstagger_xarray(U_raw.vozocrtx, 'x')
         V  = viz_tools.unstagger_xarray(V_raw.vomecrty, 'y')
-        W  = viz_tools.unstagger_xarray(W_raw.vovecrtz, 'depthw') #!!! 
+        W  = W_raw.vovecrtz #!!! 
         # convert xarrays to numpy arrays and cut off grid edges
         U = U.values[...,:,1:897:,1:397]
         V = V.values[...,:,1:897:,1:397]
+        current_w = W.values[...,:,1:897:,1:397]
         sea_surface = T_raw.sossheig.values[...,:,1:897:,1:397]
         # rotate currents to True North
         current_u, current_v = viz_tools.rotate_vel(U, V)
@@ -165,13 +164,16 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         # transpose grid (rotate 90 clockwise)
         current_u = np.transpose(current_u, [0,1,3,2])
         current_v = np.transpose(current_v, [0,1,3,2])
+        current_w = np.transpose(current_w, [0,1,3,2])
         sea_surface = np.transpose(sea_surface, [0,2,1])
         # flip currents by depth dimension
         current_u = np.flip(current_u, axis = 1)
         current_v = np.flip(current_v, axis = 1)
+        current_w = np.flip(current_w, axis = 1)
         # convert nans to 0's and set datatype to float64
         current_u = np.nan_to_num(current_u).astype('float64')
         current_v = np.nan_to_num(current_v).astype('float64')
+        current_w = np.nan_to_num(current_w).astype('float64')
         sea_surface = np.nan_to_num(sea_surface).astype('float64')
         # make list of time arrays
         datearrays = []
@@ -188,6 +190,13 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
         for i in range(current_v.shape[0]):
             velocity_attr = 'velocity V_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = velocity_v.create_dataset(velocity_attr, shape = (40, 396, 896), data = current_v[i],chunks=(40, 396, 896), compression = 'gzip', compression_opts = compression_level)
+            metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([5.]), 'Minimum' : np.array([-5.]), 'Units' : b'm/s'}
+            dset.attrs.update(metadata)
+
+        # write w wind values to hdf5
+        for i in range(current_v.shape[0]):
+            velocity_attr = 'velocity W_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            dset = velocity_w.create_dataset(velocity_attr, shape = (40, 396, 896), data = current_w[i],chunks=(40, 396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([5.]), 'Minimum' : np.array([-5.]), 'Units' : b'm/s'}
             dset.attrs.update(metadata)
     
@@ -210,7 +219,8 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
     f.close()
     return
 
-def generate_paths_HRDPS(timestart, timeend, path, outpath):
+@timer
+def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     """Generate wind forcing HDF5 input file MOHID.
 
     :arg timestart: date from when to start concatenating
@@ -304,24 +314,26 @@ def generate_paths_HRDPS(timestart, timeend, path, outpath):
             datearrays.append(np.array([date.year, date.month, date.day, date.hour, date.minute, date.second]).astype('float64'))
         for i in range(len(datearrays)):
             time_attr = 'Time_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
-            dset = times.create_dataset(time_attr, shape = (6,), data = datearrays[i],chunks=(6,), compression = 'gzip', compression_opts = 1)
-            metadata = {'Maximum' : np.array([float(datearrays[i][0])]), 'Minimum' : np.array([-0.]), 'Units' : b'YYYY/MM/DD HH:MM:SS'} # !!!
+            dset = times.create_dataset(time_attr, shape = (6,), data = datearrays[i],chunks=(6,), compression = 'gzip', compression_opts = compression_level)
+            metadata = {'Maximum' : np.array([float(datearrays[i][0])]), 'Minimum' : np.array([-0.]), 'Units' : b'YYYY/MM/DD HH:MM:SS'} 
             dset.attrs.update(metadata)
         for i in bar(range(u_wind.shape[0])):
             velocity_attr = 'wind velocity X_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
-            dset = windu.create_dataset(velocity_attr, shape = (396, 896), data = u_wind2[i],chunks=(396, 896), compression = 'gzip', compression_opts = 1)
+            dset = windu.create_dataset(velocity_attr, shape = (396, 896), data = u_wind2[i],chunks=(396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([100.]), 'Minimum' : np.array([-100.]), 'Units' : b'm/s'}
             dset.attrs.update(metadata)
         for i in bar(range(v_wind.shape[0])):
             velocity_attr = 'wind velocity Y_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
-            dset =  windx.create_dataset(velocity_attr, shape = (396, 896), data = v_wind2[i],chunks=(396, 896), compression = 'gzip', compression_opts = 1)
+            dset =  windx.create_dataset(velocity_attr, shape = (396, 896), data = v_wind2[i],chunks=(396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([100.]), 'Minimum' : np.array([-100.]), 'Units' : b'm/s'}
             dset.attrs.update(metadata)
         attr_counter = attr_counter + u_wind.shape[0]
         f.close()
         return
 
+def generate_ww3(timestart, timeend, path, outpath):
 
+    pass
 # input start time
 timestart = input('\nEnter the start time in the format |year month day| e.g. 2015 Jan 1:\n--> ')
 
