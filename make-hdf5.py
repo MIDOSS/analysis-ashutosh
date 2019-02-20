@@ -84,6 +84,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
     daterange = [parse(t) for t in [timestart, timeend]]
     U_files = []
     V_files = []
+    W_files = []
     T_files = []
 
 
@@ -106,6 +107,12 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
             print(f'File {V_path} not found. Check Directory and/or Date Range.')
             return
         V_files.append(V_path)
+            # W files
+        W_path = f'{path}{datestr1}/SalishSea_1h_{datestr2}_{datestr2}_grid_W.nc'
+        if not os.path.exists(W_path):
+            print(f'File {W_path} not found. Check Directory and/or Date Range.')
+            return
+        W_files.append(W_path)
             # T files
         T_path = f'{path}{datestr1}/SalishSea_1h_{datestr2}_{datestr2}_grid_T.nc'
         if not os.path.exists(T_path):
@@ -130,6 +137,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
     times = f.create_group('Time')
     velocity_u = f.create_group('/Results/velocity U')
     velocity_v = f.create_group('/Results/velocity V')
+    velocity_w = f.create_group('/Results/velocity W')
     water_level = f.create_group('/Results/water level')
     
     attr_counter = 0
@@ -138,12 +146,14 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
     for file_index in bar(range(number_of_files)):
         U_raw = xr.open_dataset(U_files[file_index])
         V_raw = xr.open_dataset(V_files[file_index])
+        W_raw = xr.open_dataset(W_files[file_index])
         T_raw = xr.open_dataset(T_files[file_index])
         # assume all files have same time_counter markers
         datelist = U_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
         # unstagger to move U, V to center of grid square
         U  = viz_tools.unstagger_xarray(U_raw.vozocrtx, 'x')
         V  = viz_tools.unstagger_xarray(V_raw.vomecrty, 'y')
+        W  = viz_tools.unstagger_xarray(W_raw.vovecrtz, 'depthw') #!!! 
         # convert xarrays to numpy arrays and cut off grid edges
         U = U.values[...,:,1:897:,1:397]
         V = V.values[...,:,1:897:,1:397]
