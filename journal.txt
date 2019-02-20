@@ -1,0 +1,28 @@
+19 Feb 2019
+
+    Replicate Shihan's run using files from nextcloud
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    Purpose: To determine of the model was chnaged since the intial run
+
+        Download files from Nextcloud, upload to cedar
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            Create directory (/home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/ashu_testing/nextcloud_replicate)
+            Write .yaml file pointing to all relevant input files
+            Edit file paths in Atmosphere.dat, Hydrodynamic.dat
+
+        Compile Mohid
+        ^^^^^^^^^^^^^
+            salloc --time=0:10:0 --cpus-per-task=1 --mem-per-cpu=1024m --account=def-allen
+            cd $PROJECT/$USER/MIDOSS/MIDOSS-MOHID/Solutions/linux
+            ./compile_mohid.sh -mb1 -mb2 -mw
+
+            Delete all of the compiled objects, libraries, and executables:
+            ./compile_mohid --clean
+            so that next build is clean
+        
+        Run Mohid
+        ^^^^^^^^^
+            make run directory as set in yaml file ($SCRATCH/MIDOSS/runs/ashu_testing/)
+            cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/ashu_testing/nextcloud_replicate
+            mohid run nextcloud_replicate.yaml $PROJECT/$USER/MIDOSS/results/ashu/nextcloud_replicate
+
