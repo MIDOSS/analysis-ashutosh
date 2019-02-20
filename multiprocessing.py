@@ -29,8 +29,9 @@ def manage_queue(current, remaining, workers):
         manage_queue(current, remaining, workers)
 
 # instead of loop, write target function that takes iterable argument 
-# def target_function(i):
-#   ...
+def target_function(i):
+    # do something
+    
 
 
 
