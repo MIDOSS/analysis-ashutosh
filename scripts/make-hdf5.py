@@ -449,3 +449,9 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
         attr_counter = attr_counter + mean_wave.shape[0]
     f.close()
     return
+
+starttime = '7 Feb 2019'
+endtime = '7 Mar 2019'
+
+if np.diff([parse(t) for t in [starttime, endtime]])[0].days <= 0:
+    print('invalid date range given')
