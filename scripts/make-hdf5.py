@@ -41,20 +41,19 @@ wwinput = '/opp/wwatch3/nowcast/'
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
 
-## Integer -> String
-## consumes time in seconds and outputs a string that gives the time in HH:MM:SS format
 def timer(func):
     def f(*args, **kwargs):
         beganat = time.time()
         rv = func(*args, *kwargs)
         elapsed = time.time() - beganat
-        hours = int(time/3600)
-        mins = int((time - (hours*3600))/60)
-        secs = int((time - (3600 * hours) - (mins *60)))
+        hours = int(elapsed/3600)
+        mins = int((elapsed - (hours*3600))/60)
+        secs = int((elapsed - (3600 * hours) - (mins *60)))
         print('Time elapsed: {}:{}:{}'.format(hours, mins, secs))
         return rv
     return f
 
+@timer
 def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level = 1):
     """Generate current forcing HDF5 input file for MOHID.
 
@@ -247,7 +246,6 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     # append all filename strings within daterange to list
     for day in range(np.diff(daterange)[0].days):
         datestamp = daterange[0] + timedelta(days=day)
-        datestr1 = datestamp.strftime('%d%b%y').lower()
         month = datestamp.month
         if month < 10:
             month = f'0{str(month)}'
@@ -273,12 +271,11 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     print(f'\nOutput directory {dirname} created\n')
     # create hdf5 file and create tree structure
     f = h5py.File(f'{dirname}winds.hdf5', 'w')
-    results = f.create_group('Results')
     times = f.create_group('Time')
     windu = f.create_group('/Results/wind velocity X')
     windx = f.create_group('/Results/wind velocity Y')
     attr_counter = 0
-    number_of_files = len(U_files)
+    number_of_files = len(wind_files)
     bar = utilities.statusbar('Creating winds forcing file ...')
     for file_index in bar(range(number_of_files)):
         GEM = xr.open_dataset(wind_files[file_index])
@@ -331,7 +328,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
         return
 
 @timer
-def generate_ww3(timestart, timeend, path, outpath):
+def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     """Generate wave surface forcing HDF5 input file for MOHID.
 
     :arg timestart: date from when to start concatenating
@@ -385,7 +382,6 @@ def generate_ww3(timestart, timeend, path, outpath):
     print(f'\nOutput directory {dirname} created\n')
     # create hdf5 file and create tree structure
     f = h5py.File(f'{dirname}ww3.hdf5', 'w')
-    results = f.create_group('Results')
     times = f.create_group('Time')
     mwp = f.create_group('/Results/mean wave period')
     swh = f.create_group('/Results/significant wave height')
@@ -440,13 +436,13 @@ def generate_ww3(timestart, timeend, path, outpath):
 
         for i in range(sig_wave.shape[0]):
             child_name = 'significant wave height_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
-            dset = mwp.create_dataset(child_name, shape = (396, 896), data = sig_wave[i],chunks=(396, 896), compression = 'gzip', compression_opts = compression_level)
+            dset = swh.create_dataset(child_name, shape = (396, 896), data = sig_wave[i],chunks=(396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([100.]), 'Minimum' : np.array([-100.]), 'Units' : b'm'}
             dset.attrs.update(metadata)
     
         for i in range(whitecap.shape[0]):
             child_name = 'whitecap coverage_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
-            dset = mwp.create_dataset(child_name, shape = (396, 896), data = whitecap[i],chunks=(396, 896), compression = 'gzip', compression_opts = compression_level)
+            dset = wc.create_dataset(child_name, shape = (396, 896), data = whitecap[i],chunks=(396, 896), compression = 'gzip', compression_opts = compression_level)
             metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([1.]), 'Minimum' : np.array([0.]), 'Units' : b'1'}
             dset.attrs.update(metadata)
 
