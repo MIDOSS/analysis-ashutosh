@@ -36,4 +36,7 @@
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     
         Added w ocean velocity to input file generator function
+        !! need to add date validation on input
+        !! need to create local file for lat lon data for HRDPS and WW3 grids
+        
 
