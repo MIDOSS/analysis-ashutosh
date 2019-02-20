@@ -26,3 +26,14 @@
             cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/ashu_testing/nextcloud_replicate
             mohid run nextcloud_replicate.yaml $PROJECT/$USER/MIDOSS/results/ashu/nextcloud_replicate
 
+        Outcome
+        ^^^^^^^
+            crashed with multiple error messages. will investigate.
+
+20 Feb 2019
+
+    Continue developing scripts to generate hdf5 input files for MOHID
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+        Added w ocean velocity to input file generator function
+
