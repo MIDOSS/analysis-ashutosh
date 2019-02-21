@@ -203,7 +203,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 )
 
         # write time values to hdf5
-        for i, datearray in enumarate(datearrays):
+        for i, datearray in enumerate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(
                 child_name,
@@ -221,7 +221,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
             dset.attrs.update(metadata)
 
         # write u wind values to hdf5
-        for i, dataset in enumarate(current_u):
+        for i, dataset in enumerate(current_u):
             child_name = 'velocity U_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = velocity_u.create_dataset(
                 child_name,
