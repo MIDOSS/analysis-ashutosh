@@ -40,7 +40,6 @@ wwinput = '/opp/wwatch3/nowcast/'
 # Output filepath
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/ashu_testing/'
 
-
 def timer(func):
     def f(*args, **kwargs):
         beganat = time.time()
@@ -124,7 +123,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
     folder = str(
         datetime(startfolder.year, startfolder.month,startfolder.day).strftime('%d%b%y').lower()
         ) + '-' + str(
-            endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
+            datetime(endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
             )
 
     # create output directory
@@ -358,7 +357,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     folder = str(
         datetime(startfolder.year, startfolder.month,startfolder.day).strftime('%d%b%y').lower()
         ) + '-' + str(
-            endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
+            datetime(endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
             )
 
     # create output directory 
@@ -551,7 +550,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     folder = str(
         datetime(startfolder.year, startfolder.month,startfolder.day).strftime('%d%b%y').lower()
         ) + '-' + str(
-            endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
+            datetime(endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
             )
 
     # create output directory
@@ -719,13 +718,63 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     f.close()
     return
 
-timestart = '7 Feb 2019'
-timeend = '9 Feb 2019'
+def init():
+    # input start time
+    def timestart():
+        timestart =  input('\nEnter the start time e.g. 2015 Jan 1:\n--> ')
+        try:
+            beginat = parse(timestart)
+        except ValueError:
+            print('Invalid input. Check format and Enter Again')
+            timestart()
+        return timestart
+        
+    # input end time. This must be day after required range as upper bound is not inlcuded
+    def timeend():
+        timeend = input('\nEnter the end time e.g. 2015 Jan 2:\n--> ')
+        try:
+            beginat = parse(timeend)
+        except ValueError:
+            print('Invalid input. Check format and Enter Again')
+            timeend()
+        return timeend
+    
+    # select which components to build
+    def run_choice():
+        runsdict = {1: 'All', 2: 'NEMO ONLY', 3: 'HRDPS ONLY', 4: 'WW3 ONLY'}
+        runs = int(input('\nRun: \n1) All \n2) NEMO ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n--> '))
+        if runs not in runsdict:
+            print('Please select a valid run option')
+            run_choice()
+        ask = input(f'\nProceed with concatenating {runsdict[runs]} from {timestart} to {timeend}?\n--> ')
+        if ask in ['y', 'yes', 'YES', 'Y']:
+            run(runs)
+        else:
+            print('\nAborted')
+            return
 
-# validate date range
-if np.diff([parse(t) for t in [timestart, timeend]])[0].days <= 0:
-    print('invalid date range given')
-else:
-    generate_salishseacast(timestart, timeend, nemoinput, outpath)
-    generate_winds(timestart, timeend, hdinput, outpath)
-    #generate_ww3(timestart, timeend, wwinput, outpath, compression_level = 1)
+    # make the run selected
+    @timer
+    def run(runs):
+        if runs == 1:
+            generate_salishseacast(timestart, timeend, nemoinput, outpath)
+            generate_winds(timestart, timeend, hdinput, outpath)
+            generate_ww3(timestart, timeend, wwinput, outpath, compression_level = 1)
+        if runs == 2:
+            generate_salishseacast(timestart, timeend, nemoinput, outpath)
+        if runs == 3:
+            generate_winds(timestart, timeend, hdinput, outpath)
+        if runs == 4:
+            generate_ww3(timestart, timeend, wwinput, outpath, compression_level = 1)
+        print('All done')
+    
+    # user input date range
+    timestart = timestart()
+    timeend = timeend()
+        
+    # validate date range
+    if np.diff([parse(t) for t in [timestart, timeend]])[0].days <= 0:
+        print('invalid date range given')
+        init()
+    else:
+        run_choice()
