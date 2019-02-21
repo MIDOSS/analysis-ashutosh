@@ -41,20 +41,21 @@ wwinput = '/opp/wwatch3/nowcast/'
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/ashu_testing/'
 
 def timer(func):
+    """Decorator function for timing function calls
+    """
     def f(*args, **kwargs):
         beganat = time.time()
         rv      = func(*args, *kwargs)
         elapsed = time.time() - beganat
-        hours   = int(elapsed/3600)
+        hours   = int(elapsed / 3600)
         mins    = int((elapsed - (hours*3600))/60)
-        secs    = int((elapsed - (3600 * hours) - (mins *60)))
+        secs    = int((elapsed - (3600 * hours) - (mins * 60)))
         print('\nTime elapsed: {}:{}:{}'.format(hours, mins, secs))
         return rv
     return f
 
-@timer
-def generate_salishseacast(timestart, timeend, path, outpath, compression_level = 1):
-    """Generate forcing HDF5 input file for MOHID using SalishSecast inputs.
+def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1):
+    """Generate paths for Salish Seacast forcing 
 
     :arg timestart: date from when to start concatenating
     :type string: :py:class:'str'
@@ -71,8 +72,8 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
     :arg compression_level: compression level for output file (Integer[1,9])
     :type integer: :py:class:'int'
 
-    :returns: None
-    :rtype: :py:class:`NoneType'
+    :returns tuple: two tuples containing the arguments to pass to hdf5 file generator functions
+    :rtype: :py:class:`tuple'
     """
     
     # generate list of dates from daterange given
@@ -81,7 +82,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
     # append all filename strings within daterange to lists
     U_files, V_files, W_files, T_files = [], [], [], []
     for day in range(np.diff(daterange)[0].days):
-        datestamp = daterange[0] + timedelta(days=day)
+        datestamp = daterange[0] + timedelta(days = day)
         datestr1  = datestamp.strftime('%d%b%y').lower()
         datestr2  = datestamp.strftime('%Y%m%d')
         
@@ -91,32 +92,32 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
         U_path = f'{path}{datestr1}/SalishSea_1h_{datestr2}_{datestr2}_grid_U.nc'
         if not os.path.exists(U_path):
             print(f'File {U_path} not found. Check Directory and/or Date Range.')
-            return
+            return False
         U_files.append(U_path)
 
             # V files
         V_path = f'{path}{datestr1}/SalishSea_1h_{datestr2}_{datestr2}_grid_V.nc'
         if not os.path.exists(V_path):
             print(f'File {V_path} not found. Check Directory and/or Date Range.')
-            return
+            return False
         V_files.append(V_path)
 
             # W files
         W_path = f'{path}{datestr1}/SalishSea_1h_{datestr2}_{datestr2}_grid_W.nc'
         if not os.path.exists(W_path):
             print(f'File {W_path} not found. Check Directory and/or Date Range.')
-            return
+            return False
         W_files.append(W_path)
 
             # T files
         T_path = f'{path}{datestr1}/SalishSea_1h_{datestr2}_{datestr2}_grid_T.nc'
         if not os.path.exists(T_path):
             print(f'File {T_path} not found. Check Directory and/or Date Range.')
-            return
+            return False
         T_files.append(T_path)
 
     print('\nAll source files found')
-
+    
     # string: output folder name with date ranges used. 
     # end date will be lower by a day than timeend because datasets only go until midnight
     startfolder, endfolder = parse(timestart), parse(timeend) - timedelta(1)
@@ -133,20 +134,184 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
             os.makedirs(os.path.dirname(dirname))
         except OSError as exc:
             if exc.errno != errno.EEXIST:
-                raise
+                print(exc.errno)
+                return False
     
-    print(f'\nOutput directory {dirname} created\n')
+    print(f'\nSalishSeacast output directory {dirname} created\n')
+    return (
+        (U_files, V_files, W_files, dirname, compression_level),
+        (T_files, dirname, compression_level)
+        )
+
+def hrdps_paths(timestart, timeend, path, outpath, compression_level = 1):
+    """Generate wind input file paths
+
+    :arg timestart: date from when to start concatenating
+    :type string: :py:class:'str'
+
+    :arg timeend: date at which to stop concatenating
+    :type string: :py:class:'str'
+
+    :arg path: path of input files
+    :type string: :py:class:'str'
+
+    :arg outpath: path for output files
+    :type string: :py:class:'str'
+
+    :arg compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
+
+    :returns tuple: tuple containing the arguments to pass to hdf5 file generator function
+    :rtype: :py:class:`tuple'
+    """
+    
+    # generate list of dates from daterange given
+    daterange = [parse(t) for t in [timestart, timeend]]
+
+    # append all filename strings within daterange to list
+    wind_files = []
+    for day in range(np.diff(daterange)[0].days):
+        datestamp = daterange[0] + timedelta(days=day)
         
+        month = datestamp.month
+        if month < 10:
+            month = f'0{str(month)}'
+        
+        day = datestamp.day
+        if day < 10:
+            day = f'0{str(day)}'
+        
+        year = str(datestamp.year)
+
+        # check if file exists. exit if it does not. add path to list if it does.
+        wind_path = f'{path}ops_y{year}m{month}d{day}.nc'
+        if not os.path.exists(wind_path):
+            print(f'File {wind_path} not found. Check Directory and/or Date Range.')
+            return 
+        wind_files.append(wind_path)
+
+    print('\nAll source files found')
+
+    # string: output folder name with date ranges used. 
+    # end date will be lower by a day than timeend because datasets only go until midnight
+    startfolder, endfolder = parse(timestart), parse(timeend) - timedelta(1)
+    folder = str(
+        datetime(startfolder.year, startfolder.month,startfolder.day).strftime('%d%b%y').lower()
+        ) + '-' + str(
+            datetime(endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
+            )
+
+    # create output directory 
+    dirname = f'{outpath}hrdps/{folder}/'
+    if not os.path.exists(os.path.dirname(dirname)):
+        try:
+            os.makedirs(os.path.dirname(dirname))
+        except OSError as exc:
+            if exc.errno != errno.EEXIST:
+                print(exc.errno)
+                return False
+    
+    print(f'\nHRDPS output directory {dirname} created\n')
+    return (wind_files, dirname, compression_level)
+
+def ww3_paths(timestart, timeend, path, outpath, compression_level = 1):
+    """Generate Wave Watch 3 input files paths
+
+    :arg timestart: date from when to start concatenating
+    :type string: :py:class:'str'
+
+    :arg timeend: date at which to stop concatenating
+    :type string: :py:class:'str'
+
+    :arg path: path of input files
+    :type string: :py:class:'str'
+
+    :arg outpath: path for output files
+    :type string: :py:class:'str'
+
+    :arg compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
+
+    :returns tuple: tuple containing the arguments to pass to hdf5 file generator function
+    :rtype: :py:class:`tuple'
+    """
+    # generate list of dates from daterange given
+    months = {1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5 : 'may', 6: 'jun', 7: 'jul', 8: 'aug', 9 : 'sep', 10: 'oct', 11 :'nov',12: 'dec' }
+    daterange = [parse(t) for t in [timestart, timeend]]
+
+
+    # append all filename strings within daterange to list
+    wave_files = []
+    for day in range(np.diff(daterange)[0].days):
+        datestamp = daterange[0] + timedelta(days=day)
+        datestr2  = datestamp.strftime('%Y%m%d').lower()
+        monthnm   = months[datestamp.month]
+        
+        day = datestamp.day
+        if day < 10:
+            day = f'0{str(day)}'
+        
+        year = str(datestamp.year)[2:4]
+
+        wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_{datestr2}.nc'
+        if not os.path.exists(wave_path):
+            print(f'File {wave_path} not found. Check Directory and/or Date Range.')
+            return False
+        wave_files.append(wave_path)
+
+    print('\nAll source files found')
+ 
+    # string: output folder name with date ranges used. 
+    # end date will be lower by a day than timeend because datasets only go until midnight
+    startfolder, endfolder = parse(timestart), parse(timeend) - timedelta(1)
+    folder = str(
+        datetime(startfolder.year, startfolder.month,startfolder.day).strftime('%d%b%y').lower()
+        ) + '-' + str(
+            datetime(endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
+            )
+
+    # create output directory
+    dirname = f'{outpath}ww3/{folder}/'
+    if not os.path.exists(os.path.dirname(dirname)):
+        try:
+            os.makedirs(os.path.dirname(dirname))
+        except OSError as exc:
+            if exc.errno != errno.EEXIST:
+                print(exc.errno)
+                return False
+
+    print(f'\nWW3 output directory {dirname} created\n')
+    return (wave_files, dirname, compression_level)
+
+@timer  
+def create_currents_hdf5(U_files, V_files, W_files, dirname, compression_level = 1):
+    """Generate currents forcing file for MOHID
+
+    :arg U_files: listofString; Salish SeaCast U netcdf file paths
+    :type list: :py:class:'list'
+
+    :arg V_files: listofString; Salish SeaCast V netcdf file paths
+    :type list: :py:class:'list'
+
+    :arg W_files: listofString; Salish SeaCast W netcdf file paths
+    :type list: :py:class:'list'
+
+    :arg dirname: Output file directory
+    :type string: :py:class:'str'
+
+    :arg compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
+
+    :returns: None
+    :rtype: :py:class:`NoneType'
+    """
     # create hdf5 file and create tree structure
-    f           = h5py.File(f'{dirname}salishseacast.hdf5', 'w')
+    f           = h5py.File(f'{dirname}currents.hdf5', 'w')
     times       = f.create_group('Time')
     velocity_u  = f.create_group('/Results/velocity U')
     velocity_v  = f.create_group('/Results/velocity V')
     velocity_w  = f.create_group('/Results/velocity W')
-    water_level = f.create_group('/Results/water level')
-    vosaline    = f.create_group('/Results/salinity')
-    votemper    = f.create_group('/Results/temperature')
-    
+
     # since we are looping through the source files by day, we want to keep track of the
     # number of records we have made so that we can allocate the correct child names
     attr_counter = 0
@@ -158,7 +323,6 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
         U_raw = xr.open_dataset(U_files[file_index])
         V_raw = xr.open_dataset(V_files[file_index])
         W_raw = xr.open_dataset(W_files[file_index])
-        T_raw = xr.open_dataset(T_files[file_index])
 
         # unstagger to move U, V to center of grid square
         U  = viz_tools.unstagger_xarray(U_raw.vozocrtx, 'x')
@@ -169,9 +333,6 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
         U           = U.values[...,:,1:897:,1:397]
         V           = V.values[...,:,1:897:,1:397]
         current_w   = W.values[...,:,1:897:,1:397]
-        salinity    = T_raw.vosaline.values[...,:,1:897:,1:397]
-        temperature = T_raw.votemper.values[...,:,1:897:,1:397]
-        sea_surface = T_raw.sossheig.values[...,:,1:897:,1:397]
 
         # rotate currents to True North
         current_u, current_v = viz_tools.rotate_vel(U, V)
@@ -183,24 +344,16 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
         current_u   = np.transpose(current_u, [0,1,3,2])
         current_v   = np.transpose(current_v, [0,1,3,2])
         current_w   = np.transpose(current_w, [0,1,3,2])
-        salinity    = np.transpose(salinity, [0,1,3,2])
-        temperature = np.transpose(temperature, [0,1,3,2])
-        sea_surface = np.transpose(sea_surface, [0,2,1])
 
         # flip currents by depth dimension
         current_u   = np.flip(current_u, axis = 1)
         current_v   = np.flip(current_v, axis = 1)
         current_w   = np.flip(current_w, axis = 1)
-        salinity    = np.flip(salinity, axis = 1)
-        temperature = np.flip(temperature, axis = 1)
 
         # convert nans to 0s and set datatype to float64
         current_u   = np.nan_to_num(current_u).astype('float64')
         current_v   = np.nan_to_num(current_v).astype('float64')
         current_w   = np.nan_to_num(current_w).astype('float64')
-        salinity    = np.nan_to_num(salinity).astype('float64')
-        temperature = np.nan_to_num(temperature).astype('float64')
-        sea_surface = np.nan_to_num(sea_surface).astype('float64')
 
         # load dates from U netcdf file
         datelist = U_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
@@ -287,6 +440,97 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 }
             dset.attrs.update(metadata)
         
+     
+        
+        # update the accumulator
+        attr_counter = attr_counter + current_u.shape[0]
+        
+        # clear memory
+        current_u, current_v, current_w   = None, None, None
+
+    f.close()
+    return
+
+@timer
+def create_t_hdf5(T_files, dirname, compression_level = 1):
+    """Generate Wave Watch 3 input files
+
+    :arg T_files: listofString; Salish SeaCast T netcdf file paths
+    :type list: :py:class:'list'
+
+    :arg dirname: Output file directory
+    :type string: :py:class:'str'
+
+    :arg compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
+    
+    :returns: None
+    :rtype: :py:class:`NoneType'
+    """
+
+    # create hdf5 file and tree structure
+    f           = h5py.File(f'{dirname}t.hdf5', 'w')
+    times       = f.create_group('Time')
+    water_level = f.create_group('/Results/water level')
+    vosaline    = f.create_group('/Results/salinity')
+    votemper    = f.create_group('/Results/temperature')
+
+    # since we are looping through the source files by day, we want to keep track of the
+    # number of records we have made so that we can allocate the correct child names
+    attr_counter = 0
+
+    bar = utilities.statusbar('Creating T parameters file ...', maxval = len(T_files) + 1)
+    for t_file in bar(T_files):
+        # load NEMO netcdf source files using xarray
+        T_raw = xr.open_dataset(t_file)
+
+        # convert xarray DataArrays to numpy arrays and cut off grid edges
+        salinity    = T_raw.vosaline.values[...,:,1:897:,1:397]
+        temperature = T_raw.votemper.values[...,:,1:897:,1:397]
+        sea_surface = T_raw.sossheig.values[...,:,1:897:,1:397]
+        
+        # transpose grid (rotate 90 clockwise)
+        salinity    = np.transpose(salinity, [0,1,3,2])
+        temperature = np.transpose(temperature, [0,1,3,2])
+        sea_surface = np.transpose(sea_surface, [0,2,1])
+
+        # flip by depth dimension
+        salinity    = np.flip(salinity, axis = 1)
+        temperature = np.flip(temperature, axis = 1)
+
+        # convert nans to 0s and set datatype to float64
+        salinity    = np.nan_to_num(salinity).astype('float64')
+        temperature = np.nan_to_num(temperature).astype('float64')
+        sea_surface = np.nan_to_num(sea_surface).astype('float64')
+
+        # load dates from T netcdf file
+        datelist = T_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
+        
+        # make list of time arrays
+        datearrays = []
+        for date in datelist:
+            datearrays.append(
+                np.array([date.year,date.month, date.day, date.hour, date.minute, date.second]).astype('float64')
+                )
+
+        # write time values to hdf5
+        for i, datearray in enumerate(datearrays):
+            child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            dset       = times.create_dataset(
+                child_name,
+                shape            = (6,),
+                data             = datearray,
+                chunks           = (6,),
+                compression      = 'gzip',
+                compression_opts = compression_level
+                )
+            metadata = {
+                'Maximum' : np.array(datearrays[i][0]),
+                'Minimum' : np.array([-0.]),
+                'Units'   : b'YYYY/MM/DD HH:MM:SS'
+                } 
+            dset.attrs.update(metadata)
+        
         # write salinity values to hdf5
         for i, dataset in enumerate(salinity):
             child_name = 'salinity_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
@@ -343,26 +587,24 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 'Units'     : b'm'
                 }
             dset.attrs.update(metadata)
+        
+        # update the accumulator
+        attr_counter = attr_counter + salinity.shape[0]
+        
+        # clear memory
+        salinity, temperature, sea_surface = None, None, None
 
-        attr_counter = attr_counter + current_u.shape[0]
-   
     f.close()
     return
 
 @timer
-def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
-    """Generate wind forcing HDF5 input file for MOHID.
+def create_winds_hdf5(wind_files, dirname, compression_level = 1):
+    """Generate wind forcing input files
 
-    :arg timestart: date from when to start concatenating
-    :type string: :py:class:'str'
+    :arg wind_files: listofString; HRDPS netcdf file paths
+    :type list: :py:class:'list'
 
-    :arg timeend: date at which to stop concatenating
-    :type string: :py:class:'str'
-
-    :arg path: path of input files
-    :type string: :py:class:'str'
-
-    :arg outpath: path for output files
+    :arg dirname: Output file directory
     :type string: :py:class:'str'
 
     :arg compression_level: compression level for output file (Integer[1,9])
@@ -372,53 +614,6 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     :rtype: :py:class:`NoneType'
     """
     
-    # generate list of dates from daterange given
-    daterange = [parse(t) for t in [timestart, timeend]]
-
-    # append all filename strings within daterange to list
-    wind_files = []
-    for day in range(np.diff(daterange)[0].days):
-        datestamp = daterange[0] + timedelta(days=day)
-        
-        month = datestamp.month
-        if month < 10:
-            month = f'0{str(month)}'
-        
-        day = datestamp.day
-        if day < 10:
-            day = f'0{str(day)}'
-        
-        year = str(datestamp.year)
-
-        # check if file exists. exit if it does not. add path to list if it does.
-        wind_path = f'{path}ops_y{year}m{month}d{day}.nc'
-        if not os.path.exists(wind_path):
-            print(f'File {wind_path} not found. Check Directory and/or Date Range.')
-            return 
-        wind_files.append(wind_path)
-
-    print('\nAll source files found')
-
-    # string: output folder name with date ranges used. 
-    # end date will be lower by a day than timeend because datasets only go until midnight
-    startfolder, endfolder = parse(timestart), parse(timeend) - timedelta(1)
-    folder = str(
-        datetime(startfolder.year, startfolder.month,startfolder.day).strftime('%d%b%y').lower()
-        ) + '-' + str(
-            datetime(endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
-            )
-
-    # create output directory 
-    dirname = f'{outpath}hrdps/{folder}/'
-    if not os.path.exists(os.path.dirname(dirname)):
-        try:
-            os.makedirs(os.path.dirname(dirname))
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
-    
-    print(f'\nOutput directory {dirname} created\n')
-
     # create hdf5 file and create tree structure
     f     = h5py.File(f'{dirname}winds.hdf5', 'w')
     times = f.create_group('Time')
@@ -430,9 +625,9 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     attr_counter = 0
 
     bar = utilities.statusbar('Creating winds forcing file ...', maxval = len(wind_files) + 1)
-    for file in bar(wind_files):
+    for wind_file in bar(wind_files):
         # load HRDPS netcdf file using xarray
-        GEM = xr.open_dataset(file)
+        GEM = xr.open_dataset(wind_file)
 
         # lat lon data
         GEM_grid  = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaAtmosphereGridV1')
@@ -537,79 +732,30 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
                 'Units'     : b'm/s'
                 }
             dset.attrs.update(metadata)
-        # update the counter 
+        # update the accumulator 
         attr_counter = attr_counter + u_wind.shape[0]
+
+        # clear memory
+        u_wind, v_wind = None, None
     f.close()
     return
 
 @timer
-def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
-    """Generate wave surface forcing HDF5 input file for MOHID.
+def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
+    """Generate Wave Watch 3 input files
 
-    :arg timestart: date from when to start concatenating
-    :type string: :py:class:'str'
+    :arg wave_files: listofString; WW3 netcdf file paths
+    :type list: :py:class:'list'
 
-    :arg timeend: date at which to stop concatenating
-    :type string: :py:class:'str'
-
-    :arg path: path of input files
-    :type string: :py:class:'str'
-
-    :arg outpath: path for output files
+    :arg dirname: Output file directory
     :type string: :py:class:'str'
 
     :arg compression_level: compression level for output file (Integer[1,9])
     :type integer: :py:class:'int'
-
+    
     :returns: None
     :rtype: :py:class:`NoneType'
     """
-    # generate list of dates from daterange given
-    months = {1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5 : 'may', 6: 'jun', 7: 'jul', 8: 'aug', 9 : 'sep', 10: 'oct', 11 :'nov',12: 'dec' }
-    daterange = [parse(t) for t in [timestart, timeend]]
-
-
-    # append all filename strings within daterange to list
-    wave_files = []
-    for day in range(np.diff(daterange)[0].days):
-        datestamp = daterange[0] + timedelta(days=day)
-        datestr2  = datestamp.strftime('%Y%m%d').lower()
-        monthnm   = months[datestamp.month]
-        
-        day = datestamp.day
-        if day < 10:
-            day = f'0{str(day)}'
-        
-        year = str(datestamp.year)[2:4]
-
-        wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_{datestr2}.nc'
-        if not os.path.exists(wave_path):
-            print(f'File {wave_path} not found. Check Directory and/or Date Range.')
-            return 
-        wave_files.append(wave_path)
-
-    print('\nAll source files found')
- 
-    # string: output folder name with date ranges used. 
-    # end date will be lower by a day than timeend because datasets only go until midnight
-    startfolder, endfolder = parse(timestart), parse(timeend) - timedelta(1)
-    folder = str(
-        datetime(startfolder.year, startfolder.month,startfolder.day).strftime('%d%b%y').lower()
-        ) + '-' + str(
-            datetime(endfolder.year, endfolder.month, endfolder.day).strftime('%d%b%y').lower()
-            )
-
-    # create output directory
-    dirname = f'{outpath}ww3/{folder}/'
-    if not os.path.exists(os.path.dirname(dirname)):
-        try:
-            os.makedirs(os.path.dirname(dirname))
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
-
-    print(f'\nOutput directory {dirname} created\n')
-
     # create hdf5 file and create tree structure
     f     = h5py.File(f'{dirname}ww3.hdf5', 'w')
     times = f.create_group('Time')
@@ -617,15 +763,14 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     swh   = f.create_group('/Results/significant wave height')
     wc    = f.create_group('/Results/whitecap coverage')
 
-
     # since we are looping through the source files by day, we want to keep track of the
     # number of records we have made so that we can allocate the correct child names
     attr_counter = 0
 
-    bar = utilities.statusbar('Creating WW3 forcing file ...', maxval = len(wave_files) + 1)
-    for file in bar(wave_files):
+    bar = utilities.statusbar('Creating WW3 parameters file ...', maxval = len(wave_files) + 1)
+    for wave_file in bar(wave_files):
         # load WW3 netcdf source file using xarray
-        WW3 = xr.open_dataset(file)
+        WW3 = xr.open_dataset(wave_file)
 
         # SalishSeaCast lat-lon data
         NEMO_grid = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02')
@@ -757,9 +902,12 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
                 }
             dset.attrs.update(metadata)
 
-        # update the counter
+        # update the accumulator
         attr_counter = attr_counter + mean_wave.shape[0]
-    
+        
+        # clear memory
+        mean_wave, sig_wave, whitecap  = None, None, None
+
     f.close()
     return
 
@@ -787,16 +935,16 @@ def init():
     
     # select which components to build
     def run_choice():
-        runsdict = {1: 'All', 2: 'NEMO ONLY', 3: 'HRDPS ONLY', 4: 'WW3 ONLY'}
+        runsdict = {1: 'All', 2: 'Salish SeaCast ONLY', 3: 'HRDPS ONLY', 4: 'WW3 ONLY'}
         try: 
-            runs = int(input('\nRun: \n1) All \n2) NEMO ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n--> '))
+            runs = int(input('\nRun: \n1) All \n2) Salish SeaCast ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n--> '))
         except ValueError:
             print('\nSelect a valid run option\n')
             run_choice()
         if runs not in runsdict:
             print('\nSelect a valid run option\n')
             run_choice()
-        ask = input(f'\nProceed with concatenating {runsdict[runs]} from {timestart} to {timeend}? (yes/no)\n--> ')
+        ask = input(f'\nProceed with generating MOHID input files for {runsdict[runs]} from {timestart} to {timeend}? (yes/no)\n--> ')
         if ask in ['y', 'yes', 'YES', 'Y', 'yeet', 'YEET']:
             run(runs)
         else:
@@ -806,15 +954,51 @@ def init():
     @timer
     def run(runs):
         if runs == 1:
-            generate_salishseacast(timestart, timeend, nemoinput, outpath)
-            generate_winds(timestart, timeend, hdinput, outpath)
-            generate_ww3(timestart, timeend, wwinput, outpath, compression_level = 1)
+            salishseacast_paths = salishseacast_paths(
+                timestart, timeend, nemoinput, outpath, compression_level = 1
+                )
+            hrdps_paths = hrdps_paths(
+                timestart, timeend, hdinput, outpath, compression_level = 1
+                )
+            ww3_paths = ww3_paths(
+                timestart, timeend, wwinput, outpath, compression_level = 1
+                )
+            if salishseacast_paths or hrdps_paths or ww3_paths is False:
+                print('\nAborted')
+                return 
+            create_currents_hdf5(*salishseacast_paths[0])
+            create_t_hdf5(*salishseacast_paths[1])
+            create_winds_hdf5(*hrdps_paths)
+            create_ww3_hdf5(*ww3_paths)
+
         if runs == 2:
-            generate_salishseacast(timestart, timeend, nemoinput, outpath)
+            salishseacast_paths = salishseacast_paths(
+                timestart, timeend, nemoinput, outpath, compression_level = 1
+                )
+            if salishseacast_paths is False:
+                print('\nAborted')
+                return
+            create_currents_hdf5(*salishseacast_paths[0])
+            create_t_hdf5(*salishseacast_paths[1])
+
         if runs == 3:
-            generate_winds(timestart, timeend, hdinput, outpath)
+            hrdps_paths = hrdps_paths(
+                timestart, timeend, hdinput, outpath, compression_level = 1
+                )
+            if hrdps_paths is False:
+                print('\nAborted')
+                return
+            create_winds_hdf5(*hrdps_paths)
+        
         if runs == 4:
-            generate_ww3(timestart, timeend, wwinput, outpath, compression_level = 1)
+            ww3_paths = ww3_paths(
+                timestart, timeend, wwinput, outpath, compression_level = 1
+                )
+            if ww3_paths is False:
+                print('\nAborted')
+                return
+            create_ww3_hdf5(*ww3_paths)
+            
         print('\nAll done')
     
     # user input date range
@@ -827,3 +1011,4 @@ def init():
         init()
     else:
         run_choice()
+    return
