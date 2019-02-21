@@ -722,7 +722,7 @@ def init():
     def timestart():
         timestart =  input('\nEnter the start time e.g. 2015 Jan 1:\n--> ')
         try:
-            beginat = parse(timestart)
+            parse(timestart)
         except ValueError:
             print('Invalid input. Check format and enter correctly')
             timestart()
@@ -732,7 +732,7 @@ def init():
     def timeend():
         timeend = input('\nEnter the end time e.g. 2015 Jan 2:\n--> ')
         try:
-            beginat = parse(timeend)
+            parse(timeend)
         except ValueError:
             print('\nInvalid input. Check format and enter correctly\n')
             timeend()
