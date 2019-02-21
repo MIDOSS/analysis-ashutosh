@@ -82,8 +82,8 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
     U_files, V_files, W_files, T_files = [], [], [], []
     for day in range(np.diff(daterange)[0].days):
         datestamp = daterange[0] + timedelta(days=day)
-        datestr1 = datestamp.strftime('%d%b%y').lower()
-        datestr2 = datestamp.strftime('%Y%m%d')
+        datestr1  = datestamp.strftime('%d%b%y').lower()
+        datestr2  = datestamp.strftime('%Y%m%d')
         
         # check if file exists. exit if it does not. add path to list if it does.
 
@@ -138,12 +138,14 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
     print(f'\nOutput directory {dirname} created\n')
         
     # create hdf5 file and create tree structure
-    f = h5py.File(f'{dirname}salishseacast.hdf5', 'w')
-    times = f.create_group('Time')
-    velocity_u = f.create_group('/Results/velocity U')
-    velocity_v = f.create_group('/Results/velocity V')
-    velocity_w = f.create_group('/Results/velocity W')
+    f           = h5py.File(f'{dirname}salishseacast.hdf5', 'w')
+    times       = f.create_group('Time')
+    velocity_u  = f.create_group('/Results/velocity U')
+    velocity_v  = f.create_group('/Results/velocity V')
+    velocity_w  = f.create_group('/Results/velocity W')
     water_level = f.create_group('/Results/water level')
+    vosaline    = f.create_group('/Results/salinity')
+    votemper    = f.create_group('/Results/temperature')
     
     # since we are looping through the source files by day, we want to keep track of the
     # number of records we have made so that we can allocate the correct child names
@@ -164,9 +166,11 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
         W  = W_raw.vovecrtz #!!! 
 
         # convert xarray DataArrays to numpy arrays and cut off grid edges
-        U = U.values[...,:,1:897:,1:397]
-        V = V.values[...,:,1:897:,1:397]
-        current_w = W.values[...,:,1:897:,1:397]
+        U           = U.values[...,:,1:897:,1:397]
+        V           = V.values[...,:,1:897:,1:397]
+        current_w   = W.values[...,:,1:897:,1:397]
+        salinity    = T_raw.vosaline.values[...,:,1:897:,1:397]
+        temperature = T_raw.votemper.values[...,:,1:897:,1:397]
         sea_surface = T_raw.sossheig.values[...,:,1:897:,1:397]
 
         # rotate currents to True North
@@ -176,20 +180,26 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
         U, V = None, None
         
         # transpose grid (rotate 90 clockwise)
-        current_u = np.transpose(current_u, [0,1,3,2])
-        current_v = np.transpose(current_v, [0,1,3,2])
-        current_w = np.transpose(current_w, [0,1,3,2])
+        current_u   = np.transpose(current_u, [0,1,3,2])
+        current_v   = np.transpose(current_v, [0,1,3,2])
+        current_w   = np.transpose(current_w, [0,1,3,2])
+        salinity    = np.transpose(salinity, [0,1,3,2])
+        temperature = np.transpose(temperature, [0,1,3,2])
         sea_surface = np.transpose(sea_surface, [0,2,1])
 
         # flip currents by depth dimension
-        current_u = np.flip(current_u, axis = 1)
-        current_v = np.flip(current_v, axis = 1)
-        current_w = np.flip(current_w, axis = 1)
+        current_u   = np.flip(current_u, axis = 1)
+        current_v   = np.flip(current_v, axis = 1)
+        current_w   = np.flip(current_w, axis = 1)
+        salinity    = np.flip(salinity, axis = 1)
+        temperature = np.flip(temperature, axis = 1)
 
         # convert nans to 0s and set datatype to float64
-        current_u = np.nan_to_num(current_u).astype('float64')
-        current_v = np.nan_to_num(current_v).astype('float64')
-        current_w = np.nan_to_num(current_w).astype('float64')
+        current_u   = np.nan_to_num(current_u).astype('float64')
+        current_v   = np.nan_to_num(current_v).astype('float64')
+        current_w   = np.nan_to_num(current_w).astype('float64')
+        salinity    = np.nan_to_num(salinity).astype('float64')
+        temperature = np.nan_to_num(temperature).astype('float64')
         sea_surface = np.nan_to_num(sea_surface).astype('float64')
 
         # load dates from U netcdf file
@@ -205,94 +215,132 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
         # write time values to hdf5
         for i, datearray in enumerate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = times.create_dataset(
+            dset       = times.create_dataset(
                 child_name,
-                shape = (6,),
-                data = datearray,
-                chunks=(6,),
-                compression = 'gzip',
+                shape            = (6,),
+                data             = datearray,
+                chunks           = (6,),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'Maximum' : np.array(datearrays[i][0]),
                 'Minimum' : np.array([-0.]),
-                'Units' : b'YYYY/MM/DD HH:MM:SS'
+                'Units'   : b'YYYY/MM/DD HH:MM:SS'
                 } 
             dset.attrs.update(metadata)
 
-        # write u wind values to hdf5
+        # write u current values to hdf5
         for i, dataset in enumerate(current_u):
             child_name = 'velocity U_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = velocity_u.create_dataset(
+            dset       = velocity_u.create_dataset(
                 child_name,
-                shape = (40, 396, 896),
-                data = dataset,
-                chunks = (40, 396, 896),
-                compression = 'gzip',
+                shape            = (40, 396, 896),
+                data             = dataset,
+                chunks           = (40, 396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([5.]),
-                'Minimum' : np.array([-5.]),
-                'Units' : b'm/s'
+                'Maximum'   : np.array([5.]),
+                'Minimum'   : np.array([-5.]),
+                'Units'     : b'm/s'
                 }
             dset.attrs.update(metadata)
     
-        # write v wind values to hdf5
+        # write v current values to hdf5
         for i, dataset in enumerate(current_v):
             child_name = 'velocity V_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = velocity_v.create_dataset(
+            dset       = velocity_v.create_dataset(
                 child_name,
-                shape = (40, 396, 896),
-                data = dataset,
-                chunks = (40, 396, 896),
-                compression = 'gzip',
+                shape            = (40, 396, 896),
+                data             = dataset,
+                chunks           = (40, 396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([5.]),
-                'Minimum' : np.array([-5.]),
-                'Units' : b'm/s'
+                'Maximum'   : np.array([5.]),
+                'Minimum'   : np.array([-5.]),
+                'Units'     : b'm/s'
                 }
             dset.attrs.update(metadata)
 
-        # write w wind values to hdf5
-        for i, dataset in enumerate(current_v):
+        # write w current values to hdf5
+        for i, dataset in enumerate(current_w):
             child_name = 'velocity W_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = velocity_w.create_dataset(
+            dset       = velocity_w.create_dataset(
                 child_name,
-                shape = (40, 396, 896),
-                data = dataset,
-                chunks = (40, 396, 896),
-                compression = 'gzip',
+                shape            = (40, 396, 896),
+                data             = dataset,
+                chunks           = (40, 396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([5.]),
-                'Minimum' : np.array([-5.]),
-                'Units' : b'm/s'
+                'Maximum'   : np.array([5.]),
+                'Minimum'   : np.array([-5.]),
+                'Units'     : b'm/s'
+                }
+            dset.attrs.update(metadata)
+        
+        # write salinity values to hdf5
+        for i, dataset in enumerate(salinity):
+            child_name = 'salinity_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            dset       = vosaline.create_dataset(
+                child_name,
+                shape            = (40, 396, 896),
+                data             = dataset,
+                chunks           = (40, 396, 896),
+                compression      = 'gzip',
+                compression_opts = compression_level
+                )
+            metadata = {
+                'FillValue' : np.array([0.]),
+                'Maximum'   : np.array([100.]),
+                'Minimum'   : np.array([-100.]),
+                'Units'     : b'psu'
+                }
+            dset.attrs.update(metadata)
+
+        # write temperature values to hdf5
+        for i, dataset in enumerate(temperature):
+            child_name = 'temperature_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            dset       = votemper.create_dataset(
+                child_name,
+                shape            = (40, 396, 896),
+                data             = dataset,
+                chunks           = (40, 396, 896),
+                compression      = 'gzip',
+                compression_opts = compression_level
+                )
+            metadata = {
+                'FillValue' : np.array([0.]),
+                'Maximum'   : np.array([100.]),
+                'Minimum'   : np.array([-100.]),
+                'Units'     : b'?C'
                 }
             dset.attrs.update(metadata)
     
         # write  water level values to hdf5
         for i, dataset in enumerate(sea_surface):
             child_name = 'water level_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = water_level.create_dataset(
+            dset       = water_level.create_dataset(
                 child_name,
-                shape = (396, 896),
-                data = dataset,
-                chunks = (396, 896),
-                compression = 'gzip',
+                shape            = (396, 896),
+                data             = dataset,
+                chunks           = (396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([5.]),
-                'Minimum' : np.array([-5.]),
-                'Units' : b'm'
+                'Maximum'   : np.array([5.]),
+                'Minimum'   : np.array([-5.]),
+                'Units'     : b'm'
                 }
             dset.attrs.update(metadata)
 
@@ -372,10 +420,10 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     print(f'\nOutput directory {dirname} created\n')
 
     # create hdf5 file and create tree structure
-    f = h5py.File(f'{dirname}winds.hdf5', 'w')
+    f     = h5py.File(f'{dirname}winds.hdf5', 'w')
     times = f.create_group('Time')
     windu = f.create_group('/Results/wind velocity X')
-    windx = f.create_group('/Results/wind velocity Y')
+    windv = f.create_group('/Results/wind velocity Y')
     
     # since we are looping through the source files by day, we want to keep track of the
     # number of records we have made so that we can allocate the correct child names    
@@ -387,7 +435,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
         GEM = xr.open_dataset(file)
 
         # lat lon data
-        GEM_grid = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaAtmosphereGridV1')
+        GEM_grid  = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaAtmosphereGridV1')
         NEMO_grid = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02')
         
         # GEM data coordinates
@@ -407,10 +455,10 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
         # interpolate and stack the rest of the grids
         for grid in range(1, GEM_u.shape[0]):
             interp_u = griddata(points, GEM_u[grid].ravel(), xi, method='cubic')
-            u_wind = np.vstack((u_wind, np.expand_dims(interp_u,0)))
+            u_wind   = np.vstack((u_wind, np.expand_dims(interp_u,0)))
 
             interp_v = griddata(points, GEM_v[grid].ravel(), xi, method='cubic')
-            v_wind = np.vstack((v_wind, np.expand_dims(interp_v,0)))
+            v_wind   = np.vstack((v_wind, np.expand_dims(interp_v,0)))
 
         # cut off grid edges
         u_wind = u_wind[...,:,1:897:,1:397]
@@ -437,56 +485,56 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
         # write time values to hdf5
         for i, datearray in enumerate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = times.create_dataset(
+            dset       = times.create_dataset(
                 child_name,
-                shape = (6,),
-                data = datearray,
-                chunks = (6,),
-                compression = 'gzip',
+                shape            = (6,),
+                data             = datearray,
+                chunks           = (6,),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'Maximum' : np.array([float(datearrays[i][0])]),
                 'Minimum' : np.array([-0.]),
-                'Units' : b'YYYY/MM/DD HH:MM:SS'
+                'Units'   : b'YYYY/MM/DD HH:MM:SS'
                 } 
             dset.attrs.update(metadata)
 
         # write X wind velocities to hdf5
         for i, dataset in enumerate(u_wind):
             child_name = 'wind velocity X_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = windu.create_dataset(
+            dset       = windu.create_dataset(
                 child_name,
-                shape = (396, 896),
-                data = dataset,
-                chunks = (396, 896),
-                compression = 'gzip',
+                shape            = (396, 896),
+                data             = dataset,
+                chunks           = (396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([100.]),
-                'Minimum' : np.array([-100.]),
-                'Units' : b'm/s'
+                'Maximum'   : np.array([100.]),
+                'Minimum'   : np.array([-100.]),
+                'Units'     : b'm/s'
                 }
             dset.attrs.update(metadata)
         
         # write Y wind velocities to hdf5
         for i, dataset in enumerate(v_wind):
             child_name = 'wind velocity Y_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset =  windx.create_dataset(
+            dset       = windv.create_dataset(
                 child_name,
-                shape = (396, 896),
-                data = dataset,
-                chunks = (396, 896),
-                compression = 'gzip',
+                shape            = (396, 896),
+                data             = dataset,
+                chunks           = (396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([100.]),
-                'Minimum' : np.array([-100.]),
-                'Units' : b'm/s'
+                'Maximum'   : np.array([100.]),
+                'Minimum'   : np.array([-100.]),
+                'Units'     : b'm/s'
                 }
             dset.attrs.update(metadata)
         # update the counter 
@@ -525,8 +573,8 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     wave_files = []
     for day in range(np.diff(daterange)[0].days):
         datestamp = daterange[0] + timedelta(days=day)
-        datestr2 = datestamp.strftime('%Y%m%d').lower()
-        monthnm = months[datestamp.month]
+        datestr2  = datestamp.strftime('%Y%m%d').lower()
+        monthnm   = months[datestamp.month]
         
         day = datestamp.day
         if day < 10:
@@ -563,11 +611,11 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     print(f'\nOutput directory {dirname} created\n')
 
     # create hdf5 file and create tree structure
-    f = h5py.File(f'{dirname}ww3.hdf5', 'w')
+    f     = h5py.File(f'{dirname}ww3.hdf5', 'w')
     times = f.create_group('Time')
-    mwp = f.create_group('/Results/mean wave period')
-    swh = f.create_group('/Results/significant wave height')
-    wc = f.create_group('/Results/whitecap coverage')
+    mwp   = f.create_group('/Results/mean wave period')
+    swh   = f.create_group('/Results/significant wave height')
+    wc    = f.create_group('/Results/whitecap coverage')
 
 
     # since we are looping through the source files by day, we want to keep track of the
@@ -590,39 +638,39 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
        
         # convert xarray DataArrays to numpy arrays
         mean_wave_array = WW3.hs.values
-        sig_wave_array = WW3.t02.values
-        whitecap_array = WW3.wcc.values
+        sig_wave_array  = WW3.t02.values
+        whitecap_array  = WW3.wcc.values
 
         # create an interpolated array of the 1st slice so you can stack it onto the rest
         mean_wave = np.expand_dims(griddata(points, mean_wave_array[0].ravel(), xi, method='cubic'),0)
-        sig_wave = np.expand_dims(griddata(points, sig_wave_array[0].ravel(), xi, method='cubic'),0)
-        whitecap = np.expand_dims(griddata(points, whitecap_array[0].ravel(), xi, method='cubic'),0)
+        sig_wave  = np.expand_dims(griddata(points, sig_wave_array[0].ravel(), xi, method='cubic'),0)
+        whitecap  = np.expand_dims(griddata(points, whitecap_array[0].ravel(), xi, method='cubic'),0)
         
         # interpolate and stack the rest of the grids
         for grid in range(1, mean_wave_array.shape[0]):
             interp_mean_wave = griddata(points, mean_wave_array[grid].ravel(), xi, method='cubic')
-            mean_wave = np.vstack((mean_wave, np.expand_dims(interp_mean_wave,0)))
+            mean_wave        = np.vstack((mean_wave, np.expand_dims(interp_mean_wave,0)))
             
             interp_sig_wave = griddata(points, sig_wave_array[grid].ravel(), xi, method='cubic')
-            sig_wave = np.vstack((sig_wave, np.expand_dims(interp_sig_wave,0)))
+            sig_wave        = np.vstack((sig_wave, np.expand_dims(interp_sig_wave,0)))
             
-            interp_whitecap= griddata(points, whitecap_array[grid].ravel(), xi, method='cubic')
-            whitecap = np.vstack((whitecap, np.expand_dims(interp_whitecap,0)))
+            interp_whitecap = griddata(points, whitecap_array[grid].ravel(), xi, method='cubic')
+            whitecap        = np.vstack((whitecap, np.expand_dims(interp_whitecap,0)))
         
         # cut off grid edges
         mean_wave = mean_wave[...,:,1:897:,1:397]
-        sig_wave = sig_wave[...,:,1:897:,1:397]
-        whitecap = whitecap[...,:,1:897:,1:397]
+        sig_wave  = sig_wave[...,:,1:897:,1:397]
+        whitecap  = whitecap[...,:,1:897:,1:397]
 
         # transpose grid (rotate 90 clockwise)
         mean_wave = np.transpose(mean_wave, [0, 2, 1])
-        sig_wave = np.transpose(sig_wave, [0, 2, 1])
-        whitecap = np.transpose(whitecap, [0, 2, 1])
+        sig_wave  = np.transpose(sig_wave, [0, 2, 1])
+        whitecap  = np.transpose(whitecap, [0, 2, 1])
 
         # convert nans to 0s and set datatype to float64
         mean_wave = np.nan_to_num(mean_wave).astype('float64')
-        sig_wave = np.nan_to_num(sig_wave).astype('float64')
-        whitecap = np.nan_to_num(whitecap).astype('float64')
+        sig_wave  = np.nan_to_num(sig_wave).astype('float64')
+        whitecap  = np.nan_to_num(whitecap).astype('float64')
 
         # load dates from netcdf file
         datelist = WW3.time.values.astype('datetime64[s]').astype(datetime)
@@ -637,75 +685,75 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
         # write time values to hdf5
         for i, datearray in enumerate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = times.create_dataset(
+            dset       = times.create_dataset(
                 child_name,
-                shape = (6,),
-                data = datearray,
-                chunks = (6,),
-                compression = 'gzip',
+                shape            = (6,),
+                data             = datearray,
+                chunks           = (6,),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'Maximum' : np.array([float(datearrays[i][0])]),
                 'Minimum' : np.array([-0.]),
-                'Units' : b'YYYY/MM/DD HH:MM:SS'
+                'Units'   : b'YYYY/MM/DD HH:MM:SS'
                 } 
             dset.attrs.update(metadata)
 
         # write mean wave period to hdf5
         for i, dataset in enumerate(mean_wave):
             child_name = 'mean wave period_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = mwp.create_dataset(
+            dset       = mwp.create_dataset(
                 child_name,
-                shape = (396, 896),
-                data = dataset,
-                chunks = (396, 896),
-                compression = 'gzip',
+                shape            = (396, 896),
+                data             = dataset,
+                chunks           = (396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([100000.]),
-                'Minimum' : np.array([0.]),
-                'Units' : b's'
+                'Maximum'   : np.array([100000.]),
+                'Minimum'   : np.array([0.]),
+                'Units'     : b's'
                 }
             dset.attrs.update(metadata)
 
         # write significant wave height to hdf5
         for i, dataset in enumerate(sig_wave):
             child_name = 'significant wave height_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = swh.create_dataset(
+            dset       = swh.create_dataset(
                 child_name,
-                shape = (396, 896),
-                data = dataset,
-                chunks = (396, 896),
-                compression = 'gzip',
+                shape            = (396, 896),
+                data             = dataset,
+                chunks           = (396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([100.]),
-                'Minimum' : np.array([-100.]),
-                'Units' : b'm'
+                'Maximum'   : np.array([100.]),
+                'Minimum'   : np.array([-100.]),
+                'Units'     : b'm'
                 }
             dset.attrs.update(metadata)
     
         # write whitecap coverage to hdf5
         for i, dataset in enumerate(whitecap):
             child_name = 'whitecap coverage_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = wc.create_dataset(
+            dset       = wc.create_dataset(
                 child_name,
-                shape = (396, 896),
-                data = dataset,
-                chunks = (396, 896),
-                compression = 'gzip',
+                shape            = (396, 896),
+                data             = dataset,
+                chunks           = (396, 896),
+                compression      = 'gzip',
                 compression_opts = compression_level
                 )
             metadata = {
                 'FillValue' : np.array([0.]),
-                'Maximum' : np.array([1.]),
-                'Minimum' : np.array([0.]),
-                'Units' : b'1'
+                'Maximum'   : np.array([1.]),
+                'Minimum'   : np.array([0.]),
+                'Units'     : b'1'
                 }
             dset.attrs.update(metadata)
 
