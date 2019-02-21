@@ -227,7 +227,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 child_name,
                 shape = (40, 396, 896),
                 data = dataset,
-                chunks=(40, 396, 896),
+                chunks = (40, 396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -246,7 +246,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 child_name,
                 shape = (40, 396, 896),
                 data = dataset,
-                chunks=(40, 396, 896),
+                chunks = (40, 396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -265,7 +265,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 child_name,
                 shape = (40, 396, 896),
                 data = dataset,
-                chunks=(40, 396, 896),
+                chunks = (40, 396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -284,7 +284,7 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 child_name,
                 shape = (396, 896),
                 data = dataset,
-                chunks=(396, 896),
+                chunks = (396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -381,7 +381,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     # number of records we have made so that we can allocate the correct child names    
     attr_counter = 0
 
-    bar = utilities.statusbar('Creating winds forcing file ...', maxval = len(wind_files) + 1))
+    bar = utilities.statusbar('Creating winds forcing file ...', maxval = len(wind_files) + 1)
     for file in bar(wind_files):
         # load HRDPS netcdf file using xarray
         GEM = xr.open_dataset(file)
@@ -441,7 +441,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
                 child_name,
                 shape = (6,),
                 data = datearray,
-                chunks=(6,),
+                chunks = (6,),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -459,7 +459,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
                 child_name,
                 shape = (396, 896),
                 data = dataset,
-                chunks=(396, 896),
+                chunks = (396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -478,7 +478,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
                 child_name,
                 shape = (396, 896),
                 data = dataset,
-                chunks=(396, 896),
+                chunks = (396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -641,7 +641,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
                 child_name,
                 shape = (6,),
                 data = datearray,
-                chunks=(6,),
+                chunks = (6,),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -659,7 +659,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
                 child_name,
                 shape = (396, 896),
                 data = dataset,
-                chunks=(396, 896),
+                chunks = (396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -678,7 +678,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
                 child_name,
                 shape = (396, 896),
                 data = dataset,
-                chunks=(396, 896),
+                chunks = (396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -697,7 +697,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
                 child_name,
                 shape = (396, 896),
                 data = dataset,
-                chunks=(396, 896),
+                chunks = (396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
                 )
@@ -718,6 +718,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
 def init():
     # input start time
     def timestart():
+        print('Date range entry is not inclusive of the end date i.e. [start date, end date)')
         timestart =  input('\nEnter the start time e.g. 2015 Jan 1:\n--> ')
         try:
             parse(timestart)
