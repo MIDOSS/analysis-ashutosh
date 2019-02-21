@@ -203,12 +203,12 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
                 )
 
         # write time values to hdf5
-        for i in range(len(datearrays)):
+        for i, datearray in enumarate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(
                 child_name,
                 shape = (6,),
-                data = datearrays[i],
+                data = datearray,
                 chunks=(6,),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -221,12 +221,12 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
             dset.attrs.update(metadata)
 
         # write u wind values to hdf5
-        for i in range(current_u.shape[0]):
+        for i, dataset in enumarate(current_u):
             child_name = 'velocity U_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = velocity_u.create_dataset(
                 child_name,
                 shape = (40, 396, 896),
-                data = current_u[i],
+                data = dataset,
                 chunks=(40, 396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -240,12 +240,12 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
             dset.attrs.update(metadata)
     
         # write v wind values to hdf5
-        for i in range(current_v.shape[0]):
+        for i, dataset in enumerate(current_v):
             child_name = 'velocity V_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = velocity_v.create_dataset(
                 child_name,
                 shape = (40, 396, 896),
-                data = current_v[i],
+                data = dataset,
                 chunks=(40, 396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -259,12 +259,12 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
             dset.attrs.update(metadata)
 
         # write w wind values to hdf5
-        for i in range(current_v.shape[0]):
+        for i, dataset in enunmerate(current_v):
             child_name = 'velocity W_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = velocity_w.create_dataset(
                 child_name,
                 shape = (40, 396, 896),
-                data = current_w[i],
+                data = dataset,
                 chunks=(40, 396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -278,12 +278,12 @@ def generate_salishseacast(timestart, timeend, path, outpath, compression_level 
             dset.attrs.update(metadata)
     
         # write  water level values to hdf5
-        for i in range(sea_surface.shape[0]):
+        for i, dataset in enumerate(sea_surface):
             child_name = 'water level_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = water_level.create_dataset(
                 child_name,
                 shape = (396, 896),
-                data = sea_surface[i],
+                data = dataset,
                 chunks=(396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -381,11 +381,10 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
     # number of records we have made so that we can allocate the correct child names    
     attr_counter = 0
 
-    number_of_files = len(wind_files)
-    bar = utilities.statusbar('Creating winds forcing file ...')
-    for file_index in bar(range(number_of_files)):
+    bar = utilities.statusbar('Creating winds forcing file ...', maxval = len(wind_files) + 1))
+    for file in bar(wind_files):
         # load HRDPS netcdf file using xarray
-        GEM = xr.open_dataset(wind_files[file_index])
+        GEM = xr.open_dataset(file)
 
         # lat lon data
         GEM_grid = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaAtmosphereGridV1')
@@ -436,12 +435,12 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
                 )
         
         # write time values to hdf5
-        for i in range(len(datearrays)):
+        for i, datearray in enumerate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(
                 child_name,
                 shape = (6,),
-                data = datearrays[i],
+                data = datearray,
                 chunks=(6,),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -454,12 +453,12 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
             dset.attrs.update(metadata)
 
         # write X wind velocities to hdf5
-        for i in range(u_wind.shape[0]):
+        for i, dataset in enumerate(u_wind):
             child_name = 'wind velocity X_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = windu.create_dataset(
                 child_name,
                 shape = (396, 896),
-                data = u_wind[i],
+                data = dataset,
                 chunks=(396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -473,12 +472,12 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
             dset.attrs.update(metadata)
         
         # write Y wind velocities to hdf5
-        for i in range(v_wind.shape[0]):
+        for i, dataset in enumerate(v_wind):
             child_name = 'wind velocity Y_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset =  windx.create_dataset(
                 child_name,
                 shape = (396, 896),
-                data = v_wind[i],
+                data = dataset,
                 chunks=(396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -575,11 +574,10 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     # number of records we have made so that we can allocate the correct child names
     attr_counter = 0
 
-    number_of_files = len(wave_files)
-    bar = utilities.statusbar('Creating WW3 forcing file ...')
-    for file_index in bar(range(number_of_files)):
+    bar = utilities.statusbar('Creating WW3 forcing file ...', maxval = len(wave_files) + 1)
+    for file in bar(wave_files):
         # load WW3 netcdf source file using xarray
-        WW3 = xr.open_dataset(wave_files[file_index])
+        WW3 = xr.open_dataset(file)
 
         # SalishSeaCast lat-lon data
         NEMO_grid = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02')
@@ -637,12 +635,12 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
                 )
 
         # write time values to hdf5
-        for i in range(len(datearrays)):
+        for i, datearray in enumerate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(
                 child_name,
                 shape = (6,),
-                data = datearrays[i],
+                data = datearray,
                 chunks=(6,),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -655,12 +653,12 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
             dset.attrs.update(metadata)
 
         # write mean wave period to hdf5
-        for i in range(mean_wave.shape[0]):
+        for i, dataset in enumerate(mean_wave):
             child_name = 'mean wave period_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = mwp.create_dataset(
                 child_name,
                 shape = (396, 896),
-                data = mean_wave[i],
+                data = dataset,
                 chunks=(396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -674,12 +672,12 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
             dset.attrs.update(metadata)
 
         # write significant wave height to hdf5
-        for i in range(sig_wave.shape[0]):
+        for i, dataset in enumerate(sig_wave):
             child_name = 'significant wave height_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = swh.create_dataset(
                 child_name,
                 shape = (396, 896),
-                data = sig_wave[i],
+                data = dataset,
                 chunks=(396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -693,12 +691,12 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
             dset.attrs.update(metadata)
     
         # write whitecap coverage to hdf5
-        for i in range(whitecap.shape[0]):
+        for i, dataset in enumerate(whitecap):
             child_name = 'whitecap coverage_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = wc.create_dataset(
                 child_name,
                 shape = (396, 896),
-                data = whitecap[i],
+                data = dataset,
                 chunks=(396, 896),
                 compression = 'gzip',
                 compression_opts = compression_level
