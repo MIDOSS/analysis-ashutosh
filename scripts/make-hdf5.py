@@ -437,7 +437,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
         
         # write time values to hdf5
         for i in range(len(datearrays)):
-            child_name = 'Time_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(
                 child_name,
                 shape = (6,),
@@ -455,7 +455,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
 
         # write X wind velocities to hdf5
         for i in range(u_wind.shape[0]):
-            child_name = 'wind velocity X_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            child_name = 'wind velocity X_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = windu.create_dataset(
                 child_name,
                 shape = (396, 896),
@@ -474,7 +474,7 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
         
         # write Y wind velocities to hdf5
         for i in range(v_wind.shape[0]):
-            child_name = 'wind velocity Y_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            child_name = 'wind velocity Y_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset =  windx.create_dataset(
                 child_name,
                 shape = (396, 896),
@@ -492,7 +492,6 @@ def generate_winds(timestart, timeend, path, outpath, compression_level = 1):
             dset.attrs.update(metadata)
         # update the counter 
         attr_counter = attr_counter + u_wind.shape[0]
-    
     f.close()
     return
 
@@ -639,7 +638,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
 
         # write time values to hdf5
         for i in range(len(datearrays)):
-            child_name = 'Time_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = times.create_dataset(
                 child_name,
                 shape = (6,),
@@ -657,7 +656,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
 
         # write mean wave period to hdf5
         for i in range(mean_wave.shape[0]):
-            child_name = 'mean wave period_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            child_name = 'mean wave period_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = mwp.create_dataset(
                 child_name,
                 shape = (396, 896),
@@ -676,7 +675,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
 
         # write significant wave height to hdf5
         for i in range(sig_wave.shape[0]):
-            child_name = 'significant wave height_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            child_name = 'significant wave height_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = swh.create_dataset(
                 child_name,
                 shape = (396, 896),
@@ -695,7 +694,7 @@ def generate_ww3(timestart, timeend, path, outpath, compression_level = 1):
     
         # write whitecap coverage to hdf5
         for i in range(whitecap.shape[0]):
-            child_name = 'whitecap coverage_' + ((5 - len(str(i + 1))) * '0') + str(i + 1)
+            child_name = 'whitecap coverage_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = wc.create_dataset(
                 child_name,
                 shape = (396, 896),
@@ -725,7 +724,7 @@ def init():
         try:
             beginat = parse(timestart)
         except ValueError:
-            print('Invalid input. Check format and Enter Again')
+            print('Invalid input. Check format and enter correctly')
             timestart()
         return timestart
         
@@ -735,23 +734,26 @@ def init():
         try:
             beginat = parse(timeend)
         except ValueError:
-            print('Invalid input. Check format and Enter Again')
+            print('\nInvalid input. Check format and enter correctly\n')
             timeend()
         return timeend
     
     # select which components to build
     def run_choice():
         runsdict = {1: 'All', 2: 'NEMO ONLY', 3: 'HRDPS ONLY', 4: 'WW3 ONLY'}
-        runs = int(input('\nRun: \n1) All \n2) NEMO ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n--> '))
-        if runs not in runsdict:
-            print('Please select a valid run option')
+        try: 
+            runs = int(input('\nRun: \n1) All \n2) NEMO ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n--> '))
+        except ValueError:
+            print('\nSelect a valid run option\n')
             run_choice()
-        ask = input(f'\nProceed with concatenating {runsdict[runs]} from {timestart} to {timeend}?\n--> ')
-        if ask in ['y', 'yes', 'YES', 'Y']:
+        if runs not in runsdict:
+            print('\nSelect a valid run option\n')
+            run_choice()
+        ask = input(f'\nProceed with concatenating {runsdict[runs]} from {timestart} to {timeend}? (yes/no)\n--> ')
+        if ask in ['y', 'yes', 'YES', 'Y', 'yeet', 'YEET']:
             run(runs)
         else:
             print('\nAborted')
-            return
 
     # make the run selected
     @timer
@@ -766,7 +768,7 @@ def init():
             generate_winds(timestart, timeend, hdinput, outpath)
         if runs == 4:
             generate_ww3(timestart, timeend, wwinput, outpath, compression_level = 1)
-        print('All done')
+        print('\nAll done')
     
     # user input date range
     timestart = timestart()
@@ -774,7 +776,7 @@ def init():
         
     # validate date range
     if np.diff([parse(t) for t in [timestart, timeend]])[0].days <= 0:
-        print('invalid date range given')
+        print(f'\nInvalid input. Start time {timestart} comes after end time {timeend}.\n')
         init()
     else:
         run_choice()
