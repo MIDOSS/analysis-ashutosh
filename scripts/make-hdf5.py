@@ -43,11 +43,11 @@ outpath = '/results2/MIDOSS/forcing/SalishSeaCast/ashu_testing/'
 def timer(func):
     def f(*args, **kwargs):
         beganat = time.time()
-        rv = func(*args, *kwargs)
+        rv      = func(*args, *kwargs)
         elapsed = time.time() - beganat
-        hours = int(elapsed/3600)
-        mins = int((elapsed - (hours*3600))/60)
-        secs = int((elapsed - (3600 * hours) - (mins *60)))
+        hours   = int(elapsed/3600)
+        mins    = int((elapsed - (hours*3600))/60)
+        secs    = int((elapsed - (3600 * hours) - (mins *60)))
         print('\nTime elapsed: {}:{}:{}'.format(hours, mins, secs))
         return rv
     return f
