@@ -83,3 +83,33 @@
     
         added salinity and temperature
         refactored script to generate file paths and produce hdf5 files in separate functions. added additional validation.
+    
+    Testing Script on Salish
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+        SalishSeacast output directory /results2/MIDOSS/forcing/SalishSeaCast/ashu_testing/hdf5/01oct18-07oct18/ created
+        HRDPS output directory /results2/MIDOSS/forcing/SalishSeaCast/ashu_testing/hrdps/01oct18-07oct18/ created
+        WW3 output directory /results2/MIDOSS/forcing/SalishSeaCast/ashu_testing/ww3/01oct18-07oct18/ created
+
+        Crashed on WW3. Output:
+        Creating WW3 parameters file ... N/A% (0 of 7) |                                                          |ETA:  --:--:--Traceback (most recent call last):
+        File "<stdin>", line 1, in <module>
+        File "make-hdf5.py", line 1013, in init
+            run_choice()
+        File "make-hdf5.py", line 949, in run_choice
+            run(runs)
+        File "make-hdf5.py", line 48, in f
+            rv      = func(*args, *kwargs)
+        File "make-hdf5.py", line 972, in run
+            create_ww3_hdf5(*ww3)
+        File "make-hdf5.py", line 48, in f
+            rv      = func(*args, *kwargs)
+        File "make-hdf5.py", line 790, in create_ww3_hdf5
+            mean_wave = np.expand_dims(griddata(points, mean_wave_array[0].ravel(), xi, method='cubic'),0)
+        File "/home/abhudia/anaconda3/lib/python3.6/site-packages/scipy/interpolate/ndgriddata.py", line 206, in griddata
+            raise ValueError("invalid number of dimensions in xi")
+        ValueError: invalid number of dimensions in xi
+        >>> mean_wave_array
+        Traceback (most recent call last):
+        File "<stdin>", line 1, in <module>
+        NameError: name 'mean_wave_array' is not defined
