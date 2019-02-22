@@ -113,3 +113,5 @@
         Traceback (most recent call last):
         File "<stdin>", line 1, in <module>
         NameError: name 'mean_wave_array' is not defined
+
+	Adding meshgrid did not fix the issue. The error message remains.
