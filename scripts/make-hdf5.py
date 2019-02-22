@@ -18,6 +18,7 @@
 
 import errno
 import h5py
+import multiprocessing
 import numpy as np
 import os
 import time
@@ -50,7 +51,7 @@ def timer(func):
         hours   = int(elapsed / 3600)
         mins    = int((elapsed - (hours*3600))/60)
         secs    = int((elapsed - (3600 * hours) - (mins * 60)))
-        print('\nTime elapsed: {}:{}:{}'.format(hours, mins, secs))
+        print('\nTime elapsed: {}:{}:{}\n'.format(hours, mins, secs))
         return rv
     return f
 
@@ -137,7 +138,7 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
                 print(exc.errno)
                 return False
     
-    print(f'\nSalishSeacast output directory {dirname} created\n')
+    print(f'\nSalish SeaCast output directory {dirname} created\n')
     return (
         (U_files, V_files, W_files, dirname, compression_level),
         (T_files, dirname, compression_level)
@@ -236,7 +237,7 @@ def ww3_paths(timestart, timeend, path, outpath, compression_level = 1):
     :rtype: :py:class:`tuple'
     """
     # generate list of dates from daterange given
-    months = {1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5 : 'may', 6: 'jun', 7: 'jul', 8: 'aug', 9 : 'sep', 10: 'oct', 11 :'nov',12: 'dec' }
+    months = {1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5 : 'may', 6: 'jun', 7: 'jul', 8: 'aug', 9 : 'sep', 10: 'oct', 11 :'nov',12: 'dec'}
     daterange = [parse(t) for t in [timestart, timeend]]
 
 
@@ -479,7 +480,7 @@ def create_t_hdf5(T_files, dirname, compression_level = 1):
     # number of records we have made so that we can allocate the correct child names
     attr_counter = 0
 
-    bar = utilities.statusbar('Creating T parameters file ...', maxval = len(T_files) + 1)
+    bar = utilities.statusbar('Creating T parameters file ...', maxval = len(T_files))
     for t_file in bar(T_files):
         # load NEMO netcdf source files using xarray
         T_raw = xr.open_dataset(t_file)
@@ -624,7 +625,7 @@ def create_winds_hdf5(wind_files, dirname, compression_level = 1):
     # number of records we have made so that we can allocate the correct child names    
     attr_counter = 0
 
-    bar = utilities.statusbar('Creating winds forcing file ...', maxval = len(wind_files) + 1)
+    bar = utilities.statusbar('Creating winds forcing file ...', maxval = len(wind_files))
     for wind_file in bar(wind_files):
         # load HRDPS netcdf file using xarray
         GEM = xr.open_dataset(wind_file)
@@ -767,7 +768,7 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
     # number of records we have made so that we can allocate the correct child names
     attr_counter = 0
 
-    bar = utilities.statusbar('Creating WW3 parameters file ...', maxval = len(wave_files) + 1)
+    bar = utilities.statusbar('Creating WW3 parameters file ...', maxval = len(wave_files))
     for wave_file in bar(wave_files):
         # load WW3 netcdf source file using xarray
         WW3 = xr.open_dataset(wave_file)
@@ -782,9 +783,11 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
         xi = (NEMO_grid.latitude.values, NEMO_grid.longitude.values)
        
         # convert xarray DataArrays to numpy arrays
-        mean_wave_array = WW3.hs.values
-        sig_wave_array  = WW3.t02.values
+        mean_wave_array = WW3.t02.values
+        sig_wave_array  = WW3.hs.values
         whitecap_array  = WW3.wcc.values
+        #np.meshgrid(WW3.MAPSTA.latitude.values, WW3.MAPSTA.latitude.values)[0].T
+        #np.meshgrid(WW3.MAPSTA.longitude.values, WW3.MAPSTA.longitude.values)[0]  
 
         # create an interpolated array of the 1st slice so you can stack it onto the rest
         mean_wave = np.expand_dims(griddata(points, mean_wave_array[0].ravel(), xi, method='cubic'),0)
@@ -954,50 +957,50 @@ def init():
     @timer
     def run(runs):
         if runs == 1:
-            salishseacast_paths = salishseacast_paths(
+            salishseacast = salishseacast_paths(
                 timestart, timeend, nemoinput, outpath, compression_level = 1
                 )
-            hrdps_paths = hrdps_paths(
+            hrdps = hrdps_paths(
                 timestart, timeend, hdinput, outpath, compression_level = 1
                 )
-            ww3_paths = ww3_paths(
+            ww3 = ww3_paths(
                 timestart, timeend, wwinput, outpath, compression_level = 1
                 )
-            if salishseacast_paths or hrdps_paths or ww3_paths is False:
+            if (salishseacast or hrdps or ww3) is False:
                 print('\nAborted')
                 return 
-            create_currents_hdf5(*salishseacast_paths[0])
-            create_t_hdf5(*salishseacast_paths[1])
-            create_winds_hdf5(*hrdps_paths)
-            create_ww3_hdf5(*ww3_paths)
+            create_currents_hdf5(*salishseacast[0])
+            create_t_hdf5(*salishseacast[1])
+            create_winds_hdf5(*hrdps)
+            create_ww3_hdf5(*ww3)
 
         if runs == 2:
-            salishseacast_paths = salishseacast_paths(
+            salishseacast = salishseacast_paths(
                 timestart, timeend, nemoinput, outpath, compression_level = 1
                 )
-            if salishseacast_paths is False:
+            if salishseacast is False:
                 print('\nAborted')
                 return
-            create_currents_hdf5(*salishseacast_paths[0])
-            create_t_hdf5(*salishseacast_paths[1])
+            create_currents_hdf5(*salishseacast[0])
+            create_t_hdf5(*salishseacast[1])
 
         if runs == 3:
-            hrdps_paths = hrdps_paths(
+            hrdps = hrdps_paths(
                 timestart, timeend, hdinput, outpath, compression_level = 1
                 )
-            if hrdps_paths is False:
+            if hrdps is False:
                 print('\nAborted')
                 return
-            create_winds_hdf5(*hrdps_paths)
+            create_winds_hdf5(*hrdps)
         
         if runs == 4:
-            ww3_paths = ww3_paths(
+            ww3 = ww3_paths(
                 timestart, timeend, wwinput, outpath, compression_level = 1
                 )
-            if ww3_paths is False:
+            if ww3 is False:
                 print('\nAborted')
                 return
-            create_ww3_hdf5(*ww3_paths)
+            create_ww3_hdf5(*ww3)
             
         print('\nAll done')
     

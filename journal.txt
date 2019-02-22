@@ -68,7 +68,7 @@
         
         Outcome
         ^^^^^^^
-            crashed again. stderroutput:
+            crashed again. stderr output:
                 ReadInitialImposedSolution  - ModuleHydrodynamic - ERR170
                 Usage: hdf5-to-netcdf4 [OPTIONS] HDF5_FILE NETCDF4_FILE
                 Try "hdf5-to-netcdf4 --help" for help.
@@ -76,3 +76,10 @@
                 Error: Invalid value for "HDF5_FILE": Path "/scratch/abhudia/MIDOSS/runs/ashu_testing/nextcloud_replicate_2019-02-20T171143.680870-0800/res/Lagrangian_nextcloud_replicate.hdf5" does not exist.
 
 
+21 Feb 2019
+
+    Continue developing script to generate hdf5 input files for MOHID
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+        added salinity and temperature
+        refactored script to generate file paths and produce hdf5 files in separate functions. added additional validation.
