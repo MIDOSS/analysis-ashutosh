@@ -778,9 +778,8 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
        
         
 	# WW3 data coordinates
-        latitude = np.meshgrid(WW3.MAPSTA.latitude.values, WW3.MAPSTA.latitude.values)[0].T
-        longitude = np.meshgrid(WW3.MAPSTA.longitude.values, WW3.MAPSTA.longitude.values)[0]
-        points = np.array([latitude.ravel(), longitude.ravel()-360]).T
+        lat_lon_mesh = np.meshgrid(WW3.MAPSTA.latitude.values, WW3.MAPSTA.longitude.values)    
+        points = np.array([lat_lon_mesh[1].ravel(), lat_lon_mesh[0].ravel()-360]).T
        
         # NEMO lat lon grids tuple
         xi = (NEMO_grid.latitude.values, NEMO_grid.longitude.values)
