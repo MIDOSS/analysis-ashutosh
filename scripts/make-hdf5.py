@@ -788,8 +788,6 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
         mean_wave_array = WW3.t02.values
         sig_wave_array  = WW3.hs.values
         whitecap_array  = WW3.wcc.values
-        #np.meshgrid(WW3.MAPSTA.latitude.values, WW3.MAPSTA.latitude.values)[0].T
-        #np.meshgrid(WW3.MAPSTA.longitude.values, WW3.MAPSTA.longitude.values)[0]  
 
         # create an interpolated array of the 1st slice so you can stack it onto the rest
         mean_wave = np.expand_dims(griddata(points, mean_wave_array[0].ravel(), xi, method='cubic'),0)
@@ -844,7 +842,7 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
                 compression_opts = compression_level
                 )
             metadata = {
-                'Maximum' : np.array([float(datearrays[i][0])]),
+                'Maximum' : np.array([float(datearray[0])]),
                 'Minimum' : np.array([-0.]),
                 'Units'   : b'YYYY/MM/DD HH:MM:SS'
                 } 
