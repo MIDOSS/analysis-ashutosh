@@ -148,3 +148,15 @@
 
         Second attempt:
         Used shihan's output file to dfigure out where the oil was spilt and got the lat lon. 
+
+25 Feb 2019
+^^^^^^^^^^^
+        Run MOHID
+        ^^^^^^^^^
+            in config:
+            mohid run nextcloud_replicate.yaml $PROJECT/$USER/MIDOSS/results/ashu/nextcloud_replicate --no-submit
+            in scratch:
+            ln -s /project/6001313/dlatorne/MIDOSS/MIDOSS-MOHID/Solutions/linux/bin/MohidWater.exe
+            made chnage to MOHID.sh 
+            sbatch MOHID.sh
+
