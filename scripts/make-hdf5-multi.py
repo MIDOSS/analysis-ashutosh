@@ -27,7 +27,8 @@ import h5py
 from salishsea_tools import utilities
 from salishsea_tools import viz_tools
 import multiprocessing
-
+from mpi4py import MPI
+import mpi4py
 #from scipy.interpolate import griddata
 
 # NEMO input files directory
@@ -155,7 +156,7 @@ def generate_currents_hdf5(timestart, timeend, path, outpath, compression_level 
     return U_files, V_files, T_files, dirname, compression_level
     
 #for file_index in bar(range(number_of_files)):
-def write_currents (U_files, V_files, T_files, compression_level, file_index):
+def write_currents (U_files, V_files, T_files, compression_level, file_index, times, water_level):
     """"   
     :arg U_files: listofString: U parameter file paths
     :type: :py:class:`list'
@@ -181,55 +182,26 @@ def write_currents (U_files, V_files, T_files, compression_level, file_index):
     :arg compression_level: compression level for output file (Integer[1,9])
     :type integer: :py:class:'int'
     """
-    global times, velocity_u, velocity_v, water_level
     
-    U_raw = xr.open_dataset(U_files[file_index])
-    V_raw = xr.open_dataset(V_files[file_index])
+
     T_raw = xr.open_dataset(T_files[file_index])
     # assume all files have same time_counter markers
-    datelist = U_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
+    datelist = T_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
     # unstagger to move U, V to center of grid square
-    U  = viz_tools.unstagger_xarray(U_raw.vozocrtx, 'x')
-    V  = viz_tools.unstagger_xarray(V_raw.vomecrty, 'y')
+
     # convert xarrays to numpy arrays and cut off grid edges
-    U = U.values[...,:,1:897:,1:397]
-    V = V.values[...,:,1:897:,1:397]
+
     sea_surface = T_raw.sossheig.values[...,:,1:897:,1:397]
-    # rotate currents to True North
-    current_u, current_v = viz_tools.rotate_vel(U, V)
-    # clear memory
-    U, V = None, None
-    # transpose grid (rotate 90 clockwise)
-    current_u = np.transpose(current_u, [0,1,3,2])
-    current_v = np.transpose(current_v, [0,1,3,2])
+
     sea_surface = np.transpose(sea_surface, [0,2,1])
-    # flip currents by depth dimension
-    current_u = np.flip(current_u, axis = 1)
-    current_v = np.flip(current_v, axis = 1)
-    # convert nans to 0's and set datatype to float64
-    current_u = np.nan_to_num(current_u).astype('float64')
-    current_v = np.nan_to_num(current_v).astype('float64')
+
     sea_surface = np.nan_to_num(sea_surface).astype('float64')
-    attr_counter = file_index * current_u.shape[0]
+    attr_counter = file_index * sea_surface.shape[0]
     # make list of time arrays
     datearrays = []
     for date in datelist:
         datearrays.append(np.array([date.year, date.month, date.day, date.hour, date.minute, date.second]).astype('float64'))
-    # write u wind values to hdf5
-    for i in range(current_u.shape[0]):
-        velocity_attr = 'velocity U_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-        dset = velocity_u.create_dataset(velocity_attr, shape = (40, 396, 896), data = current_u[i],chunks=(40, 396, 896), compression = 'gzip', compression_opts = compression_level)
-        metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([5.]), 'Minimum' : np.array([-5.]), 'Units' : b'm/s'}
-        dset.attrs.update(metadata)
 
-    # write v wind values to hdf5
-    for i in range(current_v.shape[0]):
-        velocity_attr = 'velocity V_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-        dset = velocity_v.create_dataset(velocity_attr, shape = (40, 396, 896), data = current_v[i],chunks=(40, 396, 896), compression = 'gzip', compression_opts = compression_level)
-        metadata = {'FillValue' : np.array([0.]), 'Maximum' : np.array([5.]), 'Minimum' : np.array([-5.]), 'Units' : b'm/s'}
-        dset.attrs.update(metadata)
-
-    # write  water level values to hdf5
 
     for i in range(sea_surface.shape[0]):
         level_attr = 'water level_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
@@ -277,18 +249,16 @@ def manage_queue(current, remaining, workers):
 if __name__ == '__main__':
     beganat = time.time()
     timestart = '1 Feb 2019'
-    timeend = '8 Feb 2019'
+    timeend = '5 Feb 2019'
     U_files, V_files, T_files, dirname,compression_level = generate_currents_hdf5(timestart, timeend, nemoinput, outpath, compression_level = 1)
-    f = h5py.File(f'temp/foocurrents.hdf5', driver = 'sec2')
+    f = h5py.File(f'temp/foocurrents.hdf5', 'w', driver='mpio', comm=MPI.COMM_WORLD)
     times = f.create_group('Time')
-    velocity_u = f.create_group('/Results/velocity U')
-    velocity_v = f.create_group('/Results/velocity V')
     water_level = f.create_group('/Results/water level')
     processes= []
     #multiprocessing.set_start_method('spawn')
     for i in range(len(U_files)):
-        p = multiprocessing.Process(target = write_currents, args = (U_files, V_files, T_files, compression_level, i))
+        p = multiprocessing.Process(target = write_currents, args = (U_files, V_files, T_files, compression_level, i, times, water_level))
         processes.append(p)
-    manage_queue([], processes, 2)
+    manage_queue([], processes, 4)
     f.close()
     print('Time elapsed: {}'.format(conv_time(time.time()-beganat)))
