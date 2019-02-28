@@ -74,6 +74,8 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Hdf5_to_nc.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Hdf5_to_nc.ipynb)
 
+* ##[Compare_output_files.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_output_files.ipynb)
+
 
 ##License
 
