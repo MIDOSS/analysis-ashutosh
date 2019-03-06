@@ -38,7 +38,7 @@ hdinput = '/results/forcing/atmospheric/GEM2.5/operational/'
 wwinput = '/opp/wwatch3/nowcast/'
 
 # Output filepath
-outpath = '/results2/MIDOSS/forcing/SalishSeaCast/ashu_testing/'
+outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
 def timer(func):
     """Decorator function for timing function calls
@@ -128,7 +128,7 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
             )
 
     # create output directory
-    dirname = f'{outpath}hdf5/{folder}/'
+    dirname = f'{outpath}MF0/{folder}/'
     if not os.path.exists(os.path.dirname(dirname)):
         try:
             os.makedirs(os.path.dirname(dirname))
@@ -202,7 +202,7 @@ def hrdps_paths(timestart, timeend, path, outpath, compression_level = 1):
             )
 
     # create output directory 
-    dirname = f'{outpath}hrdps/{folder}/'
+    dirname = f'{outpath}MF0/{folder}/'
     if not os.path.exists(os.path.dirname(dirname)):
         try:
             os.makedirs(os.path.dirname(dirname))
@@ -271,7 +271,7 @@ def ww3_paths(timestart, timeend, path, outpath, compression_level = 1):
             )
 
     # create output directory
-    dirname = f'{outpath}ww3/{folder}/'
+    dirname = f'{outpath}MF0/{folder}/'
     if not os.path.exists(os.path.dirname(dirname)):
         try:
             os.makedirs(os.path.dirname(dirname))
@@ -918,50 +918,6 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
     return
 
 def init():
-    # input start time
-    def timestart():
-        print('Date range entry is not inclusive of the end date i.e. [start date, end date)')
-        timestart = input('\nEnter the start time e.g. 2015 Jan 1:\n--> ')
-        try:
-            parse(timestart)
-        except ValueError:
-            print('Invalid input. Check format and enter correctly')
-            timestart()
-        return timestart
-        
-    # input end time. This must be day after required range as upper bound is not inlcuded
-    def timeend():
-        timeend = input('\nEnter the end time e.g. 2015 Jan 2:\n--> ')
-        try:
-            parse(timeend)
-        except ValueError:
-            print('\nInvalid input. Check format and enter correctly\n')
-            timeend()
-        return timeend
-    
-    # select which components to build
-    def run_choice():
-        runsdict = {
-            1: 'All',
-            2: 'Salish SeaCast ONLY',
-            3: 'HRDPS ONLY',
-            4: 'WW3 ONLY'
-            }
-        try: 
-            runs = int(input('\nRun: \n1) All \n2) Salish SeaCast ONLY \n3) HRDPS ONLY \n4) WW3 ONLY ?\n--> '))
-        except ValueError:
-            print('\nSelect a valid run option\n')
-            run_choice()
-        if runs not in runsdict:
-            print('\nSelect a valid run option\n')
-            run_choice()
-        ask = input(f'\nProceed with generating MOHID input files for {runsdict[runs]} from {timestart} to {timeend}? (yes/no)\n--> ')
-        if ask in ['y', 'yes', 'YES', 'Y', 'yeet', 'YEET']:
-            run(runs)
-        else:
-            print('\nAborted')
-
-    # make the run selected
     @timer
     def run(runs):
         if runs == 1:
@@ -974,52 +930,35 @@ def init():
             ww3 = ww3_paths(
                 timestart, timeend, wwinput, outpath, compression_level = 1
                 )
-            if (salishseacast or hrdps or ww3) is False:
+            if (salishseacast or hrdps) is False:
                 print('\nAborted')
                 return 
             create_currents_hdf5(*salishseacast[0])
             create_t_hdf5(*salishseacast[1])
             create_winds_hdf5(*hrdps)
-            create_ww3_hdf5(*ww3)
-
-        if runs == 2:
-            salishseacast = salishseacast_paths(
-                timestart, timeend, nemoinput, outpath, compression_level = 1
-                )
-            if salishseacast is False:
-                print('\nAborted')
+            if ww3 is False:
+                print("no ww3")
                 return
-            create_currents_hdf5(*salishseacast[0])
-            create_t_hdf5(*salishseacast[1])
+            else:
+                create_ww3_hdf5(*ww3)
 
-        if runs == 3:
-            hrdps = hrdps_paths(
-                timestart, timeend, hdinput, outpath, compression_level = 1
-                )
-            if hrdps is False:
-                print('\nAborted')
-                return
-            create_winds_hdf5(*hrdps)
-        
-        if runs == 4:
-            ww3 = ww3_paths(
+    name = ["SOG092517", "SOG071516_7","SOG062515_7","SOG060515_7"]    
+    timestarts = ["25 September 2017", "15 July 2016", "25 June 2015", "5 June 2015"]
+    timeends =   ["3 October 2017", "22 July 2016", "3 July 2015", "12 June 2015"]
+
+    timestart = "1 December 2017"
+    timeend = "8 December 2017"
+    ww3 = ww3_paths(
                 timestart, timeend, wwinput, outpath, compression_level = 1
                 )
-            if ww3 is False:
-                print('\nAborted')
-                return
-            create_ww3_hdf5(*ww3)
-            
-        print('\nAll done')
-    
-    # user input date range
-    timestart = timestart()
-    timeend = timeend()
+    create_ww3_hdf5(*ww3)
+    print("Done with the test run")
+    for i in range(len(timestarts)):
+        timestart = timestarts[i]
+        timeend = timeends[i]
+        run(1)
+        print(f'Finished {name[i]}')
         
-    # validate date range
-    if np.diff([parse(t) for t in [timestart, timeend]])[0].days <= 0:
-        print(f'\nInvalid input. Start time {timestart} comes after end time {timeend}.\n')
-        init()
-    else:
-        run_choice()
     return
+
+init()
