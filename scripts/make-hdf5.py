@@ -942,17 +942,10 @@ def init():
             else:
                 create_ww3_hdf5(*ww3)
 
-    name = ["SOG092517", "SOG071516_7","SOG062515_7","SOG060515_7"]    
-    timestarts = ["25 September 2017", "15 July 2016", "25 June 2015", "5 June 2015"]
-    timeends =   ["3 October 2017", "22 July 2016", "3 July 2015", "12 June 2015"]
+    name = ["TP051015_7", "TP120215_7","TP100716_7","TP030717_7", "TP061517_7", "TP112117_14"]    
+    timestarts = ["10 May 2015", "2 December 2015", "7 October 2016", "7 March 2017", "15 June 2017", "21 November 2017"]
+    timeends =   ["17 May 2015", "9 December 2015", "14 October 2016", "14 March 2017", "22 June 2017", "28 November 2017"]
 
-    timestart = "1 December 2017"
-    timeend = "8 December 2017"
-    ww3 = ww3_paths(
-                timestart, timeend, wwinput, outpath, compression_level = 1
-                )
-    create_ww3_hdf5(*ww3)
-    print("Done with the test run")
     for i in range(len(timestarts)):
         timestart = timestarts[i]
         timeend = timeends[i]
