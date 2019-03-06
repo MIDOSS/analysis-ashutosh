@@ -46,8 +46,31 @@
 ^^^^^^^^^^^^
     Setting up to make multiple runs at the Strait of Georgia point
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        To get a feel of how long a job is likely to take, I have set the SOG12117 case to run for the full duration of the input files on a wall time of 1:50:00
-        In the meantime, I am copying over the other job files to Cedar and making the required chnages to each job's YAML file and .dat files.
+        1) To get a feel of how long a job is likely to take, I have set the SOG12117 case to run for the full duration of the input files on a wall time of 1:50:00
+            
+            [abhudia@cedar1 ~]$ cd project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117/
+            [abhudia@cedar1 SOG12117]$ mohid run SOG12117.yaml $PROJECT/$USER/MIDOSS/results/MF0/SOG12117
+
+        ConstructHDFPredictDTMethod1 - ModuleFillMatrix - ERR50
+        Could not read solution from HDF5 file
+        Last instant in file lower than simulation ending time
+        Matrix name: wind velocity X
+        
+        Shihan sent over new bathymetry file. I am switching to that one for this initial run.
+
+            THE RUN JUST ENDED: NOTE YOU NEED TO RE RUN AFTER INPUTTING NEW BATHYMETRY 
+         A new Bathymetry has been created, which consists with the geometry
+         Modify the file Nomfich.dat and Re-run the model
+
+
+        2) In the meantime, I am copying over the other job files to Cedar and making the required chnages to each job's YAML file and .dat files.
+                SOG060515_7 : set model.dat date range
+                Set current run attributes in YAML file and pointed to Waves.dat in settings since no ww3 data
+                
+
+
+
+        3) I am also getting the turn point input files going on Salish
 
 
         
