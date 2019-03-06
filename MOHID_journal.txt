@@ -26,7 +26,7 @@
                 Hydrodynamic.dat  ST_georgia_bathymetry_modified_v02.dat  WaterProperties.dat
         folders with run IDS that have input hdf5 files, .yaml, Lagranigan.dat, Model.dat and Waves.dat
                 .yaml file header gives job name and allocates resources to job. contains the locations of all the dat files and instructions on creating symlinks in the runs dir.
-                Lagrangian.dat used primarily to chnage location of Oil spill. This has been updatd with the Medium Floater attributes from the oil types spreadsheet.
+                Lagrangian.dat used primarily to chnage location of Oil spill. This has been updated with the Medium Floater attributes from the oil types spreadsheet.
                 Model.dat used to set the time period over which we want MOHID to run
                 Waves.dat will contain the required information on how to deal with waves depending on whether or not we have the ww3.hdf5 file for a run
 
@@ -34,7 +34,20 @@
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         1) .yaml: the job ID in the header, wall time depending on how long we are running + how many input parameters we have
         2) Model.dat: the model run duration
-        3) Waves.dat: depending on wheter or not we have wave watch input data
+        3) Waves.dat: depending on whether or not we have wave watch input data
         4) Lagrangian.dat: the oil spill location/oil type
+
+    Making test run
+    ^^^^^^^^^^^^^^^
+        A test run was made on cedar with all the forcing parameters and a reduced model run time. Successful.
+        Wave file was output in the res directory. This was fixed by making the hdf5 out 0 in the Waves.dat file
+
+6 March 2019
+^^^^^^^^^^^^
+    Setting up to make multiple runs at the Strait of Georgia point
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        To get a feel of how long a job is likely to take, I have set the SOG12117 case to run for the full duration of the input files on a wall time of 1:50:00
+        In the meantime, I am copying over the other job files to Cedar and making the required chnages to each job's YAML file and .dat files.
+
 
         
