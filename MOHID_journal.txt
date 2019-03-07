@@ -102,9 +102,28 @@
                 mohid run SOG060515_7.yaml $PROJECT/$USER/MIDOSS/results/MF0/SOG060515_7
 
 
-
-
         3) I am also getting the turn point input files going on Salish
 
+7 March 2019
+^^^^^^^^^^^^
+    Made an interactive ruin statting just before MOHID was crashing 1) without waves file 2) with shorter directory. Both crashed with same Error.     
+    Taked to Shihan, who said I should also update Geometry.dat, which he provided. Old Geometry.dat saved as Geometry.old
+    Ran interactively sing same config as 1) above but with new Geometry.dat, and the run did not crash. This was confirmed by looking at the time stamps in ncdump.
+    I shall now reconfigure the Model.dat to make a full run, with the wave watch data as well.
 
+    - New naming convention also introduced:
+
+        location_date_oiltype_oilvolume_ndays
+
+        e.g. SOGa_05june2015_LE0_1000m3_7days, with:
+
+        1) SOGa: is the location we have currently chosen for SOG.  We may choose another (several?) prior to doing the stochastic runs, hence, the “a”.
+        2) 05june2015: represents the start-date of the run
+        3) LE0: represents that oil type.  In this case, it’s Light Evaporate “0”, where “0” is an index for the kind of LE that we are running
+        4) 1000m3: Oil volume
+        5) 7days: Run length
+
+    - Will have to switch oil type back to light evaporate from current setting of medium floater.
+
+    
         
