@@ -58,15 +58,49 @@
         
         Shihan sent over new bathymetry file. I am switching to that one for this initial run.
 
-            THE RUN JUST ENDED: NOTE YOU NEED TO RE RUN AFTER INPUTTING NEW BATHYMETRY 
-         A new Bathymetry has been created, which consists with the geometry
-         Modify the file Nomfich.dat and Re-run the model
+
 
 
         2) In the meantime, I am copying over the other job files to Cedar and making the required chnages to each job's YAML file and .dat files.
                 SOG060515_7 : set model.dat date range
                 Set current run attributes in YAML file and pointed to Waves.dat in settings since no ww3 data
-                
+            STDOUT: 
+                THE RUN JUST ENDED: NOTE YOU NEED TO RE RUN AFTER INPUTTING NEW BATHYMETRY 
+                A new Bathymetry has been created, which consists with the geometry
+                Modify the file Nomfich.dat and Re-run the model
+                Ended run at Wed Mar  6 13:45:45 PST 2019
+                Results hdf5 to netCDF4 conversion started at Wed Mar  6 13:45:45 PST 2019
+                Results hdf5 to netCDF4 conversion ended at Wed Mar  6 13:45:58 PST 2019
+                Results gathering started at Wed Mar  6 13:45:58 PST 2019
+                mohid_cmd.gather INFO: Moving run definition and results files...
+                mohid_cmd.gather INFO: Moving MIDOSS-MOHID_rev.txt to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/MIDOSS-MOHID_rev.txt
+                mohid_cmd.gather INFO: Moving UsedKeyWords_1.dat to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/UsedKeyWords_1.dat
+                mohid_cmd.gather INFO: Moving MOHID.sh to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/MOHID.sh
+                mohid_cmd.gather INFO: Moving nomfich.dat to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/nomfich.dat
+                mohid_cmd.gather INFO: Moving NEMO-Cmd_rev.txt to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/NEMO-Cmd_rev.txt
+                mohid_cmd.gather INFO: Moving SOG12117.yaml to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/SOG12117.yaml
+                mohid_cmd.gather INFO: Moving moad_tools_rev.txt to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/moad_tools_rev.txt
+                mohid_cmd.gather INFO: Moving MOHID-Cmd_rev.txt to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/MOHID-Cmd_rev.txt
+                mohid_cmd.gather INFO: Moving MIDOSS-MOHID-config_rev.txt to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/MIDOSS-MOHID-config_rev.txt
+                mohid_cmd.gather INFO: Moving Error_and_Messages_1.log to /project/6001313/abhudia/MIDOSS/results/MF0/SOG12117/Error_and_Messages_1.log
+                mohid_cmd.gather INFO: Deleting symbolic links...
+                mohid_cmd.gather INFO: Deleting files left in res/...
+                mohid_cmd.gather INFO: Deleting res/...
+                Results gathering ended at Wed Mar  6 13:46:00 PST 2019
+                Deleting run directory
+                Finished at Wed Mar  6 13:46:00 PST 2019
+            
+             A new Bathymetry has been created, with isolated cells removed
+            Modify the file Nomfich.dat and Re-run the model
+            New Bathymetry file : 
+            /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/settings/Bathymetry_v01
+            .dat
+
+
+            Found that wave watch dates are wrong, so those will need to be Corrected
+            In the meantime, start other run that does not use wave watch 
+                mohid run SOG060515_7.yaml $PROJECT/$USER/MIDOSS/results/MF0/SOG060515_7
+
 
 
 
