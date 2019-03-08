@@ -123,7 +123,9 @@
         4) 1000m3: Oil volume
         5) 7days: Run length
 
-    - Will have to switch oil type back to light evaporate from current setting of medium floater.
 
-    
+    - Will have to read through MOHID documentation and find out how best ot make the bathymetry.dat file
+
+
+
         
