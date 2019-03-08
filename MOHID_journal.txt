@@ -106,9 +106,9 @@
 
 7 March 2019
 ^^^^^^^^^^^^
-    Made an interactive ruin statting just before MOHID was crashing 1) without waves file 2) with shorter directory. Both crashed with same Error.     
+    Made an interactive run statting just before MOHID was crashing 1) without waves file 2) with shorter directory. Both crashed with same Error.     
     Taked to Shihan, who said I should also update Geometry.dat, which he provided. Old Geometry.dat saved as Geometry.old
-    Ran interactively sing same config as 1) above but with new Geometry.dat, and the run did not crash. This was confirmed by looking at the time stamps in ncdump.
+    Ran interactively using same config as 1) above but with new Geometry.dat, and the run did not crash. This was confirmed by looking at the time stamps in ncdump.
     I shall now reconfigure the Model.dat to make a full run, with the wave watch data as well.
 
     - New naming convention also introduced:
@@ -125,7 +125,3 @@
 
 
     - Will have to read through MOHID documentation and find out how best ot make the bathymetry.dat file
-
-
-
-        
