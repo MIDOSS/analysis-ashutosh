@@ -146,4 +146,36 @@
             $ mohid run SOGa_01dec17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_hi
 
             Note: mohid run is taking a few minutes to submit the run today
+    
+        Got the following error for the first attempt at making the run:
+            Fatal Python error: initsite: Failed to import the site module
+            Traceback (most recent call last):
+                File "/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/python/3.7.0/lib/python3.7/site.py", line 570, in <module>
+                    main()
+                File "/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/python/3.7.0/lib/python3.7/site.py", line 556, in main
+                    known_paths = addusersitepackages(known_paths)
+                File "/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/python/3.7.0/lib/python3.7/site.py", line 315, in addusersitepackages
+                    addsitedir(user_site, known_paths)
+                File "/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/python/3.7.0/lib/python3.7/site.py", line 207, in addsitedir
+                    addpackage(sitedir, name, known_paths)
+                File "/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/python/3.7.0/lib/python3.7/site.py", line 163, in addpackage
+                    for n, line in enumerate(f):
+                OSError: [Errno 5] Input/output error
+
+        SoG Runs:
+        ^^^^^^^^^
+            Due to file system error on cedar, these commands will have to be run later:
+                $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117
+                $ mohid run SOGa_01dec17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_low
+                $ mohid run SOGa_01dec17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_hi
+
+            In the meantime, I am prepping the other runs. The commands that follow will be to set off the runs that I have ready.
+                $ /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG092517
+                $ mohid run SOGa_25sep17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_25sep17_MF0_1000m3_7days_low
+                $ mohid run SOGa_25sep17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_25sep17_MF0_1000m3_7days_hi
+        
+        Turn Point Runs:
+        ^^^^^^^^^^^^^^^^
+
+
 
