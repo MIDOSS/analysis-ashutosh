@@ -125,3 +125,25 @@
 
 
     - Will have to read through MOHID documentation and find out how best ot make the bathymetry.dat file
+
+8 March 2019
+^^^^^^^^^^^^
+    Developed further visualisation for oil spill thickness. Will adapt the functions to do the same for 3D concentrations.
+    Developed notebook to extract tidal records from hdf5.
+
+    We decided to start runs at low tide and make a second run for the scenario 6 hours after that.
+
+    Cedar:
+        $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117
+        
+        Prep runs:
+            Made new .yaml and Model.dat files for the runs. the yaml files contain thr run ID and point to the correct Model.dat file
+            Model_low.dat has the start time at low tide
+            Model_hi.dat has the start time six hours later
+
+        Make runs: 
+            $ mohid run SOGa_01dec17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_low
+            $ mohid run SOGa_01dec17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_hi
+
+            Note: mohid run is taking a few minutes to submit the run today
+
