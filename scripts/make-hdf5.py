@@ -942,9 +942,9 @@ def init():
             else:
                 create_ww3_hdf5(*ww3)
 
-    name = ["TP051015_7", "TP120215_7","TP100716_7","TP030717_7", "TP061517_7", "TP112117_14"]    
-    timestarts = ["10 May 2015", "2 December 2015", "7 October 2016", "7 March 2017", "15 June 2017", "21 November 2017"]
-    timeends =   ["17 May 2015", "9 December 2015", "14 October 2016", "14 March 2017", "22 June 2017", "28 November 2017"]
+    timestarts = ["01 August 2017", "15 November 2017", "25 November 2018", "07 December 2018"]    
+    timeends = ["08 August 2017", "22 November 2017", "2 December 2016", "14 December 2018"]
+    name =   ["1","2","3","4"]
 
     for i in range(len(timestarts)):
         timestart = timestarts[i]
