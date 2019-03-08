@@ -347,14 +347,19 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
     # finally, check how many boxes we found
     if boxes_found == 0:
         return _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask)
-    if boxes_found == 1:
-        # just produce that
-        index_i, index_j, latitudes, longitudes = box_attrs[0]
+    if boxes_found != 0:
+        # loop through and find the one with the lowest average distance to the points
+        min_avg_dist = 1000000
+        min_avg_dist_ind = 0
+        for distance_ind, box in enumerate(box_attrs):
+            distance = box[4]
+            if distance < min_avg_dist:
+                min_avg_dist = distance
+                min_avg_dist_ind = distance_ind
+        # produce that best box
+        index_i, index_j, latitudes, longitudes = box_attrs[min_avg_dist_ind]
         weights =  _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes)
         return (weights, index_j, index_i)
-    else:
-        # decide on whcih one you want by distance averaging 
-        return
 
 def _any_vertex_on_land(
     # Check if any of the vertices is on land
@@ -466,9 +471,9 @@ def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask, how_close = 6)
 
     for weight, i in enumerate(weights):
         weight_arr[i] = weight
+
     return (weight_arr, indices_j, indices_i)
     
-
 def _add_box_attribute(
     tgt_lon, tgt_lat,
     vert1_i, vert2_i, vert3_i, vert4_i,
@@ -528,4 +533,3 @@ def _check_bound(
 
     # the point is within the bounding box
     return True
-
