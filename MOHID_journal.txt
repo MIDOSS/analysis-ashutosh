@@ -168,14 +168,23 @@
                 $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117
                 $ mohid run SOGa_01dec17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_low
                 $ mohid run SOGa_01dec17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_hi
+            UPDATE: Both runs submitted
 
             In the meantime, I am prepping the other runs. The commands that follow will be to set off the runs that I have ready.
-                $ /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG092517
+                $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG092517
                 $ mohid run SOGa_25sep17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_25sep17_MF0_1000m3_7days_low
                 $ mohid run SOGa_25sep17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_25sep17_MF0_1000m3_7days_hi
-        
+            UPDATE: First run submitted
+
         Turn Point Runs:
         ^^^^^^^^^^^^^^^^
+            Prepared the run files
+
+        Salmon Bank Runs:
+        ^^^^^^^^^^^^^^^^^
+            Set Salish to generate the input files
+            Prepped the following for a run: /results2/MIDOSS/forcing/SalishSeaCast/MF0/SB080117_7
+
 
 
 
