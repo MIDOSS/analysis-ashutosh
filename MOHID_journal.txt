@@ -179,12 +179,22 @@
         Turn Point Runs:
         ^^^^^^^^^^^^^^^^
             Prepared the run files
+                $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/TP061517_7
+                $ mohid run  TPa_15jun17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/TPa_15jun17_MF0_1000m3_7days_low
+                $ mohid run  TPa_15jun17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/TPa_15jun17_MF0_1000m3_7days_hi
+
+                $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/TP112117_7
+                $ mohid run TPa_21nov17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/TPa_21nov17_MF0_1000m3_7days_low
+                $ mohid run TPa_21nov17_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/TPa_21nov17_MF0_1000m3_7days_hi
 
         Salmon Bank Runs:
         ^^^^^^^^^^^^^^^^^
             Set Salish to generate the input files
             Prepped the following for a run: /results2/MIDOSS/forcing/SalishSeaCast/MF0/SB080117_7
+                $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SB080117_7
+                $ mohid run SBa_01aug2017_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SBa_01aug2017_MF0_1000m3_7days_low
+                $ mohid run SBa_01aug2017_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SBa_01aug2017_MF0_1000m3_7days_hi
 
-
+        the initial SoG runs ran out of wall time so I restarted them with 2:30:00 of wall time up from 1:40:00
 
 
