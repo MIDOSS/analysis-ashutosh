@@ -76,7 +76,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Compare_output_files.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_output_files.ipynb)
 
-
+* ##[Tidal_record_MOHID_runs.ipynb](https://nbviewer/jupyter.org/urls/bitbucket/org/midoss/analysis-ashutosh/raw/default/.//Tidal_record_MOHID_runs.ipynb)
 ##License
 
 These notebooks and files are copyright 2013-2019
