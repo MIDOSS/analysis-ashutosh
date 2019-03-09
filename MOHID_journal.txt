@@ -202,3 +202,26 @@
     Tidal record visulaisation notebook
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         Tidal_record_MOHID_runs.ipynb can be used to find tidal record at oil spill grid point and obtain times for setting off the model
+    
+    SOGa_25sep17_MF0_1000m3_7days_hi and SOGa_25sep17_MF0_1000m3_7days_low crashed 
+        forrtl: error (65): floating invalid
+        Image              PC                Routine            Line        Source             
+        MohidWater.exe     0000000000AC8B9D  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000AC6A37  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000A7F642  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000A7F496  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009FE4CD  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000A022F7  Unknown               Unknown  Unknown
+        Unknown            00002B26D3EC0E90  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000005B94C3  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000005E3E29  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000005A606C  Unknown               Unknown  Unknown
+        MohidWater.exe     000000000064147E  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000640B74  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009DBC85  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009DBF70  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009DB5EF  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000410E6E  Unknown               Unknown  Unknown
+        libc.so.6          00002B26D40ED2E0  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000410D6A  Unknown               Unknown  Unknown
+        /var/spool/slurmd/job17994677/slurm_script: line 31: 120594 Aborted                 (core dumped) /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID/Solutions/linux/bin/MohidWater.exe
