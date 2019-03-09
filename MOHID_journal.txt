@@ -197,6 +197,10 @@
                 $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SB080117_7
                 $ mohid run SBa_01aug2017_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SBa_01aug2017_MF0_1000m3_7days_low
                 $ mohid run SBa_01aug2017_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SBa_01aug2017_MF0_1000m3_7days_hi
+            
+                $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SB120718_7
+                $ mohid run SBa_13dec2018_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SBa_13dec2018_MF0_1000m3_7days_low
+                $ mohid run SBa_13dec2018_MF0_1000m3_7days_hi.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SBa_13dec2018_MF0_1000m3_7days_hi
 
         the initial SoG runs ran out of wall time so I restarted them with 2:30:00 of wall time up from 1:40:00
     
@@ -254,3 +258,4 @@
         libc.so.6          00002AF041EEC2E0  Unknown               Unknown  Unknown
         MohidWater.exe     0000000000410D6A  Unknown               Unknown  Unknown
         /var/spool/slurmd/job17994699/slurm_script: line 31: 120677 Aborted                 (core dumped) /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID/Solutions/linux/bin/MohidWater.exe
+
