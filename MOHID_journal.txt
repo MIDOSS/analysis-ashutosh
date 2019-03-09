@@ -162,6 +162,7 @@
                 File "/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/python/3.7.0/lib/python3.7/site.py", line 163, in addpackage
                     for n, line in enumerate(f):
                 OSError: [Errno 5] Input/output error
+        This was probably because Cedar was undergoing file system problems
 
         SoG Runs:
         ^^^^^^^^^
@@ -225,3 +226,31 @@
         libc.so.6          00002B26D40ED2E0  Unknown               Unknown  Unknown
         MohidWater.exe     0000000000410D6A  Unknown               Unknown  Unknown
         /var/spool/slurmd/job17994677/slurm_script: line 31: 120594 Aborted                 (core dumped) /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID/Solutions/linux/bin/MohidWater.exe
+
+    TPa_15jun17_MF0_1000m3_7days_low + high crashed at 97% completion
+        forrtl: error (73): floating divide by zero
+        Image              PC                Routine            Line        Source             
+        MohidWater.exe     0000000000AC8B9D  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000AC6A37  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000A7F642  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000A7F496  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009FE4CD  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000A027ED  Unknown               Unknown  Unknown
+        Unknown            00002AF041CBFE90  Unknown               Unknown  Unknown
+        MohidWater.exe     000000000048CC77  Unknown               Unknown  Unknown
+        libiomp5.so        00002AF041A07413  Unknown               Unknown  Unknown
+        libiomp5.so        00002AF0419D760D  Unknown               Unknown  Unknown
+        libiomp5.so        00002AF0419AFEE8  Unknown               Unknown  Unknown
+        MohidWater.exe     000000000048B856  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000487A6E  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000487946  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000482374  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000006411FF  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000640B74  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009DBC85  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009DBF70  Unknown               Unknown  Unknown
+        MohidWater.exe     00000000009DB5EF  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000410E6E  Unknown               Unknown  Unknown
+        libc.so.6          00002AF041EEC2E0  Unknown               Unknown  Unknown
+        MohidWater.exe     0000000000410D6A  Unknown               Unknown  Unknown
+        /var/spool/slurmd/job17994699/slurm_script: line 31: 120677 Aborted                 (core dumped) /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID/Solutions/linux/bin/MohidWater.exe
