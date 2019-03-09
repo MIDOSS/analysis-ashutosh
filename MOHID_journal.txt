@@ -199,4 +199,6 @@
 
         the initial SoG runs ran out of wall time so I restarted them with 2:30:00 of wall time up from 1:40:00
     
-    
+    Tidal record visulaisation notebook
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        Tidal_record_MOHID_runs.ipynb can be used to find tidal record at oil spill grid point and obtain times for setting off the model
