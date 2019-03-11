@@ -58,18 +58,18 @@ def _produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, 
     tgt_y_indices[:] = np.nan
     tgt_x_indices = np.zeros([898, 398, 4])
     tgt_x_indices[:] = np.nan
-
     min_src_lat, max_src_lat = src_lats.min(), src_lats.max()
     min_src_lon, max_src_lon = src_lons.min(), src_lons.max()
-
     bar = utilities.statusbar("Loading...")
-    for j, tgt_lat in bar(enumerate(tgt_lats)):
-        if (tgt_lat < min_src_lat) or (tgt_lat > max_src_lat):
-            continue
-        for i, tgt_lon in enumerate(tgt_lons):
+    for j in bar(range(898)):
+        for i in range(398):
+            if tgt_mask[j][i] == 0:
+                continue
+            tgt_lon = tgt_lons[j][i]
             if (tgt_lon < min_src_lon) or (tgt_lon > max_src_lon):
                 continue
-            if tgt_mask[j][i] == 0:
+            tgt_lat = tgt_lats[j][i]
+            if (tgt_lat < min_src_lat) or (tgt_lat > max_src_lat):
                 continue
             else:
                 result = _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask)
@@ -82,7 +82,7 @@ def _produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, 
                 continue
     grid_x = np.arange(398)
     grid_y = np.arange(898)
-    corners = np.arange(4)
+    corners = np.arange(4) + 1
     u = xr.DataArray(tgt_weights, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
     v = xr.DataArray(tgt_y_indices, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
     w = xr.DataArray(tgt_x_indices, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
