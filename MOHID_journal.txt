@@ -259,3 +259,23 @@
         MohidWater.exe     0000000000410D6A  Unknown               Unknown  Unknown
         /var/spool/slurmd/job17994699/slurm_script: line 31: 120677 Aborted                 (core dumped) /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID/Solutions/linux/bin/MohidWater.exe
 
+
+Mohid Presentation
+
+	Dispersed oil can resurface
+
+	Horizontal Advection
+		F points are th eones we need to define the MOHID grid
+		Quits on intialisation when fed with unstaggered grid
+		
+	Vertical Velocity
+		Mohid arranges w in grid center
+
+	Wind drift and diffusion
+		user defined wind drift angle and drag coeff
+		(has module for turbulence but not connected with particle tracking and oil model
+		vertical diffusivity is added to model, but not used to calculate vertical movement yet
+		This is calculating the top 3 cm. moves faster at the surface than top1m because of wind.
+
+	
+		
