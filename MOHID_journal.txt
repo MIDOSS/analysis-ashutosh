@@ -284,5 +284,10 @@ Mohid Presentation
     cd project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117
     mohid run SOGa_01dec17_MF0_1000m3_7days_hi_test.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_hi_test
 
-	
+	[abhudia@cedar1 ~]$ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG092517
+    [abhudia@cedar1 SOG092517]$ mohid run SOGa_25sep17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_25sep17_MF0_1000m3_7days_low
+    [abhudia@cedar1 SOG092517]$ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/TP061517_7
+    [abhudia@cedar1 TP061517_7]$ mohid run  TPa_15jun17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/TPa_15jun17_MF0_1000m3_7days_low
+    
+
 		
