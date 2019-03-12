@@ -276,6 +276,13 @@ Mohid Presentation
 		(has module for turbulence but not connected with particle tracking and oil model
 		vertical diffusivity is added to model, but not used to calculate vertical movement yet
 		This is calculating the top 3 cm. moves faster at the surface than top1m because of wind.
+    
+9 March 2019
+^^^^^^^^^^^^
+    cedar:
+    ^^^^^^
+    cd project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117
+    mohid run SOGa_01dec17_MF0_1000m3_7days_hi_test.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_hi_test
 
 	
 		
