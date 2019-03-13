@@ -333,12 +333,12 @@ def create_currents_hdf5(U_files, V_files, W_files, dirname, compression_level =
         W  = W_raw.vovecrtz #!!! 
 
         # convert xarray DataArrays to numpy arrays and cut off grid edges
-        U = U.values[...,:,1:897:,1:397]
-        V = V.values[...,:,1:897:,1:397]
+        current_u = U.values[...,:,1:897:,1:397]
+        current_v = V.values[...,:,1:897:,1:397]
         current_w = W.values[...,:,1:897:,1:397]
 
         # rotate currents to True North
-        current_u, current_v = viz_tools.rotate_vel(U, V)
+        #current_u, current_v = viz_tools.rotate_vel(U, V)
         
         # clear memory
         del(U_raw); del(V_raw); del(W_raw); del(U); del(V)
@@ -924,27 +924,27 @@ def init():
             salishseacast = salishseacast_paths(
                 timestart, timeend, nemoinput, outpath, compression_level = 1
                 )
-            hrdps = hrdps_paths(
-                timestart, timeend, hdinput, outpath, compression_level = 1
-                )
-            ww3 = ww3_paths(
-                timestart, timeend, wwinput, outpath, compression_level = 1
-                )
-            if (salishseacast or hrdps) is False:
-                print('\nAborted')
-                return 
+           # hrdps = hrdps_paths(
+           #     timestart, timeend, hdinput, outpath, compression_level = 1
+           #     )
+           # ww3 = ww3_paths(
+           #     timestart, timeend, wwinput, outpath, compression_level = 1
+           #     )
+           # if (salishseacast or hrdps) is False:
+           #     print('\nAborted')
+           #     return 
             create_currents_hdf5(*salishseacast[0])
-            create_t_hdf5(*salishseacast[1])
-            create_winds_hdf5(*hrdps)
-            if ww3 is False:
-                print("no ww3")
-                return
-            else:
-                create_ww3_hdf5(*ww3)
+           # create_t_hdf5(*salishseacast[1])
+           # create_winds_hdf5(*hrdps)
+           # if ww3 is False:
+           #     print("no ww3")
+           #     return
+           # else:
+           #     create_ww3_hdf5(*ww3)
 
-    timestarts = ["01 August 2017", "15 November 2017", "25 November 2018", "07 December 2018"]    
-    timeends = ["08 August 2017", "22 November 2017", "2 December 2016", "14 December 2018"]
-    name =   ["1","2","3","4"]
+    timestarts = ["01 December 2017"]    
+    timeends = ["08 December 2017"]
+    name =   ["1"]
 
     for i in range(len(timestarts)):
         timestart = timestarts[i]
