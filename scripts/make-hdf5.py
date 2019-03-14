@@ -346,7 +346,6 @@ def create_currents_hdf5(U_files, V_files, W_files, dirname, compression_level =
 
         # rotate currents to True North
         #current_u, current_v = viz_tools.rotate_vel(U, V)
-        
         # clear memory
         del(U_raw); del(V_raw); del(W_raw); del(U); del(V)
         
@@ -943,7 +942,7 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
     # create hdf5 file and create tree structure
     f = h5py.File(f'{dirname}e3t.hdf5', 'w')
     times = f.create_group('Time')
-    e3t = f.create_group('/Results/e3t')
+    e3t_group = f.create_group('/Results/e3t')
 
     # since we are looping through the source files by day, we want to keep track of the
     # number of records we have made so that we can allocate the correct child names
@@ -1001,7 +1000,7 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
         # write u current values to hdf5
         for i, dataset in enumerate(e3t):
             child_name = 'e3t_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = e3t.create_dataset(
+            dset = e3t_group.create_dataset(
                 child_name,
                 shape = (40, 396, 896),
                 data = dataset,
