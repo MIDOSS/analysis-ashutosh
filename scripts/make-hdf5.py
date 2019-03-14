@@ -72,7 +72,7 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
     :arg compression_level: compression level for output file (Integer[1,9])
     :type integer: :py:class:'int'
 
-    :returns tuple: two tuples containing the arguments to pass to hdf5 file generator functions
+    :returns tuple: three tuples containing the arguments to pass to hdf5 file generator functions
     :rtype: :py:class:`tuple'
     """
     
@@ -80,7 +80,7 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
     daterange = [parse(t) for t in [timestart, timeend]]
 
     # append all filename strings within daterange to lists
-    U_files, V_files, W_files, T_files = [], [], [], []
+    U_files, V_files, W_files, T_files, e3t_files = [], [], [], [], []
     for day in range(np.diff(daterange)[0].days):
         datestamp = daterange[0] + timedelta(days = day)
         datestr1 = datestamp.strftime('%d%b%y').lower()
@@ -115,6 +115,12 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
             print(f'File {T_path} not found. Check Directory and/or Date Range.')
             return False
         T_files.append(T_path)
+        
+        e3t_path = f'{path}{datestr1}/SalishSea_1h_{datestr2}_{datestr2}_carp_T.nc'
+        if not os.path.exists(e3t_path):
+            print(f'File {e3t_path} not found. Check Directory and/or Date Range.')
+            return False
+        e3t_files.append(e3t_path)
 
     print('\nAll source files found')
     
@@ -140,7 +146,8 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
     print(f'\nSalish SeaCast output directory {dirname} created\n')
     return (
         (U_files, V_files, W_files, dirname, compression_level),
-        (T_files, dirname, compression_level)
+        (T_files, dirname, compression_level),
+        (e3t_files, dirname, compression_level),
         )
 
 def hrdps_paths(timestart, timeend, path, outpath, compression_level = 1):
@@ -917,41 +924,206 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
     f.close()
     return
 
+@timer
+def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
+    """Generate e3t files for MOHID
+
+    :arg W_files: listofString; Salish SeaCast e3t netcdf file paths
+    :type list: :py:class:'list'
+
+    :arg dirname: Output file directory
+    :type string: :py:class:'str'
+
+    :arg compression_level: compression level for output file (Integer[1,9])
+    :type integer: :py:class:'int'
+
+    :returns: None
+    :rtype: :py:class:`NoneType'
+    """
+    # create hdf5 file and create tree structure
+    f = h5py.File(f'{dirname}e3t.hdf5', 'w')
+    times = f.create_group('Time')
+    e3t = f.create_group('/Results/e3t')
+
+    # since we are looping through the source files by day, we want to keep track of the
+    # number of records we have made so that we can allocate the correct child names
+    attr_counter = 0
+
+    number_of_files = len(e3t_files)
+    bar = utilities.statusbar('Creating e3t file ...')
+    for file_index in bar(range(number_of_files)):
+        # load NEMO netcdf source files using xarray
+        e3t_raw = xr.open_dataset(e3t_files[file_index])
+
+        # load dates from e3t netcdf file
+        datelist = e3t_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
+
+        # convert xarray DataArrays to numpy arrays and cut off grid edges
+        e3t = e3t_raw.e3t.values[...,:,1:897:,1:397]
+        
+        # clear memory
+        del(e3t_raw)
+        
+        # transpose grid (rotate 90 clockwise)
+        e3t = np.transpose(e3t, [0,1,3,2])
+
+        # flip currents by depth dimension
+        e3t = np.flip(e3t, axis = 1)
+
+        # convert nans to 0s and set datatype to float64
+        e3t = np.nan_to_num(e3t).astype('float64')
+        
+        # make list of time arrays
+        datearrays = []
+        for date in datelist:
+            datearrays.append(
+                np.array([date.year,date.month, date.day, date.hour, date.minute, date.second]).astype('float64')
+                )
+
+        # write time values to hdf5
+        for i, datearray in enumerate(datearrays):
+            child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            dset = times.create_dataset(
+                child_name,
+                shape = (6,),
+                data = datearray,
+                chunks = (6,),
+                compression = 'gzip',
+                compression_opts = compression_level
+                )
+            metadata = {
+                'Maximum' : np.array(datearrays[i][0]),
+                'Minimum' : np.array([-0.]),
+                'Units' : b'YYYY/MM/DD HH:MM:SS'
+                } 
+            dset.attrs.update(metadata)
+
+        # write u current values to hdf5
+        for i, dataset in enumerate(e3t):
+            child_name = 'e3t_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            dset = e3t.create_dataset(
+                child_name,
+                shape = (40, 396, 896),
+                data = dataset,
+                chunks = (40, 396, 896),
+                compression = 'gzip',
+                compression_opts = compression_level
+                )
+            metadata = {
+                'FillValue' : np.array([0.]),
+                'Units' : b'm'
+                }
+            dset.attrs.update(metadata)
+        
+        # update the accumulator
+        attr_counter = attr_counter + e3t.shape[0]
+        
+        # clear memory
+        del(e3t)
+
+    f.close()
+    return
+
 def init():
+    # input start time
+    def timestart():
+        print('Date range entry is not inclusive of the end date i.e. [start date, end date)')
+        timestart =  input('\nEnter the start time e.g. 2015 Jan 1:\n--> ')
+        try:
+            parse(timestart)
+        except ValueError:
+            print('Invalid input. Check format and enter correctly')
+            timestart()
+        return timestart
+        
+    # input end time. This must be day after required range as upper bound is not inlcuded
+    def timeend():
+        timeend = input('\nEnter the end time e.g. 2015 Jan 2:\n--> ')
+        try:
+            parse(timeend)
+        except ValueError:
+            print('\nInvalid input. Check format and enter correctly\n')
+            timeend()
+        return timeend
+    
+    # select which components to build
+    def run_choice():
+        runsdict = {1: 'All', 2: 'Salish SeaCast ONLY', 3: 'HRDPS ONLY', 4: 'WW3 ONLY'}
+        try: 
+            runs = int(input('\nRun: \n1) All \n2) Salish SeaCast ONLY \n3) HRDPS ONLY \n4) WW3 ONLY?\n--> '))
+        except ValueError:
+            print('\nSelect a valid run option\n')
+            run_choice()
+        if runs not in runsdict:
+            print('\nSelect a valid run option\n')
+            run_choice()
+        ask = input(f'\nProceed with generating MOHID input files for {runsdict[runs]} from {timestart} to {timeend}? (yes/no)\n--> ')
+        if ask in ['y', 'yes', 'YES', 'Y']:
+            run(runs)
+        else:
+            print('\nAborted')
+
+    # make the run selected
     @timer
     def run(runs):
         if runs == 1:
             salishseacast = salishseacast_paths(
                 timestart, timeend, nemoinput, outpath, compression_level = 1
                 )
-           # hrdps = hrdps_paths(
-           #     timestart, timeend, hdinput, outpath, compression_level = 1
-           #     )
-           # ww3 = ww3_paths(
-           #     timestart, timeend, wwinput, outpath, compression_level = 1
-           #     )
-           # if (salishseacast or hrdps) is False:
-           #     print('\nAborted')
-           #     return 
+            hrdps = hrdps_paths(
+                timestart, timeend, hdinput, outpath, compression_level = 1
+                )
+            ww3 = ww3_paths(
+                timestart, timeend, wwinput, outpath, compression_level = 1
+                )
+            if (salishseacast or hrdps or ww3) is False:
+                print('\nAborted')
+                return 
             create_currents_hdf5(*salishseacast[0])
-           # create_t_hdf5(*salishseacast[1])
-           # create_winds_hdf5(*hrdps)
-           # if ww3 is False:
-           #     print("no ww3")
-           #     return
-           # else:
-           #     create_ww3_hdf5(*ww3)
+            create_t_hdf5(*salishseacast[1])
+            create_e3t_hdf5(*salishseacast[2])
+            create_winds_hdf5(*hrdps)
+            create_ww3_hdf5(*ww3)
 
-    timestarts = ["01 December 2017"]    
-    timeends = ["08 December 2017"]
-    name =   ["1"]
+        if runs == 2:
+            salishseacast = salishseacast_paths(
+                timestart, timeend, nemoinput, outpath, compression_level = 1
+                )
+            if salishseacast is False:
+                print('\nAborted')
+                return
+            create_currents_hdf5(*salishseacast[0])
+            create_t_hdf5(*salishseacast[1])
+            create_e3t_hdf5(*salishseacast[2])
 
-    for i in range(len(timestarts)):
-        timestart = timestarts[i]
-        timeend = timeends[i]
-        run(1)
-        print(f'Finished {name[i]}')
+        if runs == 3:
+            hrdps = hrdps_paths(
+                timestart, timeend, hdinput, outpath, compression_level = 1
+                )
+            if hrdps is False:
+                print('\nAborted')
+                return
+            create_winds_hdf5(*hrdps)
         
+        if runs == 4:
+            ww3 = ww3_paths(
+                timestart, timeend, wwinput, outpath, compression_level = 1
+                )
+            if ww3 is False:
+                print('\nAborted')
+                return
+            create_ww3_hdf5(*ww3)
+            
+        print('\nAll done')
+    
+    # user input date range
+    timestart = timestart()
+    timeend = timeend()
+        
+    # validate date range
+    if np.diff([parse(t) for t in [timestart, timeend]])[0].days <= 0:
+        print(f'\nInvalid input. Start time {timestart} comes after end time {timeend}.\n')
+        init()
+    else:
+        run_choice()
     return
-
-init()
