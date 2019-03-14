@@ -1126,3 +1126,4 @@ def init():
     else:
         run_choice()
     return
+init()
