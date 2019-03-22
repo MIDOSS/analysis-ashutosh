@@ -78,7 +78,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Tidal_record_MOHID_runs.ipynb](https://nbviewer/jupyter.org/urls/bitbucket/org/midoss/analysis-ashutosh/raw/default/.//Tidal_record_MOHID_runs.ipynb)
 
-* ##[MOHID_BATHYMETRY.ipynb](https://nbviewer/jupyter.org/urls/bitbucket/org/midoss/analysis-ashutosh/raw/default/./MIDOSS/MOHID_bathymetry.ipynb)
+* ##[MOHID_BATHYMETRY.ipynb](https://nbviewer/jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/src/default/MIDOSS/MOHID_bathymetry.ipynb)
 ##License
 
 These notebooks and files are copyright 2013-2019
