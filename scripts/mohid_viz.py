@@ -23,29 +23,54 @@ def plot_params(array, mask_value = 0):
     :returns: tuple consisting of truncated array bounding the oil data needed, the x and y bounds for
               further visualisation and the maximum value contained in the array for normalisation
     """
+    # for 3D array case
     if len(array.shape) == 3:
         z_indices, y_indices, x_indices = np.where(array != mask_value)
-    else: 
+    # for 2D array case
+    else:
         y_indices, x_indices = np.where(array != mask_value)
+    # if all values are the mask value
     if y_indices.shape[0] == 0:
         return False
+    # the bounds to slice the so that we only have the parts with oil data we are interested in
     y_min, y_max = y_indices.min(), y_indices.max()
     x_min, x_max = x_indices.min(), x_indices.max()
-
+    # slice the input array according to these bounds
     if len(array.shape) == 3:
         array = array[...,:,y_min:y_max, x_min:x_max]
     else:
         array = array[y_min:y_max, x_min:x_max]
+    # get the maximum value in the array for colormap normalisation
     maxval = array.max()
     return (array, y_min, y_max, x_min, x_max, maxval)
 
 def surface_conc_params(xarray, mask_values = 0):
+    """Return the plotting parameters for the surface layer oil concentration
+
+    :arg xarray: Output netcdf Lagrangian file loaded with xarray
+
+    :returns: tuple consisting of truncated array bounding the oil data needed, the x and y bounds for
+              further visualisation and the maximum value contained in the array for normalisation
+    """
     return plot_params(xarray.OilConcentration_3D.isel(grid_z = 39).values)
 
 def thickness_params(xarray, mask_values= 0):
+    """Return the plotting parameters for the surface oil thickness
+
+    :arg xarray: Output netcdf Lagrangian file loaded with xarray
+
+    :returns: tuple consisting of truncated array bounding the oil data needed, the x and y bounds for
+              further visualisation and the maximum value contained in the array for normalisation
+    """
     return plot_params(xarray.Thickness_2D.values)
 
 def make_scope(array):
+    """For each frame of animation, produce scope grid and scope slice bounds for quiver plots
+
+    :arg array: 2D array
+
+    :returns: tuple consisting of scope array, the x and y bounds for the scope quiver plots
+    """
     if array.sum() != 0:
         array_shape = array.shape
         y_indices, x_indices = np.where(array != 0)
@@ -102,11 +127,14 @@ def wcc(file, i, ymin, ymax, xmin, xmax):
     return whitecap.T
 
 def produce_mask(yshape, xshape):
+    """Produce mask to pass to numpy.ma for quiver plots
+    """
     mask = np.ones([yshape,xshape])
     interval = 5
     for i in range(int(yshape/interval)):
         for j in range(int(xshape/interval)):
             mask[i*interval][j*interval] = 0
+    return mask
 
 def wind_quivers(file, i, ymin, ymax, xmin, xmax):
     """ produce the required arrays for producing wind quivers over the oil spill region 
@@ -127,10 +155,12 @@ def when_to_start_rendering(first_time, h5file):
     for i, key in enumerate(times.keys()):
         yr, mo, day, hr, mins, s = np.asarray(times[key]).astype(int)
         timestamp = datetime.datetime(yr, mo, day, hr, mins,s)
-        delta = (first_time - timestamp).total_seconds()
+        delta = (first_time-timestamp).total_seconds()
         if  delta <= 0:
-            # if there is more than an hour of difference, there is a problem
-            if delta < (60*60):
+            # if there is more than an hour of difference, there is a problem.
+            # this will likely be caught in the first instance
+            if delta < -3600:
+                print(f'{first_time}, {timestamp}')
                 return False
             else:
                 return i
@@ -381,6 +411,7 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
     # get the plotting parameters for 2D oil thickness
     time_values = xarray.time.values
     # read only the times from the input files that correspond to the timestamp in the netcdf file. 
+    first_time = time_values[0]
     currents = h5py.File(currents_path)
     winds = h5py.File(winds)    
     sea_level = h5py.File(sea_level)  
@@ -394,8 +425,9 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
     sea_level_start = when_to_start_rendering(first_time, sea_level)
     assert (sea_level_start is not False), "Check that you are using correct t-parameters input file"
     ww3_start = when_to_start_rendering(first_time, ww3)
+    print(sea_level_start)
     assert (ww3_start is not False), "Check that you are using correct WW3 input file"
-
+    
     thickness_param = thickness_params(xarray)
     if thickness_param is False:
         print('NO OIL WAS SPILT')
@@ -422,19 +454,23 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
         else:
             scope, ys_min, ys_max, xs_min, xs_max = scope_result
           
-        sossheig = ssh(sea_level, t+sea_level_start, ys_min, ys_max, xs_min, xs_max)
+        sossheig = ssh(sea_level, t+sea_level_start, t_y_min + ys_min, t_y_max + ys_max, t_x_min + xs_min, t_x_max + xs_max)
         condlist = [sossheig == 0, sossheig != 0]
         choicelist = [np.nan, sossheig]
         sossheig = np.select(condlist, choicelist)
         
-        whitecap = wcc(ww3, t+ww3_start, ys_min, ys_max, xs_min, xs_max)
-        condlist = [whitecap == 0, whitecap != 0]
-        choicelist = [np.nan, whitecap]
-        whitecap = np.select(condlist, choicelist)
-        
+        try:
+            whitecap = wcc(ww3, 2*(t+ww3_start), t_y_min + ys_min, t_y_max + ys_max, t_x_min + xs_min, t_x_max + xs_max)
+            #whitecap = ma.array(whitecap, ~t_mask[ys_min: ys_max, xs_min: xs_max ])
+            condlist = [whitecap == 0, whitecap != 0]
+            choicelist = [np.nan, whitecap]
+            whitecap = np.select(condlist, choicelist)
+        except KeyError:
+            pass
         avg_soss, min_soss, max_soss = np.nanmin(sossheig), np.nanmax(sossheig), np.nanmean(sossheig)
+        print(t, t_y_min + ys_min, t_y_max + ys_max, t_x_min + xs_min, t_x_max + xs_max)
         avg_wcc, min_wcc, max_wcc = np.nanmin(whitecap), np.nanmax(whitecap), np.nanmean(whitecap)
-        if scope is not False:
+        if scope is not (False or None):
             # plot in blue
             avg_norm.append(avg_soss); min_norm.append(min_soss); max_norm.append(max_soss)
             savg_norm.append(avg_wcc); smin_norm.append(min_wcc); smax_norm.append(max_wcc)
@@ -447,7 +483,6 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
     min_ylim = min([min(max_norm), min(max_abnorm)])
     smax_ylim = max([max(smax_norm), max(smax_abnorm)])
     smin_ylim = min([min(smax_norm), min(smax_abnorm)])
-    
     def update_frame(t, 
                      t_array = t_array, t_y_min = t_y_min, t_y_max = t_y_max, t_x_min = t_x_min, t_x_max = t_x_max, t_maxval = t_maxval,
                      times = time_values, t_mask = t_mask, t_q_mask = t_q_mask,
