@@ -425,7 +425,7 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
     sea_level_start = when_to_start_rendering(first_time, sea_level)
     assert (sea_level_start is not False), "Check that you are using correct t-parameters input file"
     ww3_start = when_to_start_rendering(first_time, ww3)
-    print(sea_level_start)
+    #print(sea_level_start)
     assert (ww3_start is not False), "Check that you are using correct WW3 input file"
     
     thickness_param = thickness_params(xarray)
@@ -437,14 +437,11 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
     
     # land masks
     t_mask = mask[t_y_min: t_y_max, t_x_min: t_x_max] # mask for oil thickness
+    t_q_mask = produce_mask(t_y_max-t_y_min, t_x_max-t_x_min) # use this one for masking out land
 
-    t_q_mask = produce_mask(t_y_max-t_y_min, t_x_max-t_x_min)
     avg_norm, min_norm, max_norm, avg_abnorm, min_abnorm, max_abnorm = [],[],[],[],[],[]
     savg_norm, smin_norm, smax_norm, savg_abnorm, smin_abnorm, smax_abnorm = [],[],[],[],[],[]
     time_norm, time_abnorm = [], []
-
-    # take care of the first case, just in case
-    ys_min, ys_max, xs_min, xs_max = t_y_min, t_y_max, t_x_min, t_x_max
     
     for t in range(time_values.shape[0]):
         thickness = t_array[t]
@@ -452,33 +449,30 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
         if scope_result is (False or None):
             scope = False
         else:
-            scope, ys_min, ys_max, xs_min, xs_max = scope_result
-          
-        sossheig = ssh(sea_level, t+sea_level_start, t_y_min + ys_min, t_y_max + ys_max, t_x_min + xs_min, t_x_max + xs_max)
-        condlist = [sossheig == 0, sossheig != 0]
-        choicelist = [np.nan, sossheig]
-        sossheig = np.select(condlist, choicelist)
+            scope = True
+        sossheig = ssh(sea_level, t+sea_level_start, t_y_min, t_y_max, t_x_min, t_x_max)
+        sossheig = ma.array(sossheig, mask = t_q_mask)
         
         try:
-            whitecap = wcc(ww3, 2*(t+ww3_start), t_y_min + ys_min, t_y_max + ys_max, t_x_min + xs_min, t_x_max + xs_max)
+            whitecap = wcc(ww3, 2*(t+ww3_start), t_y_min, t_y_max, t_x_min, t_x_max)
             #whitecap = ma.array(whitecap, ~t_mask[ys_min: ys_max, xs_min: xs_max ])
-            condlist = [whitecap == 0, whitecap != 0]
-            choicelist = [np.nan, whitecap]
-            whitecap = np.select(condlist, choicelist)
+            whitecap = ma.array(whitecap, mask = t_q_mask)
+
         except KeyError:
             pass
-        avg_soss, min_soss, max_soss = np.nanmin(sossheig), np.nanmax(sossheig), np.nanmean(sossheig)
-        print(t, t_y_min + ys_min, t_y_max + ys_max, t_x_min + xs_min, t_x_max + xs_max)
-        avg_wcc, min_wcc, max_wcc = np.nanmin(whitecap), np.nanmax(whitecap), np.nanmean(whitecap)
-        if scope is not (False or None):
+        avg_soss, min_soss, max_soss = sossheig.min(), sossheig.max(), np.mean(sossheig)
+        avg_wcc, min_wcc, max_wcc = whitecap.min(), whitecap.max(), np.mean(whitecap)
+        if scope is True:
             # plot in blue
             avg_norm.append(avg_soss); min_norm.append(min_soss); max_norm.append(max_soss)
             savg_norm.append(avg_wcc); smin_norm.append(min_wcc); smax_norm.append(max_wcc)
             time_norm.append(time_values[t])
-        else:
+        if scope is False:
             avg_abnorm.append(avg_soss); min_abnorm.append(min_soss); max_abnorm.append(max_soss)
             savg_abnorm.append(avg_wcc); smin_abnorm.append(min_wcc); smax_abnorm.append(max_wcc)
             time_abnorm.append(time_values[t])
+        else:
+            pass
     max_ylim = max([max(max_norm), max(max_abnorm)])
     min_ylim = min([min(max_norm), min(max_abnorm)])
     smax_ylim = max([max(smax_norm), max(smax_abnorm)])
@@ -517,7 +511,7 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
         cbar = plt.colorbar(plt.pcolormesh(np.meshgrid(np.array([0.0001, t_maxval])),
                                            norm=colors.LogNorm(vmin=0.0001, vmax=t_maxval),
                                            cmap = 'inferno'))
-        cbar.ax.get_yaxis().labelpad = 10
+        cbar.ax.get_yaxis().labelpad = 25
         cbar.ax.set_ylabel('Oil thickness (microns)', rotation=270)
         cbar.ax.hlines(thickmax, xmin =  0, xmax = 150, colors = 'Red')
         cbar.ax.hlines(thickmin, xmin =  0, xmax = 150, colors = 'Blue')
@@ -565,7 +559,7 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
         ax.axvline(x = times[t], ymin = smin_ylim,ymax = smax_ylim)
         plt.legend()
         plt.title('Whitecap Coverage (m)')
-        
+        #plt.tight_layout()
         print(t)
         # !----------------------------------------------------------------------------------------------------------------------------
     fig = plt.figure(figsize = (16,9))
