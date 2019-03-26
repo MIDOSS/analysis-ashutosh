@@ -13,12 +13,9 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Freshet analysis**  
 
-* ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
+* ##[SZZ.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//MIDOSS/SZZ.ipynb)  
     
-* ##[Halocline.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Halocline.ipynb)  
-    
-* ##[arcgis.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//arcgis.ipynb)  
-    
+
 * ##[Breadcrumbs.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Breadcrumbs.ipynb)  
     
     **This notebook describes and directs to notebooks, scripts and other documents I have produced**  
@@ -40,10 +37,6 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[Produce_interpolation_weights.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Produce_interpolation_weights.ipynb)  
     
     **Produce interpolation weighting matrix**  
-
-* ##[pyfvcom.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//pyfvcom.ipynb)  
-    
-    **An exploration of the PyFVCOM library for reading in the FVCOM results files**  
 
 * ##[compare_lagrangian.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//compare_lagrangian.ipynb)  
     
