@@ -1118,6 +1118,4 @@ def init():
     else:
         run_choice()
     return
-#init()
-e3t = salishseacast_paths('1 December 2017', '8 December 2017', nemoinput, outpath)[2]
-create_e3t_hdf5(*e3t)
+init()
