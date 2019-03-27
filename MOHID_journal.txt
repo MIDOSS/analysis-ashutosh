@@ -259,35 +259,17 @@
         MohidWater.exe     0000000000410D6A  Unknown               Unknown  Unknown
         /var/spool/slurmd/job17994699/slurm_script: line 31: 120677 Aborted                 (core dumped) /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID/Solutions/linux/bin/MohidWater.exe
 
+11 March 2019
+^^^^^^^^^^^^^
+    Restarted the last Salmon bank run with 2:30:00 of wall time
+    Copied the output files of the successful runs from cedar to analysis-ashutosh/MIDOSS/MF0
 
-Mohid Presentation
-
-	Dispersed oil can resurface
-
-	Horizontal Advection
-		F points are th eones we need to define the MOHID grid
-		Quits on intialisation when fed with unstaggered grid
-		
-	Vertical Velocity
-		Mohid arranges w in grid center
-
-	Wind drift and diffusion
-		user defined wind drift angle and drag coeff
-		(has module for turbulence but not connected with particle tracking and oil model
-		vertical diffusivity is added to model, but not used to calculate vertical movement yet
-		This is calculating the top 3 cm. moves faster at the surface than top1m because of wind.
+26 March 2019
+^^^^^^^^^^^^^
+    Rebased to 16:c96d2907cd4b. Compile failed.
+    Reverted to 6:991a511d7b64.
+    Compilation successful. Will now make runs with small dt for 3 days.
+    Prepped .dat files and .yaml files for runs with all dt set to 1200s and one with const W and the other without const WaterProperties.dat
+    Now to run MOHID interactively to get it set up on the new Bathymetry file.
+    mohid run SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt --no-submit
     
-9 March 2019
-^^^^^^^^^^^^
-    cedar:
-    ^^^^^^
-    cd project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117
-    mohid run SOGa_01dec17_MF0_1000m3_7days_hi_test.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_hi_test
-
-	[abhudia@cedar1 ~]$ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG092517
-    [abhudia@cedar1 SOG092517]$ mohid run SOGa_25sep17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_25sep17_MF0_1000m3_7days_low
-    [abhudia@cedar1 SOG092517]$ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/TP061517_7
-    [abhudia@cedar1 TP061517_7]$ mohid run  TPa_15jun17_MF0_1000m3_7days_low.yaml $PROJECT/abhudia/MIDOSS/results/MF0/TPa_15jun17_MF0_1000m3_7days_low
-    
-
-		

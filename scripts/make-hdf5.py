@@ -942,43 +942,35 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
     # create hdf5 file and create tree structure
     f = h5py.File(f'{dirname}e3t.hdf5', 'w')
     times = f.create_group('Time')
-    e3t_group = f.create_group('/Results/e3t')
+    vvl_group = f.create_group('/Results/vvl')
 
     # since we are looping through the source files by day, we want to keep track of the
     # number of records we have made so that we can allocate the correct child names
     attr_counter = 0
 
     number_of_files = len(e3t_files)
-    bar = utilities.statusbar('Creating e3t file ...')
+    bar = utilities.statusbar('Creating vvl file ...')
     for file_index in bar(range(number_of_files)):
         # load NEMO netcdf source files using xarray
         e3t_raw = xr.open_dataset(e3t_files[file_index])
-
         # load dates from e3t netcdf file
         datelist = e3t_raw.time_counter.values.astype('datetime64[s]').astype(datetime)
-
         # convert xarray DataArrays to numpy arrays and cut off grid edges
         e3t = e3t_raw.e3t.values[...,:,1:897:,1:397]
-        
         # clear memory
         del(e3t_raw)
-        
         # transpose grid (rotate 90 clockwise)
         e3t = np.transpose(e3t, [0,1,3,2])
-
         # flip currents by depth dimension
         e3t = np.flip(e3t, axis = 1)
-
         # convert nans to 0s and set datatype to float64
         e3t = np.nan_to_num(e3t).astype('float64')
-        
         # make list of time arrays
         datearrays = []
         for date in datelist:
             datearrays.append(
                 np.array([date.year,date.month, date.day, date.hour, date.minute, date.second]).astype('float64')
                 )
-
         # write time values to hdf5
         for i, datearray in enumerate(datearrays):
             child_name = 'Time_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
@@ -991,7 +983,7 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
                 compression_opts = compression_level
                 )
             metadata = {
-                'Maximum' : np.array(datearrays[i][0]),
+                'Maximum' : np.array([2022]), #!!!
                 'Minimum' : np.array([-0.]),
                 'Units' : b'YYYY/MM/DD HH:MM:SS'
                 } 
@@ -999,8 +991,8 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
 
         # write u current values to hdf5
         for i, dataset in enumerate(e3t):
-            child_name = 'e3t_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
-            dset = e3t_group.create_dataset(
+            child_name = 'vvl_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            dset = vvl_group.create_dataset(
                 child_name,
                 shape = (40, 396, 896),
                 data = dataset,
@@ -1126,4 +1118,6 @@ def init():
     else:
         run_choice()
     return
-init()
+#init()
+e3t = salishseacast_paths('1 December 2017', '8 December 2017', nemoinput, outpath)[2]
+create_e3t_hdf5(*e3t)
