@@ -270,8 +270,11 @@
     Reverted to 6:991a511d7b64.
     Compilation successful. Will now make runs with small dt for 3 days.
     Prepped .dat files and .yaml files for runs with all dt set to 1200s and one with const W and the other without const WaterProperties.dat
-    Now to run MOHID interactively to get it set up on the new Bathymetry file.
-    mohid run SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt --no-submit
+    Now run MOHID interactively to get it set up on the new Bathymetry file.
+    $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117/
+    $ mohid run SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt
+    $ mohid run SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt
+    Results show that no oil was spilt. Will have to investigate further.
 
 
 27 March 2019
