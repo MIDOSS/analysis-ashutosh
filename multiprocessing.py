@@ -1,8 +1,7 @@
 import time
 import multiprocessing
 
-
-def manage_queue(current, remaining, workers):
+def manage_queue(remaining, workers, current=[]):
     if len(current) != 0:
         for task in current:
             if task.is_alive():
@@ -20,28 +19,21 @@ def manage_queue(current, remaining, workers):
         remaining[0].start()
         current.append(remaining[0])
         remaining.remove(remaining[0])
-        time.sleep(1)
-        manage_queue(current, remaining, workers)
+        manage_queue(remaining, workers, current)
     if len(current) == 0  and  len(remaining) == 0:
         return
     else:
-        time.sleep(1)
-        manage_queue(current, remaining, workers)
+        time.sleep(1) # may want to increment this if each process takes over 40 minutes to complete
+        manage_queue(remaining, workers, current)
 
 # instead of loop, write target function that takes iterable argument 
 def target_function(i):
     # do something
-    
 
-
-
+num_processes_alive = 4
 if __name__ == '__main__':
     processes= []
-    for i in [YOUR_LIST / RANGE]:
-        p = multiprocessing.Process(target = target_function, args = (argument1, argument2, ..., i))
+    for i in []:
+        p = multiprocessing.Process(target = target_function, args = (i, *kwargs))
         processes.append(p)
-    manage_queue([], processes, 2) # edit number of processes you want alive at once
-
-# All loops will be finished before next lines of code run becuase of process.join()
-
-# Additional lines of code
+    manage_queue(processes, num_processes_alive)
