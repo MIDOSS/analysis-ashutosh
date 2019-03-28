@@ -272,4 +272,22 @@
     Prepped .dat files and .yaml files for runs with all dt set to 1200s and one with const W and the other without const WaterProperties.dat
     Now to run MOHID interactively to get it set up on the new Bathymetry file.
     mohid run SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_const_w_unrotated_smalldt --no-submit
+
+
+27 March 2019
+^^^^^^^^^^^^^
+    Clean the solution:
+        Update working version to 16:c96d2907cd4b
+        $ cd $PROJECT/$USER/MIDOSS/MIDOSS-MOHID-CODE/Solutions/linux
+        $ ./compile_mohid.sh --clean
+        $ salloc --time=0:10:0 --cpus-per-task=1 --mem-per-cpu=1024m --account=def-allen
+        $ ./compile_mohid.sh -mb1 -mb2
+        mb2 failed to compile
+
+        using Rachaels' build of MOHID, attempt to compile Shihan;s latest push wih circular referencing (16:c96d2907cd4b)
+        Modify shell script to compile MOHID according to Shihan's instractions.
+        Compile failed because intel compiler saw that circular referencing was being used. (ModuleGeometry and ModuleFillMatrix are 'using' each other)
+
+
+
     
