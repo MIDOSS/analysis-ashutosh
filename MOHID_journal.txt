@@ -291,6 +291,26 @@
         Modify shell script to compile MOHID according to Shihan's instractions.
         Compile failed because intel compiler saw that circular referencing was being used. (ModuleGeometry and ModuleFillMatrix are 'using' each other)
 
-
-
+29 March 2019
+^^^^^^^^^^^^^
+    Further work on diagnostic tools for MOHID output
     
+    on cedar:
+    update to 19:385b50ef9385
+    revert to previous shell script 21:26db2134efbd
+    build solution
+    Add to geometry.dat the vvl block 
+    Add to the yaml file the e3t file location
+    Change Lagrangian so oil is output at DEPTH_FROM_FREE_SURFACE : 0
+    Chnage model.dat to encompass time of entire run
+    add settings to version control 
+    Give wall time of 2 hours
+
+    Time to run
+    $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117/
+    $ mohid run SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl
+        mohid_cmd.run INFO: Created temporary run directory /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-03-29T141455.384756-0700
+        mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-03-29T141455.384756-0700/MOHID.sh
+        mohid_cmd.run INFO: Submitted batch job 18940289
+
+
