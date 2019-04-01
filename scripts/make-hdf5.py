@@ -40,6 +40,8 @@ wwinput = '/opp/wwatch3/nowcast/'
 # Output filepath
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
+mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn2DMeshMaskV17-02').tmaskutil.isel(time = 0).values[1:897, 1:397].T
+
 def timer(func):
     """Decorator function for timing function calls
     """
@@ -54,7 +56,7 @@ def timer(func):
         return rv
     return f
 
-def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1):
+def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1, mask = mask):
     """Generate paths for Salish Seacast forcing 
 
     :arg timestart: date from when to start concatenating
@@ -147,7 +149,7 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
     return (
         (U_files, V_files, W_files, dirname, compression_level),
         (T_files, dirname, compression_level),
-        (e3t_files, dirname, compression_level),
+        (e3t_files, dirname, compression_level, mask),
         )
 
 def hrdps_paths(timestart, timeend, path, outpath, compression_level = 1):
@@ -924,7 +926,7 @@ def create_ww3_hdf5(wave_files, dirname, compression_level = 1):
     return
 
 @timer
-def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
+def create_e3t_hdf5(e3t_files, dirname, compression_level = 1, mask = mask):
     """Generate e3t files for MOHID
 
     :arg W_files: listofString; Salish SeaCast e3t netcdf file paths
@@ -971,7 +973,7 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1):
 
         # convert nans to 0s and set datatype to float64
         e3t = np.nan_to_num(e3t).astype('float64')
-        
+        e3t = e3t*mask
         # make list of time arrays
         datearrays = []
         for date in datelist:
@@ -1127,3 +1129,8 @@ def init():
         run_choice()
     return
 init()
+
+e3t_files = salishseacast_paths(
+                '1 December 2017', '8 December 2017', nemoinput, outpath, compression_level = 1
+                )[2]
+create_e3t_hdf5(*e3t_files)
