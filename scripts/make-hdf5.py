@@ -1128,7 +1128,6 @@ def init():
     else:
         run_choice()
     return
-init()
 
 e3t_files = salishseacast_paths(
                 '1 December 2017', '8 December 2017', nemoinput, outpath, compression_level = 1
