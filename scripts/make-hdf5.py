@@ -40,7 +40,13 @@ wwinput = '/opp/wwatch3/nowcast/'
 # Output filepath
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
-mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn2DMeshMaskV17-02').tmaskutil.isel(time = 0).values[1:897, 1:397].T
+mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DwGridFields1hV18-06').isel(time = 0).wVelocity.values[...,:,1:897:,1:397]
+mask = np.select([np.isnan(mask), ~np.isnan(mask)], [np.nan, 1])
+# transpose grid (rotate 90 clockwise)
+mask = np.transpose(mask, [0,2,1])
+# flip currents by depth dimension
+mask = np.flip(mask, axis = 1)
+
 
 def timer(func):
     """Decorator function for timing function calls
@@ -944,7 +950,7 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1, mask = mask):
     # create hdf5 file and create tree structure
     f = h5py.File(f'{dirname}e3t.hdf5', 'w')
     times = f.create_group('Time')
-    e3t_group = f.create_group('/Results/e3t')
+    e3t_group = f.create_group('/Results/vvl')
 
     # since we are looping through the source files by day, we want to keep track of the
     # number of records we have made so that we can allocate the correct child names
@@ -1001,7 +1007,7 @@ def create_e3t_hdf5(e3t_files, dirname, compression_level = 1, mask = mask):
 
         # write u current values to hdf5
         for i, dataset in enumerate(e3t):
-            child_name = 'e3t_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
+            child_name = 'vvl_' + ((5 - len(str(i + attr_counter + 1))) * '0') + str(i + attr_counter + 1)
             dset = e3t_group.create_dataset(
                 child_name,
                 shape = (40, 396, 896),
