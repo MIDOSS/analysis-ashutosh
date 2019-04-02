@@ -29,7 +29,7 @@ Descriptions under the links below are from the first cell of the notebooks
     
 * ##[mohid_viz.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//mohid_viz.ipynb)  
     
-    **Salinity Plots**  
+    **MOHID visualisation tools**  
 
 * ##[Interpolate_ww3.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Interpolate_ww3.ipynb)  
     
