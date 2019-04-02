@@ -32,6 +32,7 @@ def plot_params(array, mask_value = 0):
     # if all values are the mask value
     if y_indices.shape[0] == 0:
         return False
+    # !!!!!! what about when it is 1
     # the bounds to slice the so that we only have the parts with oil data we are interested in
     y_min, y_max = y_indices.min(), y_indices.max()
     x_min, x_max = x_indices.min(), x_indices.max()
