@@ -27,6 +27,10 @@ Descriptions under the links below are from the first cell of the notebooks
     
 * ##[Untitled1.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled1.ipynb)  
     
+* ##[mohid_viz.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//mohid_viz.ipynb)  
+    
+    **Salinity Plots**  
+
 * ##[Interpolate_ww3.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Interpolate_ww3.ipynb)  
     
     ** Compare input file data**  
@@ -54,10 +58,6 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[Compare_output_files.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_output_files.ipynb)  
     
     **Compare Lagrangian Output files**  
-
-* ##[Salinity plots.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Salinity plots.ipynb)  
-    
-    **Salinity Plots**  
 
 * ##[SpringNeapTide.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//SpringNeapTide.ipynb)  
     
