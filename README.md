@@ -13,14 +13,19 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Freshet analysis**  
 
-* ##[SZZ.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//MIDOSS/SZZ.ipynb)  
+* ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
     
-
+* ##[Halocline.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Halocline.ipynb)  
+    
+* ##[arcgis.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//arcgis.ipynb)  
+    
 * ##[Breadcrumbs.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Breadcrumbs.ipynb)  
     
     **This notebook describes and directs to notebooks, scripts and other documents I have produced**  
 
 * ##[oil_pattern_storytelling.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//oil_pattern_storytelling.ipynb)  
+    
+* ##[Untitled1.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled1.ipynb)  
     
 * ##[Interpolate_ww3.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Interpolate_ww3.ipynb)  
     
@@ -28,7 +33,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Stratification.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Stratification.ipynb)  
     
-    **Stratification**  
+    **Stratification vs Depth Plots**  
 
 * ##[wind_speed_jan.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_speed_jan.ipynb)  
     
@@ -38,6 +43,10 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Produce interpolation weighting matrix**  
 
+* ##[pyfvcom.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//pyfvcom.ipynb)  
+    
+    **An exploration of the PyFVCOM library for reading in the FVCOM results files**  
+
 * ##[compare_lagrangian.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//compare_lagrangian.ipynb)  
     
     **Lagrangian output file analysis**  
@@ -45,6 +54,10 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[Compare_output_files.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_output_files.ipynb)  
     
     **Compare Lagrangian Output files**  
+
+* ##[Salinity plots.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Salinity plots.ipynb)  
+    
+    **Salinity Plots**  
 
 * ##[SpringNeapTide.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//SpringNeapTide.ipynb)  
     
@@ -56,9 +69,9 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Discharge Vs Salinity in SoG**  
 
-* ##[Read_hdf5.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Read_hdf5.ipynb)  
+* ##[explore_pytables_h5py.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//explore_pytables_h5py.ipynb)  
     
-    <h1>Making forcing files for MOHID<h1>  
+    <h1>Exploration of use of pytables and h5py libraries for creating forcing files for MOHID<h1>  
         <ol>  
             <li>  
                 <a href="#winds">Winds Structure</a>  
@@ -73,10 +86,13 @@ Descriptions under the links below are from the first cell of the notebooks
                 <a href="#createcurrents">Create Current Input file pytables</a>  
             </li>  
             <li>  
-                <a href="#windssh5py">Create Wind Input file h5py</a>  
+                <a href="#windsh5py">Create Wind Input file h5py</a>  
             </li>  
             <li>  
                 <a href="#currentsh5py">Create Current Input file h5py</a>  
+            </li>  
+            <li>  
+                <a href="#comparison">Looking at file size and time incentive for different compression levels</a>  
             </li>  
         </ol>  
 
