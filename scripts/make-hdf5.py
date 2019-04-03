@@ -40,13 +40,12 @@ wwinput = '/opp/wwatch3/nowcast/'
 # Output filepath
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
-mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DwGridFields1hV18-06').isel(time = 0).wVelocity.values[...,:,1:897:,1:397]
+mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV18-06').isel(time = 0).salinity.values[...,:,1:897:,1:397]
 mask = np.select([np.isnan(mask), ~np.isnan(mask)], [np.nan, 1])
 # transpose grid (rotate 90 clockwise)
 mask = np.transpose(mask, [0,2,1])
 # flip currents by depth dimension
 mask = np.flip(mask, axis = 1)
-
 
 def timer(func):
     """Decorator function for timing function calls
