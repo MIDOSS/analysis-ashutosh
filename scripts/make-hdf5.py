@@ -40,9 +40,7 @@ wwinput = '/opp/wwatch3/nowcast/'
 # Output filepath
 outpath = '/results2/MIDOSS/forcing/SalishSeaCast/'
 
-mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV18-06').isel(time = 0).salinity.values[...,:,1:897:,1:397]
-mask = np.nan_to_num(mask)
-mask = np.select([mask==0, mask!=0], [0, 1])
+mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn3DMeshMaskV17-02').isel(time = 0).tmask.values[...,:,1:897:,1:397]
 # transpose grid (rotate 90 clockwise)
 mask = np.transpose(mask, [0,2,1])
 # flip currents by depth dimension
