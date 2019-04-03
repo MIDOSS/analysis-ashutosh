@@ -296,21 +296,66 @@
     Further work on diagnostic tools for MOHID output
     
     on cedar:
-    update to 19:385b50ef9385
-    revert to previous shell script 21:26db2134efbd
-    build solution
-    Add to geometry.dat the vvl block 
-    Add to the yaml file the e3t file location
-    Change Lagrangian so oil is output at DEPTH_FROM_FREE_SURFACE : 0
-    Chnage model.dat to encompass time of entire run
-    add settings to version control 
-    Give wall time of 2 hours
+    ^^^^^^^^^
+        update to 19:385b50ef9385
+        revert to previous shell script 21:26db2134efbd
+        build solution
+        Add to geometry.dat the vvl block 
+        Add to the yaml file the e3t file location
+        Change Lagrangian so oil is output at DEPTH_FROM_FREE_SURFACE : 0
+        Chnage model.dat to encompass time of entire run
+        add settings to version control 
+        Give wall time of 2 hours
 
-    Time to run
-    $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117/
-    $ mohid run SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl
-        mohid_cmd.run INFO: Created temporary run directory /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-03-29T141455.384756-0700
-        mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-03-29T141455.384756-0700/MOHID.sh
-        mohid_cmd.run INFO: Submitted batch job 18940289
+        Time to run
+        $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117/
+        $ mohid run SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl
+            mohid_cmd.run INFO: Created temporary run directory /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-03-29T141455.384756-0700
+            mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-03-29T141455.384756-0700/MOHID.sh
+            mohid_cmd.run INFO: Submitted batch job 18940289
+        
+        Added yaml file to verion contorl 9:2cd777287fef
 
+        The run crashed. I have attached the stderr and stdout files
+        stdout contains the line "Particle bigger then domain" that I haven't seen before
+        and stderr says only FillGridConcentration - ModuleLagrangianGlobal - ERR30
+
+1 April 2019
+^^^^^^^^^^^^
+    Began work on Heat maps of salinity profiles (depth) vs. time over output record for all three locations
+
+
+    On cedar:
+    ^^^^^^^^^
+        Rebased to 22:60d27b174c76, Fixed the 'Particle larger than domain' error
+        Reverted to original shell script
+        Compiled new version of MOHID
+        $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117/
+        $ mohid run SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl
+            nemo_cmd.prepare WARNING: There are uncommitted changes in /project/6001313/abhudia/MIDOSS/MIDOSS-MOHID-CODE
+            mohid_cmd.run INFO: Created temporary run directory /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-04-01T135808.370932-0700
+            mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_2019-04-01T135808.370932-0700/MOHID.sh
+            mohid_cmd.run INFO: Submitted batch job 19037426
+        
+        used hg strip to prune the branch
+        hg strip -r 23 to remove rebased tip
+        hg strip -r 20 to remove branch
+        hg revert -r 6:991a511d7b64 compile_mohid.sh  to revert shell scrpit 
+        pushed, sent pull requests
+
+        run finished successfuly but conversion did not. scratch was cleaned. submitted run again with extra 30 mins to allow for conversion.
+
+3 April 2019
+^^^^^^^^^^^^
+    On cedar:
+    ^^^^^^^^^
+        update to tip
+        Recompile
+        Copy masked vvl to config
+        Remove duplicate Imposed VVL tag in Geometry.dat 
+        $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117/
+        $ mohid run SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_masked
+            mohid_cmd.run INFO: Created temporary run directory /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_masked_2019-04-03T085027.847828-0700
+            mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_masked_2019-04-03T085027.847828-0700/MOHID.sh
+            mohid_cmd.run INFO: Submitted batch job 19129916
 
