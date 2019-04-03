@@ -25,7 +25,15 @@ def _convert_timestamp(time):
     return datetime64
 
 class vertical_velocities():
-    def __init__(self, xr_path, begin=None, end=None, top=None, bottom=None, plot_max=None):         
+    def __init__(self, xr_path, begin=None, end=None, top=None, bottom=None, plot_max=None):
+        """initialise based on instance attributes and create plot
+        arg xr_path: str, path of netcdf file
+        arg begin: beginning time, optional 
+        arg end:  end time, optional
+        arg top: index of top depth layer to slice by, optional. int [0,39]
+        arg bottom: index of bottom depth layer to slice by, optional. int [0,39]
+        arg plot_max: still working on this one
+        """
         xr_file = xr.open_dataset(xr_path)
         self.xr_file = xr_file
         self.begin_time = begin
@@ -39,7 +47,15 @@ class vertical_velocities():
         
     def data(self):
         return self.current_view
-        
+    
+    def __find_bottom__(self):
+        i=0
+        for value in np.flip(self.xr_file.vovecrtz.isel(time_counter = 0).values):
+            if value != 0:
+                self.bottom_depth = 39-i
+            else:
+                i=i+1
+
     def __plot__(self):
         self.current_view.T.plot(cmap = 'RdBu')
         plt.gca().invert_yaxis()
@@ -80,14 +96,14 @@ class vertical_velocities():
         begin, end = self.top_depth, self.bottom_depth
         assert((type(i) is int or None) for i in (begin, end)), "Depth slices are integers [0,39], or None"
         if (begin is None) and (end is None):
-            self.begin_depth = 0
-            self.end_depth = 39
+            self.top_depth = 0
+            self.__find_bottom__()
         elif (begin is None):
             assert(0 <= end <= 39), "bottom_depth_depth must be in [0,39]"
-            self.begin_depth = 0
+            self.top_depth = 0
         elif (end is None):
             assert(0 <= begin <= 39), "top_depth must be in [0,39]"
-            self.end_depth = 39
+            self.__find_bottom__()
         else:
             assert(end-begin >= 0), "End must be larger than begin"
 
@@ -120,6 +136,21 @@ class velocity():
     def __plot__(self):
         self.current_view.T.plot(cmap = 'RdBu')
         plt.gca().invert_yaxis()
+    
+    def __find_bottom__(self):
+        i=0
+        try:
+            for value in np.flip(self.xr_file.vozocrtx.isel(time_counter = 0).values):
+                if value != 0:
+                    self.bottom_depth = 39-i
+                else:
+                    i=i+1
+        except AttributeError:
+            for value in np.flip(self.xr_file.vomecrty.isel(time_counter = 0).values):
+                if value != 0:
+                    self.bottom_depth = 39-i
+                else:
+                    i=i+1            
     
     def __slice__(self):
         attrs = (self.xr_file, self.begin_time, self.end_time, self.top_depth, self.bottom_depth)
@@ -164,14 +195,14 @@ class velocity():
         begin, end = self.top_depth, self.bottom_depth
         assert((type(i) is int or None) for i in (begin, end)), "Depth slices are integers [0,39], or None"
         if (begin is None) and (end is None):
-            self.begin_depth = 0
-            self.end_depth = 39
+            self.top_depth = 0
+            self.__find_bottom__()
         elif (begin is None):
             assert(0 <= end <= 39), "bottom_depth_depth must be in [0,39]"
-            self.begin_depth = 0
+            self.top_depth = 0
         elif (end is None):
             assert(0 <= begin <= 39), "top_depth must be in [0,39]"
-            self.end_depth = 39
+            self.__find_bottom__()
         else:
             assert(end-begin >= 0), "End must be larger than begin"
 
@@ -194,6 +225,14 @@ class salinity():
     def __plot__(self):
         self.current_view.T.plot(cmap = cmocean.cm.haline)
         plt.gca().invert_yaxis()
+    
+    def __find_bottom__(self):
+        i=0
+        for value in np.flip(self.xr_file.vosaline.isel(time_counter = 0).values):
+            if value != 0:
+                self.bottom_depth = 39-i
+            else:
+                i=i+1
     
     def __slice__(self):
         attrs = (self.xr_file, self.begin_time, self.end_time, self.top_depth, self.bottom_depth)
@@ -231,13 +270,13 @@ class salinity():
         begin, end = self.top_depth, self.bottom_depth
         assert((type(i) is int or None) for i in (begin, end)), "Depth slices are integers [0,39], or None"
         if (begin is None) and (end is None):
-            self.begin_depth = 0
-            self.end_depth = 39
+            self.top_depth = 0
+            self.__find_bottom__()
         elif (begin is None):
             assert(0 <= end <= 39), "bottom_depth_depth must be in [0,39]"
-            self.begin_depth = 0
+            self.top_depth = 0
         elif (end is None):
             assert(0 <= begin <= 39), "top_depth must be in [0,39]"
-            self.end_depth = 39
+            self.__find_bottom__()
         else:
             assert(end-begin >= 0), "End must be larger than begin"
