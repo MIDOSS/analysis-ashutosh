@@ -359,3 +359,9 @@
             mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_masked_2019-04-03T085027.847828-0700/MOHID.sh
             mohid_cmd.run INFO: Submitted batch job 19129916
 
+(base) hake:compare_dat$ diff shi/Atmosphere_27.dat settings/Atmosphere.dat 
+6c6
+< NO_INTERPOLATION          : 1
+---
+> !NO_INTERPOLATION          : 1
+
