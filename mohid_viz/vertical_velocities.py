@@ -219,11 +219,8 @@ class salinity():
         self.__slice__()
         self.__plot__()
         
-    def data(self):
-        return self.current_view
-        
     def __plot__(self):
-        self.current_view.T.plot(cmap = cmocean.cm.haline)
+        self.data.T.plot(cmap = cmocean.cm.haline)
         plt.gca().invert_yaxis()
     
     def __find_bottom__(self):
@@ -237,7 +234,7 @@ class salinity():
     def __slice__(self):
         attrs = (self.xr_file, self.begin_time, self.end_time, self.top_depth, self.bottom_depth)
         xr_file, begin_time, end_time, top_depth, bottom_depth = attrs
-        self.current_view = xr_file.vosaline.sel(
+        self.data = xr_file.vosaline.sel(
             time_counter = slice(begin_time, end_time)
         ).isel(
             deptht = slice(top_depth, bottom_depth)
@@ -280,3 +277,11 @@ class salinity():
             self.__find_bottom__()
         else:
             assert(end-begin >= 0), "End must be larger than begin"
+    
+    def delta(self):
+        """Plot the difference between the top and bottom depth salinity selected
+        """
+        xr_file = self.data
+        self.data = (xr_file.isel(deptht=0)-xr_file.isel(deptht=-1))
+        self.data.plot()
+        plt.xlim(self.begin_time, self.end_time)
