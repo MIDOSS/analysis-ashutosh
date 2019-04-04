@@ -1133,7 +1133,4 @@ def init():
         run_choice()
     return
 
-e3t_files = salishseacast_paths(
-                '1 December 2017', '8 December 2017', nemoinput, outpath, compression_level = 1
-                )[2]
-create_e3t_hdf5(*e3t_files)
+init()

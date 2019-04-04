@@ -223,11 +223,15 @@ class salinity():
         self.data.T.plot(cmap = cmocean.cm.haline)
         plt.gca().invert_yaxis()
     
-    def __find_bottom__(self):
+    def __find_bottom__(self, both=True):
         i=0
         for value in np.flip(self.xr_file.vosaline.isel(time_counter = 0).values):
             if value != 0:
-                self.bottom_depth = 39-i
+                if both is False:
+                    self.sea_floor = 39-i
+                if both is True:
+                    self.bottom_depth = 39-i 
+                    self.sea_floor = 39-i
             else:
                 i=i+1
     
@@ -272,12 +276,14 @@ class salinity():
         elif (begin is None):
             assert(0 <= end <= 39), "bottom_depth_depth must be in [0,39]"
             self.top_depth = 0
+            self.__find_bottom__(both=False)
         elif (end is None):
             assert(0 <= begin <= 39), "top_depth must be in [0,39]"
             self.__find_bottom__()
+            self.__find_bottom__(both=True)
         else:
             assert(end-begin >= 0), "End must be larger than begin"
-    
+            self.__find_bottom__(both=False)
     def delta(self):
         """Plot the difference between the top and bottom depth salinity selected
         """
