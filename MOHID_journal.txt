@@ -358,10 +358,27 @@
             mohid_cmd.run INFO: Created temporary run directory /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_masked_2019-04-03T085027.847828-0700
             mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_vvl_masked_2019-04-03T085027.847828-0700/MOHID.sh
             mohid_cmd.run INFO: Submitted batch job 19129916
+        Run crashed :particle bigger than domain
 
-(base) hake:compare_dat$ diff shi/Atmosphere_27.dat settings/Atmosphere.dat 
-6c6
-< NO_INTERPOLATION          : 1
----
-> !NO_INTERPOLATION          : 1
+4 April 2019
+^^^^^^^^^^^^
+    On Cedar:
+    ^^^^^^^^^
+        copy Rachaels new bathy file to settings
+        $ scp abhudia@hake.eoas.ubc.ca:/home/rmueller/Data/SalishSeaCast/grid/AfterNEMOBathy201702_rdm.dat ./
+        in SOG12117 modify yaml file to wall time of 10 minutes to initialise bathymetry file
+        $ mohid run submit_run.yaml $PROJECT/abhudia/MIDOSS/results/MF0/Bathymetry_init
+        Rename Bathymetry_v01.dat to Bathymetry.dat and run again
+        Repeat above procedure
+        Repeat once again
+        And again
+         -------------------------- MOHID -------------------------
+ 
+            Running MOHID, please wait...
+            
+            
+            FATAL; INTERNAL; Modify_ChezyZ - Hydrodynamic - ERR04.
+
+
+
 
