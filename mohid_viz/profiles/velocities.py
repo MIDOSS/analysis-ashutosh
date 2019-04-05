@@ -1,7 +1,7 @@
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
-import lib.functions as funcs
+import lib.time_functions as funcs
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 
