@@ -117,9 +117,9 @@ class salinity():
         xr_dataarray = self.data
         values = xr_dataarray.values
         # time is axis 0, depth is axis 1
-        difference = np.diff(values, axis=1)
+        difference = np.abs(np.diff(values, axis=1))
         times = xr_dataarray.time_counter.values
-        data = (xr_dataarray.deptht.values[np.argmax(difference, axis=0)])
+        data = (xr_dataarray.deptht.values[np.argmax(difference, axis=1)])
         plt.plot(times, data, 'k', linewidth=1)
 
     def diff(self):
