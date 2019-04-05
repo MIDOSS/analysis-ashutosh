@@ -1,10 +1,11 @@
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
-import cmocean
-from lib.functions import *
+import lib.functions as funcs
+from datetime import datetime, timedelta
+from dateutil.parser import parse
 
-class velocities():
+class velocity():
     def __init__(self, xr_path, begin=None, end=None, top=None, bottom=None, plot_max=None, cmap='RdBu', title=None, verbose=False):
         """initialise based on instance attributes and create plot
         arg xr_path: str, path of netcdf file
@@ -100,12 +101,6 @@ class velocities():
                 depthw = slice(self.top_depth, self.bottom_depth)
             )
     
-    def __reset__(self):
-        self.begin_time = None
-        self.end_time = None
-        self.top_depth = None
-        self.bottom_depth = None
-    
     def __time_slice__(self):
         begin, end = self.begin_time, self.end_time
         if (begin is None) and (end is None):
@@ -113,15 +108,15 @@ class velocities():
             self.end_time = str(self.xr_file.time_counter[-1].values)
         elif (begin is None) and (end is not None):
             self.begin_time = str(self.xr_file.time_counter[0].values)
-            self.end_time = _convert_timestamp(parse(end))
+            self.end_time = funcs._convert_timestamp(parse(end))
         elif (begin is not None) and (end is None):
-            self.begin_time = _convert_timestamp(parse(begin))
+            self.begin_time = funcs._convert_timestamp(parse(begin))
             self.end_time = str(self.xr_file.time_counter[-1].values)
         else:
             daterange = [parse(t) for t in [begin, end]]
             assert(np.diff(daterange)[0].days >= 0), "Invalid Date Range"
-            self.begin_time = _convert_timestamp(daterange[0])
-            self.end_time = _convert_timestamp(daterange[1])
+            self.begin_time = funcs._convert_timestamp(daterange[0])
+            self.end_time = funcs._convert_timestamp(daterange[1])
     
     def __depth_slice__(self):      
         begin, end = self.top_depth, self.bottom_depth

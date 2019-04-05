@@ -1,3 +1,2 @@
-from profiles.salinity import *
 from profiles.velocities import *
-
+from profiles.salinity import *
