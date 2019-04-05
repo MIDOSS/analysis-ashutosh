@@ -1,5 +1,20 @@
+import time
 from datetime import datetime, timedelta
 from dateutil.parser import parse
+
+def timer(func):
+    """Decorator function for timing function calls
+    """
+    def f(*args, **kwargs):
+        beganat = time.time()
+        rv = func(*args, *kwargs)
+        elapsed = time.time() - beganat
+        hours = int(elapsed / 3600)
+        mins = int((elapsed - (hours*3600))/60)
+        secs = int((elapsed - (hours*3600) - (mins*60)))
+        print('Time elapsed: {}:{}:{}'.format(hours, mins, secs))
+        return rv
+    return f
 
 def _convert_timestamp(time):
     """Convert datetime.datetime to string in datetime64[s] format
