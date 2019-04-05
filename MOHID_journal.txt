@@ -380,5 +380,24 @@
             FATAL; INTERNAL; Modify_ChezyZ - Hydrodynamic - ERR04.
 
 
+5 April 2019
+^^^^^^^^^^^^
+    On Cedar
+    ^^^^^^^^
+    Copy shihan's bathymetry file to cedar
+    $ cd project/abhudia/MIDOSS/MIDOSS-MOHID-config/MF0/SOG12117
+    change submit_run yaml wall time to five minutes
+    submit run
+    Failed with same error as above.
+    Clean build mohid
+    $ cd /home/abhudia/project/abhudia/MIDOSS/MIDOSS-MOHID-CODE/Solutions/linux
+    $ ./compile_mohid.sh --clean
+    $ salloc --time=0:10:0 --cpus-per-task=1 --mem-per-cpu=1024m --account=def-allen
+    $ ./compile_mohid.sh -mb1 -mb2 -mw
+    submit run again
 
+
+    Mohid viz
+    ^^^^^^^^^
+        Rename to mohid
 
