@@ -134,3 +134,8 @@ class velocity():
         else:
             assert(end-begin >= 0), "End must be larger than begin"
             self.__find_bottom__(both=False)
+    
+    def delta(self):
+        """difference between vertical layers
+        """
+        pass
