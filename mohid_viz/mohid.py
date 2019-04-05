@@ -1,2 +1,2 @@
-from profiles import __init__
-from lib import __init__
+from profiles.__init__ import *
+from lib.__init__ import *
