@@ -34,8 +34,8 @@ def plot_params(array, mask_value = 0):
         return False
     # !!!!!! what about when it is 1
     # the bounds to slice the so that we only have the parts with oil data we are interested in
-    y_min, y_max = y_indices.min(), y_indices.max()
-    x_min, x_max = x_indices.min(), x_indices.max()
+    y_min, y_max = y_indices.min(), y_indices.max()+1
+    x_min, x_max = x_indices.min(), x_indices.max()+1
     # slice the input array according to these bounds
     if len(array.shape) == 3:
         array = array[...,:,y_min:y_max, x_min:x_max]
@@ -75,8 +75,8 @@ def make_scope(array):
     if array.sum() != 0:
         array_shape = array.shape
         y_indices, x_indices = np.where(array != 0)
-        xs_min, xs_max = x_indices.min(), x_indices.max()
-        ys_min, ys_max = y_indices.min(), y_indices.max()
+        xs_min, xs_max = x_indices.min(), x_indices.max()+1
+        ys_min, ys_max = y_indices.min(), y_indices.max()+1
         increase = 5
         if ys_min < increase:
             ys_min = 0
