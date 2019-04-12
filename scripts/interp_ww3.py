@@ -19,14 +19,13 @@
 import numpy as np
 import xarray as xr 
 from salishsea_tools import geo_tools, utilities
-
+from time import time
 # struct: IndexY : [Yindex1, Yindex2, Yindex3, Yindex4]
 # struct: IndexX : [Yindex1, Yindex2, Yindex3, Yindex4]
 # struct: Latitude : [Latitude1, Latitude2, Latitude3, Latitude4]
 # struct: Longitude : [Longitude1, Longitude2, Longitude3, Longitude4]
 
-
-def _produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask):
+def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask):
     """Produce the weighting matrix for regridding from a source grid to a target grid.
        This will be quite time consuming and is only recommended if the weighting matrix
        will be used multiple times.
@@ -60,7 +59,7 @@ def _produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, 
     tgt_x_indices[:] = np.nan
     min_src_lat, max_src_lat = src_lats.min(), src_lats.max()
     min_src_lon, max_src_lon = src_lons.min(), src_lons.max()
-    bar = utilities.statusbar("Loading...")
+    bar = utilities.statusbar('Loading...')
     for j in bar(range(898)):
         for i in range(398):
             if tgt_mask[j][i] == 0:
@@ -73,7 +72,7 @@ def _produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, 
                 continue
             else:
                 result = _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask)
-            if result is tuple:
+            if type(result) is tuple:
                 weights, indices_j, indices_i = result
                 tgt_weights[j][i] = weights
                 tgt_y_indices[j][i] = indices_j
@@ -87,8 +86,7 @@ def _produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, 
     v = xr.DataArray(tgt_y_indices, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
     w = xr.DataArray(tgt_x_indices, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
     a = xr.Dataset({'weights': u, 'y':v, 'x' : w})
-    a.to_netcdf('ww3_weighting_matrix.nc', format = 'NETCDF4',engine = 'netcdf4')
-
+    a.to_netcdf('ww3_weighting_matrix_hake.nc', format = 'NETCDF4',engine = 'netcdf4')
 
 def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
     """Search for a bounding box for a target lat-lon coordinate. 
@@ -116,7 +114,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
     """
     boxes_found = 0
     box_attrs = []
-    i_max, j_max = src_lons.shape[0], src_lats.shape[0]
+    i_max, j_max = src_lons.shape[1], src_lats.shape[0]
     # focal point i,j is index of (1)
     for j in range(1, j_max):
         for i in range(i_max-1):
@@ -135,13 +133,12 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                 ):
                 continue    
 
-            vert1_lat, vert1_lon = src_lats[vert1_j], src_lons[vert1_i]
-            vert2_lat, vert2_lon = src_lats[vert2_j], src_lons[vert2_i]
-            vert3_lat, vert3_lon = src_lats[vert3_j], src_lons[vert3_i]
-            vert4_lat, vert4_lon = src_lats[vert4_j], src_lons[vert4_i]
+            vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+            vert2_lat, vert2_lon = src_lats[vert2_j][vert2_i], src_lons[vert2_j][vert2_i]
+            vert3_lat, vert3_lon = src_lats[vert3_j][vert3_i], src_lons[vert3_j][vert3_i]
+            vert4_lat, vert4_lon = src_lats[vert4_j][vert4_i], src_lons[vert4_j][vert4_i]
             
-            is_point_bounded = _check_bound
-            (
+            is_point_bounded = _check_bound(
                 tgt_lat, tgt_lon,
                 vert1_lat, vert1_lon,
                 vert2_lat, vert2_lon,
@@ -152,8 +149,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
             if is_point_bounded is False:
                 continue
             else:
-                box_attrs = _add_box_attribute
-                (
+                box_attrs = _add_box_attribute(
                     tgt_lon, tgt_lat,
                     vert1_i, vert2_i, vert3_i, vert4_i,
                     vert1_j, vert2_j, vert3_j, vert4_j,
@@ -161,7 +157,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     vert1_lon, vert2_lon, vert3_lon, vert4_lon,
                     src_mask, box_attrs
                     )
-                boxes_found += boxes_found
+                boxes_found = 1 +  boxes_found
             
             # case 2: //
             if i > i_max-3:
@@ -181,13 +177,12 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     ):
                     continue    
 
-                vert1_lat, vert1_lon = src_lats[vert1_j], src_lons[vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j], src_lons[vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j], src_lons[vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j], src_lons[vert4_i]
+                vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
 
-                is_point_bounded = _check_bound
-                (
+                is_point_bounded = _check_bound(
                     tgt_lat, tgt_lon,
                     vert1_lat, vert1_lon,
                     vert2_lat, vert2_lon,
@@ -198,8 +193,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                 if is_point_bounded is False:
                     continue
                 else:
-                    box_attrs = _add_box_attribute
-                    (
+                    box_attrs = _add_box_attribute(
                         tgt_lon, tgt_lat,
                         vert1_i, vert2_i, vert3_i, vert4_i,
                         vert1_j, vert2_j, vert3_j, vert4_j,
@@ -207,7 +201,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                         vert1_lon, vert2_lon, vert3_lon, vert4_lon,
                         src_mask, box_attrs
                         )
-                    boxes_found += boxes_found
+                    boxes_found = 1 +  boxes_found
             
             # case 3: \\
             if i == 0:
@@ -227,10 +221,10 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     ):
                     continue
                 
-                vert1_lat, vert1_lon = src_lats[vert1_j], src_lons[vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j], src_lons[vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j], src_lons[vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j], src_lons[vert4_i]
+                vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
             
                 is_point_bounded = _check_bound
                 (
@@ -244,8 +238,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                 if is_point_bounded is False:
                     continue
                 else:
-                    box_attrs = _add_box_attribute
-                    (
+                    box_attrs = _add_box_attribute(
                         tgt_lon, tgt_lat,
                         vert1_i, vert2_i, vert3_i, vert4_i,
                         vert1_j, vert2_j, vert3_j, vert4_j,
@@ -253,7 +246,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                         vert1_lon, vert2_lon, vert3_lon, vert4_lon,
                         src_mask, box_attrs
                         )
-                    boxes_found += boxes_found
+                    boxes_found = 1 + boxes_found
             # case 4: |//|
             if j < 1:
                 continue
@@ -272,13 +265,12 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     ):
                     continue    
                 
-                vert1_lat, vert1_lon = src_lats[vert1_j], src_lons[vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j], src_lons[vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j], src_lons[vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j], src_lons[vert4_i]
+                vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
                 
-                is_point_bounded = _check_bound
-                (
+                is_point_bounded = _check_bound(
                     tgt_lat, tgt_lon,
                     vert1_lat, vert1_lon,
                     vert2_lat, vert2_lon,
@@ -289,8 +281,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                 if is_point_bounded is False:
                     continue
                 else:
-                    box_attrs = _add_box_attribute
-                    (
+                    box_attrs = _add_box_attribute(
                         tgt_lon, tgt_lat,
                         vert1_i, vert2_i, vert3_i, vert4_i,
                         vert1_j, vert2_j, vert3_j, vert4_j,
@@ -298,7 +289,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                         vert1_lon, vert2_lon, vert3_lon, vert4_lon,
                         src_mask, box_attrs
                         )
-                    boxes_found += boxes_found
+                    boxes_found = 1 + boxes_found
             # case 5: |\\|
             if j > j_max - 2:
                 continue
@@ -315,13 +306,12 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     vert4_i, vert4_j,
                     src_mask
                     ):
-                    continue    
-
-                vert1_lat, vert1_lon = src_lats[vert1_j], src_lons[vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j], src_lons[vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j], src_lons[vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j], src_lons[vert4_i]
-
+                    continue
+                    
+                vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
                 is_point_bounded = _check_bound
                 (
                     tgt_lat, tgt_lon,
@@ -334,8 +324,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                 if is_point_bounded is False:
                     continue
                 else:
-                    box_attrs = _add_box_attribute
-                    (
+                    box_attrs = _add_box_attribute(
                         tgt_lon, tgt_lat,
                         vert1_i, vert2_i, vert3_i, vert4_i,
                         vert1_j, vert2_j, vert3_j, vert4_j,
@@ -343,21 +332,22 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                         vert1_lon, vert2_lon, vert3_lon, vert4_lon,
                         src_mask, box_attrs
                         )
-                    boxes_found += boxes_found
+                    boxes_found = 1 + boxes_found
     # finally, check how many boxes we found
     if boxes_found == 0:
         return _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask)
-    if boxes_found != 0:
+    else:
+        print(boxes_found)
         # loop through and find the one with the lowest average distance to the points
         min_avg_dist = 1000000
         min_avg_dist_ind = 0
         for distance_ind, box in enumerate(box_attrs):
-            distance = box[4]
+            distance = box[4].sum()/4
             if distance < min_avg_dist:
                 min_avg_dist = distance
                 min_avg_dist_ind = distance_ind
         # produce that best box
-        index_i, index_j, latitudes, longitudes = box_attrs[min_avg_dist_ind]
+        index_i, index_j, latitudes, longitudes, dist = box_attrs[min_avg_dist_ind]
         weights =  _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes)
         return (weights, index_j, index_i)
 
@@ -420,7 +410,7 @@ def _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes, iteratio
             w2 = i_iter*(1 - j_iter)
             w3 = i_iter*j_iter
             w4 = j_iter*(1 - i_iter)
-            weights = np.asarray([w1,w2,w3,w4])
+            weights = np.array([w1,w2,w3,w4])
             return weights
 
 def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask, how_close = 6):
@@ -452,7 +442,7 @@ def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask, how_close = 6)
             indices_j[points_found] = ind_j
             indices_i[points_found] = ind_i
             chosen_distances[points_found] = item
-            points_found += points_found # increment this by one
+            points_found = 1 + points_found # increment this by one
             
     # finally, produce the weights
     if points_found == 0:
@@ -469,7 +459,7 @@ def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask, how_close = 6)
     weight_arr = np.zeros([4])
     weight_arr[:] = np.nan
 
-    for weight, i in enumerate(weights):
+    for i,weight in enumerate(weights):
         weight_arr[i] = weight
 
     return (weight_arr, indices_j, indices_i)
@@ -486,8 +476,7 @@ def _add_box_attribute(
     index_j = (vert1_j, vert2_j, vert3_j, vert4_j)
     latitudes = (vert1_lat, vert2_lat, vert3_lat, vert4_lat)
     longitudes = (vert1_lon, vert2_lon, vert3_lon, vert4_lon)
-    distances = geo_tools.haversine
-    (tgt_lon, tgt_lat, longitudes, latitudes)
+    distances = geo_tools.haversine(tgt_lon, tgt_lat, longitudes, latitudes)
     box_attr = (index_i, index_j, latitudes, longitudes, distances)
     box_attrs.append(box_attr)
 
@@ -505,10 +494,10 @@ def _check_bound(
     # check if the point is contained within the bounding box
 
     # point cannot be contained if lat is lower than bouding box bottom edges
-    if (tgt_lat < vert2_lat) and (tgt_lat < vert1_lat):
+    if (tgt_lat > vert2_lat) and (tgt_lat > vert1_lat):
         return False
     # point cannot be contained if lat is greater than bounding box top edges
-    if (tgt_lat > vert3_lat) and (tgt_lat > vert4_lat):
+    if (tgt_lat < vert3_lat) and (tgt_lat < vert4_lat):
         return False
     # point cannot be contained if lon is less than bounding box left edges
     if (tgt_lon < vert4_lon) and (tgt_lon < vert1_lon):
@@ -523,13 +512,29 @@ def _check_bound(
     for vertex in range(4):
         vec1_lat = vert_lats[vertex + 1] - vert_lats[vertex]
         vec1_lon = vert_lons[vertex + 1] - vert_lons[vertex]
-        vec2_lat = vert_lats[vertex] - tgt_lat
-        vec2_lon = vert_lons[vertex] - tgt_lat
+        vec2_lat = tgt_lat - vert_lats[vertex]
+        vec2_lon = tgt_lon - vert_lons[vertex]
 
-        # if cross product is negative for any of these vectors, the point is not contained
+        # if cross product is positive for any of these vectors, the point is not contained
         cross_product = vec1_lon*vec2_lat - vec2_lon*vec1_lat
-        if cross_product < 0:
+        if cross_product > 0:
             return False
 
     # the point is within the bounding box
     return True
+
+if __name__ == '__main__':
+    src = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02')
+    f = np.meshgrid(src.longitude.values - 360 ,src.latitude.values)
+    src_lats, src_lons = f[1], f[0]
+
+    smask = src.ucur.isel(time = 0).values * 0
+    condlist = [smask == 0, smask!=0]
+    choicelist = [1,0]
+    src_mask = np.select(condlist,choicelist)
+
+    tgt = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02')
+    tgt_lats, tgt_lons = tgt.latitude.values, tgt.longitude.values
+    tgt_mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn2DMeshMaskV17-02').isel(time = 0).tmaskutil.values
+
+    produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask)
