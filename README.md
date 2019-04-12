@@ -13,8 +13,6 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Freshet analysis**  
 
-* ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
-    
 * ##[Halocline.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Halocline.ipynb)  
     
 * ##[arcgis.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//arcgis.ipynb)  
@@ -22,6 +20,10 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[Breadcrumbs.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Breadcrumbs.ipynb)  
     
     **This notebook describes and directs to notebooks, scripts and other documents I have produced**  
+
+* ##[Make_profile.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Make_profile.ipynb)  
+    
+    **Make a vertical profile**  
 
 * ##[oil_pattern_storytelling.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//oil_pattern_storytelling.ipynb)  
     
@@ -42,6 +44,10 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[wind_speed_jan.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_speed_jan.ipynb)  
     
     **This script calculates wind speed **  
+
+* ##[Untitled2.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled2.ipynb)  
+    
+    ** Improved oil movement animation**  
 
 * ##[Produce_interpolation_weights.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Produce_interpolation_weights.ipynb)  
     
@@ -68,6 +74,10 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[Salinity_Regression.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Salinity_Regression.ipynb)  
     
     **Discharge Vs Salinity in SoG**  
+
+* ##[Regrid_ww3_with_weighting_matrix.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Regrid_ww3_with_weighting_matrix.ipynb)  
+    
+    **Regridding WW3 using weighting matrix**  
 
 * ##[explore_pytables_h5py.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//explore_pytables_h5py.ipynb)  
     
