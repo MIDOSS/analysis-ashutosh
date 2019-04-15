@@ -401,3 +401,11 @@
     ^^^^^^^^^
         Rename to mohid
 
+13 April 2019
+^^^^^^^^^^^^^
+    On Cedar:
+    ^^^^^^^^^
+	mohid run submit_run.yaml $PROJECT/abhudia/MIDOSS/results/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_hi
+	mohid_cmd.run INFO: Created temporary run directory /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_hi_2019-04-13T172246.625397-0700
+	mohid_cmd.run INFO: Wrote job run script to /scratch/abhudia/MIDOSS/runs/MF0/SOGa_01dec17_MF0_1000m3_7days_unrotated_smalldt_hi_2019-04-13T172246.625397-0700/MOHID.sh
+	mohid_cmd.run INFO: Submitted batch job 19511672
