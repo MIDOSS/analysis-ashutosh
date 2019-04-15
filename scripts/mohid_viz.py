@@ -256,8 +256,8 @@ def plot_thick_conc(xr_path, currents_path, winds_path, outfile_path, mask = mas
                                            cmap = 'inferno'))
         cbar.ax.get_yaxis().labelpad = 10
         cbar.ax.set_ylabel('Oil thickness (microns)', rotation=270)
-        cbar.ax.hlines(thickmax, xmin =  0, xmax = 150, colors = 'Red')
-        cbar.ax.hlines(thickmin, xmin =  0, xmax = 150, colors = 'Blue')
+        cbar.ax.hlines(thickmax, xmin =  0, xmax = 1000, colors = 'Red')
+        cbar.ax.hlines(thickmin, xmin =  0, xmax = 1000, colors = 'Blue')
         # plot the land mask and coastline
         plt.contourf(t_mask, levels = [-0.1, 0.1], colors = 'Burlywood')
         plt.contour(t_mask, levels = [-0.1, 0.1], colors = 'k')        
@@ -268,11 +268,11 @@ def plot_thick_conc(xr_path, currents_path, winds_path, outfile_path, mask = mas
         # mask out everything but every nth quiver
         U_ma, V_ma = ma.array(U, mask = t_q_mask), ma.array(V, mask = t_q_mask)
         currentq = plt.quiver(U_ma, V_ma, scale = 20, width = 0.003)
-        plt.quiverkey(currentq, 1.5, 1.92, 1, label = 'Current (1 m/s)', transform=ax.transAxes)
+        plt.quiverkey(currentq, 0, 1.08, 2, label = 'Current (2 m/s)', transform=ax.transAxes)
         u, v = wind_quivers(wind, t + winds_start, t_y_min, t_y_max, t_x_min, t_x_max)
         u,v = np.average(u), np.average(v)
         windq = plt.quiver(10, t_y_max - t_y_min - 10, u, v, scale = 20, color = 'Red')
-        plt.quiverkey(windq, 1.45,1.8, 5, label = 'Wind (5 m/s)', transform=ax.transAxes)
+        plt.quiverkey(windq, 1,1.08, 5, label = 'Wind (5 m/s)', transform=ax.transAxes)
         
         viz_tools.set_aspect(ax)
         
@@ -346,8 +346,8 @@ def plot_thick_conc(xr_path, currents_path, winds_path, outfile_path, mask = mas
                                            cmap = 'inferno'))
         cbar.ax.get_yaxis().labelpad = 10
         cbar.ax.set_ylabel('Oil concentration (ppm)', rotation=270)
-        cbar.ax.hlines(concmax, xmin =  0, xmax = 500, colors = 'Red')
-        cbar.ax.hlines(concmin, xmin =  0, xmax = 500, colors = 'Blue')
+        cbar.ax.hlines(concmax, xmin =  0, xmax = 1000, colors = 'Red')
+        cbar.ax.hlines(concmin, xmin =  0, xmax = 1000, colors = 'Blue')
         # plot the land mask and coastline
         plt.contourf(c_mask, levels = [-0.1, 0.1], colors = 'Burlywood')
         plt.contour(c_mask, levels = [-0.1, 0.1], colors = 'k')        
@@ -358,12 +358,12 @@ def plot_thick_conc(xr_path, currents_path, winds_path, outfile_path, mask = mas
         # mask out everything but every nth quiver
         U_ma, V_ma = ma.array(U, mask = c_q_mask), ma.array(V, mask = c_q_mask)
         currentq = plt.quiver(U_ma, V_ma, scale = 20, width = 0.003)
-        plt.quiverkey(currentq, 1.5, 1.92, 1, label = 'Current (1 m/s)', transform=ax.transAxes)
+        plt.quiverkey(currentq, 0.0, 1.08, 2, label = 'Current (2 m/s)', transform=ax.transAxes)
         
         u, v = wind_quivers(wind, t + winds_start, c_y_min, c_y_max, c_x_min, c_x_max)
         u,v = np.average(u), np.average(v)
         windq = plt.quiver(10, c_y_max - c_y_min - 10, u, v, scale = 20, color = 'Red')
-        plt.quiverkey(windq, 1.45,1.8, 5, label = 'Wind (5 m/s)', transform=ax.transAxes)
+        plt.quiverkey(windq, 1.0,1.08, 5, label = 'Wind (5 m/s)', transform=ax.transAxes)
         
         viz_tools.set_aspect(ax)        
         
@@ -399,11 +399,13 @@ def plot_thick_conc(xr_path, currents_path, winds_path, outfile_path, mask = mas
             plt.yticks([])
             plt.title('Oil Concentration Scope')
         #plt.tight_layout()
-        plt.suptitle(times[t])
+        plt.suptitle(times[t], y= 0.99)
         # !----------------------------------------------------------------------------------------------------------------------------
     fig = plt.figure(figsize = (16,9))
+    #ani = animation.FuncAnimation(plt.gcf(), update_frame, range(1))
     ani = animation.FuncAnimation(plt.gcf(), update_frame, range(time_values.shape[0]))
     ani.save(outfile_path, writer = animation.FFMpegWriter(), dpi = 100)
+    currents.close();winds.close()
 
 # find the wcc and ssh at the oil spill locations
 def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, output, mask = mask):
@@ -567,7 +569,7 @@ def plot_thickness_with_ssh(xr_path, sea_level, ww3, currents_path, winds, outpu
     ani = animation.FuncAnimation(plt.gcf(), update_frame, range(time_values.shape[0]))
     ani.save(output, writer = animation.FFMpegWriter(), dpi = 100)
 
-def conc_heatmap(oilpath, outfile):
+def conc_heatmap(oilpath, outfile, title):
     oil = xr.open_dataset(oilpath)
     ## concentration by depth heat map
     # go through entire record and create array
@@ -610,6 +612,6 @@ def conc_heatmap(oilpath, outfile):
     plt.xticks(np.arange(0, number_steps, 24), time_values[::24], rotation='vertical')
     # plot colorbar normalised to log scale, with current min and max thicknesses
     plt.colorbar()
-    plt.title('Oil Concentration (ppm)')
+    plt.title('Oil Concentration {} (ppm)'.format(title))
     plt.ylabel('Depth (m)')
     plt.savefig(outfile, dpi = 200)
