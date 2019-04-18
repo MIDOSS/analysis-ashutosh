@@ -136,6 +136,10 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Wind Climatology Maps**  
 
+* ##[Regrid_winds_weights.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Regrid_winds_weights.ipynb)  
+    
+    **Regridding winds using SSC weighting matrix**  
+
 * ##[WindSpeedTimeseries.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//WindSpeedTimeseries.ipynb)  
     
     **Wind Speed Time Series**  
