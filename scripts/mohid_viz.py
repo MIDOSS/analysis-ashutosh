@@ -579,13 +579,15 @@ def conc_heatmap(oilpath, outfile, title):
     conc_heatmap = np.zeros([40,number_steps])
     bar = utilities.statusbar('Loading...')
     for t in bar(range(number_steps)):
-        # sum along x and y axes to get concentration at each depth
-        conc_vals = np.sum(np.sum(oil.OilConcentration_3D.isel(time = t).values, axis = 1), axis = 1)
-        # add this to the heatmap array
+        instances = np.array([])
+        param = oil.OilConcentration_3D.isel(time = t)
+        for i, sli in enumerate(param):
+            instances = np.append(instances, np.where(sli != 0)[0].shape[0])
+        conc_vals = np.sum(np.sum(param.values, axis = 1), axis = 1) / instances
+        
+        
         conc_heatmap[:,t] = conc_vals
     # cut out the useless bits
-    conc_heatmap = conc_heatmap[~(conc_heatmap==0).all(1)]
-    # get the limits
     condlist = [conc_heatmap == 0, conc_heatmap != 0]
     choicelist = [np.nan, conc_heatmap]
     conc_heatmap = np.select(condlist, choicelist)
@@ -601,6 +603,7 @@ def conc_heatmap(oilpath, outfile, title):
                       347.2116  , 374.1385  , 401.06845 , 428.      ])[1:depths+1])
     # now make the plot
     fig = plt.figure(figsize = (15,15))
+    ax = plt.subplot(111)
     #  normaise on log10 scale
     plt.pcolormesh(conc_heatmap,
                    animated = True,
@@ -609,9 +612,14 @@ def conc_heatmap(oilpath, outfile, title):
                    vmax = vmax,
                    cmap = 'inferno')
     plt.yticks(range(depths), depth)
-    plt.xticks(np.arange(0, number_steps, 24), time_values[::24], rotation='vertical')
+    plt.xticks(np.arange(0, number_steps, 24), time_values[::24], rotation=45)
     # plot colorbar normalised to log scale, with current min and max thicknesses
-    plt.colorbar()
+    cbar = plt.colorbar()
+    cbar.ax.tick_params(labelsize=16) 
     plt.title('Oil Concentration {} (ppm)'.format(title))
     plt.ylabel('Depth (m)')
+    for item in ([ax.xaxis.label, ax.yaxis.label] + ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(16)
+        # set the font size for the axis label
+    ax.title.set_fontsize(20)
     plt.savefig(outfile, dpi = 200)

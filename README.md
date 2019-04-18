@@ -13,6 +13,8 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Freshet analysis**  
 
+* ##[Untitled.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Untitled.ipynb)  
+    
 * ##[Halocline.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Halocline.ipynb)  
     
 * ##[arcgis.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//arcgis.ipynb)  
@@ -137,6 +139,10 @@ Descriptions under the links below are from the first cell of the notebooks
 * ##[WindSpeedTimeseries.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//WindSpeedTimeseries.ipynb)  
     
     **Wind Speed Time Series**  
+
+* ##[find_missing_ww3_files.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//find_missing_ww3_files.ipynb)  
+    
+    **Find Missing Wave Watch Files**  
 
 * ##[Compare_ssh_currents_winds.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Compare_ssh_currents_winds.ipynb)  
     
