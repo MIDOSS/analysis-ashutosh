@@ -20,6 +20,9 @@ import numpy as np
 import xarray as xr 
 from salishsea_tools import geo_tools, utilities
 from time import time
+from numba import jit
+import cProfile
+import pstats
 
 def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask):
     """Produce the weighting matrix for regridding from a source grid to a target grid.
@@ -53,6 +56,8 @@ def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, s
     tgt_y_indices[:] = np.nan
     tgt_x_indices = np.zeros([898, 398, 4])
     tgt_x_indices[:] = np.nan
+    which_arr = np.zeros([898, 398])
+    which_arr[:] = np.nan
     min_src_lat, max_src_lat = src_lats.min(), src_lats.max()
     min_src_lon, max_src_lon = src_lons.min(), src_lons.max()
     bar = utilities.statusbar('Loading...')
@@ -69,10 +74,11 @@ def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, s
             else:
                 result = _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask)
             if type(result) is tuple:
-                weights, indices_j, indices_i = result
+                weights, indices_j, indices_i, which = result
                 tgt_weights[j][i] = weights
                 tgt_y_indices[j][i] = indices_j
                 tgt_x_indices[j][i] = indices_i
+                which_arr[j][i] = which
             else:
                 continue
     grid_x = np.arange(398)
@@ -81,9 +87,11 @@ def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, s
     u = xr.DataArray(tgt_weights, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
     v = xr.DataArray(tgt_y_indices.astype(int), coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
     w = xr.DataArray(tgt_x_indices.astype(int), coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
-    a = xr.Dataset({'weights': u, 'y':v, 'x' : w})
-    a.to_netcdf('ww3_weighting_matrix_hake.nc', format = 'NETCDF4',engine = 'netcdf4')
+    which_xr = xr.DataArray(which_arr, coords  = [grid_y, grid_x], dims= ['grid_y', 'grid_x'])
+    a = xr.Dataset({'weights': u, 'y':v, 'x' : w, 'which': which_xr})
+    a.to_netcdf('ww3_weighting_matrix_hakeV1.nc', format = 'NETCDF4',engine = 'netcdf4')
 
+@jit
 def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
     """Search for a bounding box for a target lat-lon coordinate. 
        If none found, do a distance weighted average.
@@ -321,20 +329,18 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
         # produce that best box
         index_i, index_j, latitudes, longitudes, dist = box_attrs[min_avg_dist_ind]
         weights =  _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes)
-        return (weights, index_j, index_i)
+        return (weights, index_j, index_i, 1)
 
-def _bounding_box_found():
-    pass
-    
-
-def  _all_vertex_on_water(
-    # Check if any of the vertices is on land
+@jit(nopython = True)
+def _all_vertex_on_water(
     vert1_i, vert1_j,
     vert2_i, vert2_j,
     vert3_i, vert3_j,
     vert4_i, vert4_j,
     src_mask
     ):
+    """Return false if any of the vertices is on land, true otherwise
+    """
     if (
         src_mask[vert1_j][vert1_i] == 0
         ) or (
@@ -347,9 +353,12 @@ def  _all_vertex_on_water(
         return False
     return True
     
-
-def _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes, iterations = 1000):
-    # if we are inside a bounding box, we want to iterate and find the weights
+@jit(nopython=True)
+def _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes):
+    iterations = 1000
+    converge = 1e-10
+    """ if we are inside a bounding box, we want to iterate and find the weights
+    """
     lat1, lat2, lat3, lat4 = latitudes
     lon1, lon2, lon3, lon4 = longitudes
     dlat1 = lat2 - lat1
@@ -363,7 +372,6 @@ def _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes, iteratio
     i_iter = 0.5
     j_iter = 0.5
 
-    converge = 1e-10
     for iteration in range(iterations):
         ddlat =  tgt_lat - lat1 - dlat1*i_iter - dlat2*j_iter - dlat3*i_iter*j_iter
         ddlon =  tgt_lon - lon1 - dlon1*i_iter - dlon2*j_iter - dlon3*i_iter*j_iter
@@ -389,8 +397,13 @@ def _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes, iteratio
             weights = np.array([w1,w2,w3,w4])
             return weights
 
-def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask, how_close = 6):
-    # distance between the nemo coord and *each* coord in the src grid
+@jit
+def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
+    """Distance averaged weighting. Find distance between the target coordinates 
+       and each of the source coordinates
+    """
+    how_close = 2
+
     distances = geo_tools.haversine(tgt_lon,tgt_lat,src_lons,src_lats)
     # make a copy and unravel
     dist_copy = distances.copy().ravel()
@@ -422,7 +435,7 @@ def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask, how_close = 6)
             
     # finally, produce the weights
     if points_found == 0:
-        return False # !!!!!!
+        return False
     smol_boi = 1e-31 # small number to prevent division by zero
     weighting_divisor = 0
     for distance in  chosen_distances:
@@ -438,8 +451,9 @@ def _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask, how_close = 6)
     for i,weight in enumerate(weights):
         weight_arr[i] = weight
 
-    return (weight_arr, indices_j, indices_i)
-    
+    return (weight_arr, indices_j, indices_i, 2)
+
+@jit  
 def _add_box_attribute(
     tgt_lon, tgt_lat,
     vert1_i, vert2_i, vert3_i, vert4_i,
@@ -458,7 +472,7 @@ def _add_box_attribute(
 
     return box_attrs
 
-
+@jit(nopython = True)
 def _check_bound(
     tgt_lat, tgt_lon,
     vert1_lat, vert1_lon,
@@ -513,4 +527,12 @@ if __name__ == '__main__':
     tgt_lats, tgt_lons = tgt.latitude.values, tgt.longitude.values
     tgt_mask = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn2DMeshMaskV17-02').isel(time = 0).tmaskutil.values
 
-    produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask)
+    prof = cProfile.Profile()
+    prof.run('produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask)')
+    prof.dump_stats('output.prof')
+
+    stream = open('profile_regrid.txt', 'w')
+    stats = pstats.Stats('output.prof', stream=stream)
+    stats.sort_stats('cumtime')
+    stats.print_stats()
+    
