@@ -20,10 +20,6 @@ import numpy as np
 import xarray as xr 
 from salishsea_tools import geo_tools, utilities
 from time import time
-# struct: IndexY : [Yindex1, Yindex2, Yindex3, Yindex4]
-# struct: IndexX : [Yindex1, Yindex2, Yindex3, Yindex4]
-# struct: Latitude : [Latitude1, Latitude2, Latitude3, Latitude4]
-# struct: Longitude : [Longitude1, Longitude2, Longitude3, Longitude4]
 
 def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask):
     """Produce the weighting matrix for regridding from a source grid to a target grid.
@@ -83,8 +79,8 @@ def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, s
     grid_y = np.arange(898)
     corners = np.arange(4) + 1
     u = xr.DataArray(tgt_weights, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
-    v = xr.DataArray(tgt_y_indices, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
-    w = xr.DataArray(tgt_x_indices, coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
+    v = xr.DataArray(tgt_y_indices.astype(int), coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
+    w = xr.DataArray(tgt_x_indices.astype(int), coords  = [grid_y, grid_x, corners], dims= ['grid_y', 'grid_x', 'index'])
     a = xr.Dataset({'weights': u, 'y':v, 'x' : w})
     a.to_netcdf('ww3_weighting_matrix_hake.nc', format = 'NETCDF4',engine = 'netcdf4')
 
@@ -109,7 +105,6 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
     :arg src_mask: 2D array with 0 for land points and 1 for water points on source grid
     :type numpy.ndarray
 
-    !!! what does it return
 
     """
     boxes_found = 0
@@ -124,75 +119,28 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
             vert3_i, vert3_j = i+1, j-1
             vert4_i, vert4_j = i, j-1
 
-            if _any_vertex_on_land(
+            if _all_vertex_on_water(
                 vert1_i, vert1_j,
                 vert2_i, vert2_j,
                 vert3_i, vert3_j,
                 vert4_i, vert4_j,
                 src_mask
-                ):
-                continue    
-
-            vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
-            vert2_lat, vert2_lon = src_lats[vert2_j][vert2_i], src_lons[vert2_j][vert2_i]
-            vert3_lat, vert3_lon = src_lats[vert3_j][vert3_i], src_lons[vert3_j][vert3_i]
-            vert4_lat, vert4_lon = src_lats[vert4_j][vert4_i], src_lons[vert4_j][vert4_i]
-            
-            is_point_bounded = _check_bound(
-                tgt_lat, tgt_lon,
-                vert1_lat, vert1_lon,
-                vert2_lat, vert2_lon,
-                vert3_lat, vert3_lon,
-                vert4_lat, vert4_lon
-                )
-            
-            if is_point_bounded is False:
-                continue
-            else:
-                box_attrs = _add_box_attribute(
-                    tgt_lon, tgt_lat,
-                    vert1_i, vert2_i, vert3_i, vert4_i,
-                    vert1_j, vert2_j, vert3_j, vert4_j,
-                    vert1_lat, vert2_lat, vert3_lat, vert4_lat,
-                    vert1_lon, vert2_lon, vert3_lon, vert4_lon,
-                    src_mask, box_attrs
-                    )
-                boxes_found = 1 +  boxes_found
-            
-            # case 2: //
-            if i > i_max-3:
-                continue
-            else:
-                vert1_i, vert1_j = i, j
-                vert2_i, vert2_j = i+1, j
-                vert3_i, vert3_j = i+2, j-1
-                vert4_i, vert4_j = i+1, j-1
-            
-                if _any_vertex_on_land(
-                    vert1_i, vert1_j,
-                    vert2_i, vert2_j,
-                    vert3_i, vert3_j,
-                    vert4_i, vert4_j,
-                    src_mask
-                    ):
-                    continue    
+                ):    
 
                 vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
-
+                vert2_lat, vert2_lon = src_lats[vert2_j][vert2_i], src_lons[vert2_j][vert2_i]
+                vert3_lat, vert3_lon = src_lats[vert3_j][vert3_i], src_lons[vert3_j][vert3_i]
+                vert4_lat, vert4_lon = src_lats[vert4_j][vert4_i], src_lons[vert4_j][vert4_i]
+                
                 is_point_bounded = _check_bound(
                     tgt_lat, tgt_lon,
                     vert1_lat, vert1_lon,
                     vert2_lat, vert2_lon,
                     vert3_lat, vert3_lon,
-                    vert4_lat, vert4_lon,
+                    vert4_lat, vert4_lon
                     )
             
-                if is_point_bounded is False:
-                    continue
-                else:
+                if is_point_bounded:
                     box_attrs = _add_box_attribute(
                         tgt_lon, tgt_lat,
                         vert1_i, vert2_i, vert3_i, vert4_i,
@@ -203,136 +151,160 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                         )
                     boxes_found = 1 +  boxes_found
             
+            # case 2: //
+            elif i <= i_max-3:
+                vert1_i, vert1_j = i, j
+                vert2_i, vert2_j = i+1, j
+                vert3_i, vert3_j = i+2, j-1
+                vert4_i, vert4_j = i+1, j-1
+            
+                if _all_vertex_on_water(
+                    vert1_i, vert1_j,
+                    vert2_i, vert2_j,
+                    vert3_i, vert3_j,
+                    vert4_i, vert4_j,
+                    src_mask
+                    ):   
+
+                    vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                    vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                    vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                    vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
+
+                    is_point_bounded = _check_bound(
+                        tgt_lat, tgt_lon,
+                        vert1_lat, vert1_lon,
+                        vert2_lat, vert2_lon,
+                        vert3_lat, vert3_lon,
+                        vert4_lat, vert4_lon,
+                        )
+                
+                    if is_point_bounded:
+                        box_attrs = _add_box_attribute(
+                            tgt_lon, tgt_lat,
+                            vert1_i, vert2_i, vert3_i, vert4_i,
+                            vert1_j, vert2_j, vert3_j, vert4_j,
+                            vert1_lat, vert2_lat, vert3_lat, vert4_lat,
+                            vert1_lon, vert2_lon, vert3_lon, vert4_lon,
+                            src_mask, box_attrs
+                            )
+                        boxes_found = 1 +  boxes_found
+            
             # case 3: \\
-            if i == 0:
-                continue
-            else:
+            elif i != 0:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j-1
                 vert3_i, vert3_j = i, j-1
                 vert4_i, vert4_j = i-1, j-1
 
-                if _any_vertex_on_land(
+                if _all_vertex_on_water(
                     vert1_i, vert1_j,
                     vert2_i, vert2_j,
                     vert3_i, vert3_j,
                     vert4_i, vert4_j,
                     src_mask
                     ):
-                    continue
                 
-                vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
+                    vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                    vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                    vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                    vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
             
-                is_point_bounded = _check_bound
-                (
-                    tgt_lat, tgt_lon,
-                    vert1_lat, vert1_lon,
-                    vert2_lat, vert2_lon,
-                    vert3_lat, vert3_lon,
-                    vert4_lat, vert4_lon,
-                    )
-            
-                if is_point_bounded is False:
-                    continue
-                else:
-                    box_attrs = _add_box_attribute(
-                        tgt_lon, tgt_lat,
-                        vert1_i, vert2_i, vert3_i, vert4_i,
-                        vert1_j, vert2_j, vert3_j, vert4_j,
-                        vert1_lat, vert2_lat, vert3_lat, vert4_lat,
-                        vert1_lon, vert2_lon, vert3_lon, vert4_lon,
-                        src_mask, box_attrs
+                    is_point_bounded = _check_bound
+                    (
+                        tgt_lat, tgt_lon,
+                        vert1_lat, vert1_lon,
+                        vert2_lat, vert2_lon,
+                        vert3_lat, vert3_lon,
+                        vert4_lat, vert4_lon,
                         )
-                    boxes_found = 1 + boxes_found
+                
+                    if is_point_bounded:
+                        box_attrs = _add_box_attribute(
+                            tgt_lon, tgt_lat,
+                            vert1_i, vert2_i, vert3_i, vert4_i,
+                            vert1_j, vert2_j, vert3_j, vert4_j,
+                            vert1_lat, vert2_lat, vert3_lat, vert4_lat,
+                            vert1_lon, vert2_lon, vert3_lon, vert4_lon,
+                            src_mask, box_attrs
+                            )
+                        boxes_found = 1 + boxes_found
             # case 4: |//|
-            if j < 1:
-                continue
-            else:
+            elif j >= 1:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j-1
                 vert3_i, vert3_j = i+1, j-2
                 vert4_i, vert4_j = i, j-1
 
-                if _any_vertex_on_land(
+                if _all_vertex_on_water(
                     vert1_i, vert1_j,
                     vert2_i, vert2_j,
                     vert3_i, vert3_j,
                     vert4_i, vert4_j,
                     src_mask
-                    ):
-                    continue    
+                    ): 
                 
-                vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
-                
-                is_point_bounded = _check_bound(
-                    tgt_lat, tgt_lon,
-                    vert1_lat, vert1_lon,
-                    vert2_lat, vert2_lon,
-                    vert3_lat, vert3_lon,
-                    vert4_lat, vert4_lon
-                    )
-            
-                if is_point_bounded is False:
-                    continue
-                else:
-                    box_attrs = _add_box_attribute(
-                        tgt_lon, tgt_lat,
-                        vert1_i, vert2_i, vert3_i, vert4_i,
-                        vert1_j, vert2_j, vert3_j, vert4_j,
-                        vert1_lat, vert2_lat, vert3_lat, vert4_lat,
-                        vert1_lon, vert2_lon, vert3_lon, vert4_lon,
-                        src_mask, box_attrs
+                    vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                    vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                    vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                    vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
+                    
+                    is_point_bounded = _check_bound(
+                        tgt_lat, tgt_lon,
+                        vert1_lat, vert1_lon,
+                        vert2_lat, vert2_lon,
+                        vert3_lat, vert3_lon,
+                        vert4_lat, vert4_lon
                         )
-                    boxes_found = 1 + boxes_found
+                
+                    if is_point_bounded:
+                        box_attrs = _add_box_attribute(
+                            tgt_lon, tgt_lat,
+                            vert1_i, vert2_i, vert3_i, vert4_i,
+                            vert1_j, vert2_j, vert3_j, vert4_j,
+                            vert1_lat, vert2_lat, vert3_lat, vert4_lat,
+                            vert1_lon, vert2_lon, vert3_lon, vert4_lon,
+                            src_mask, box_attrs
+                            )
+                        boxes_found = 1 + boxes_found
             # case 5: |\\|
-            if j > j_max - 2:
-                continue
-            else:
+            elif j <= j_max - 2:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j+1
                 vert3_i, vert3_j = i+1, j
                 vert4_i, vert4_j = i, j-1
 
-                if _any_vertex_on_land(
+                if _all_vertex_on_water(
                     vert1_i, vert1_j,
                     vert2_i, vert2_j,
                     vert3_i, vert3_j,
                     vert4_i, vert4_j,
                     src_mask
                     ):
-                    continue
                     
-                vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
-                vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
-                vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
-                vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
-                is_point_bounded = _check_bound
-                (
-                    tgt_lat, tgt_lon,
-                    vert1_lat, vert1_lon,
-                    vert2_lat, vert2_lon,
-                    vert3_lat, vert3_lon,
-                    vert4_lat, vert4_lon
-                    )
-            
-                if is_point_bounded is False:
-                    continue
-                else:
-                    box_attrs = _add_box_attribute(
-                        tgt_lon, tgt_lat,
-                        vert1_i, vert2_i, vert3_i, vert4_i,
-                        vert1_j, vert2_j, vert3_j, vert4_j,
-                        vert1_lat, vert2_lat, vert3_lat, vert4_lat,
-                        vert1_lon, vert2_lon, vert3_lon, vert4_lon,
-                        src_mask, box_attrs
+                    vert1_lat, vert1_lon = src_lats[vert1_j][vert1_i], src_lons[vert1_j][vert1_i]
+                    vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
+                    vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
+                    vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
+                    is_point_bounded = _check_bound
+                    (
+                        tgt_lat, tgt_lon,
+                        vert1_lat, vert1_lon,
+                        vert2_lat, vert2_lon,
+                        vert3_lat, vert3_lon,
+                        vert4_lat, vert4_lon
                         )
-                    boxes_found = 1 + boxes_found
+                
+                    if is_point_bounded:
+                        box_attrs = _add_box_attribute(
+                            tgt_lon, tgt_lat,
+                            vert1_i, vert2_i, vert3_i, vert4_i,
+                            vert1_j, vert2_j, vert3_j, vert4_j,
+                            vert1_lat, vert2_lat, vert3_lat, vert4_lat,
+                            vert1_lon, vert2_lon, vert3_lon, vert4_lon,
+                            src_mask, box_attrs
+                            )
+                        boxes_found = 1 + boxes_found
     # finally, check how many boxes we found
     if boxes_found == 0:
         return _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask)
@@ -351,7 +323,11 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
         weights =  _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes)
         return (weights, index_j, index_i)
 
-def _any_vertex_on_land(
+def _bounding_box_found():
+    pass
+    
+
+def  _all_vertex_on_water(
     # Check if any of the vertices is on land
     vert1_i, vert1_j,
     vert2_i, vert2_j,
@@ -368,8 +344,8 @@ def _any_vertex_on_land(
                 ) or(
                     src_mask[vert4_j][vert4_i] == 0
                     ):
-        return True
-    return False
+        return False
+    return True
     
 
 def _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes, iterations = 1000):
