@@ -48,6 +48,17 @@ def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, s
     :arg src_mask: 2D array with 0 for land points and 1 for water points on source grid
     :type numpy.ndarray
 
+    :returns weights: 1D array containing 4 floats, representing interpolation weights
+    :type numpy.ndarray
+
+    :returns index_j: 1D array containing 4 floats, representing source j indices
+    :type numpy.ndarray
+
+    :returns index_j: 1D array containing 4 floats, representing source i indices
+    :type numpy.ndarray
+
+    :returns integer: 1 if produced using iterations or 2 is produced using weighting matrix 
+    :type int
     """
     # initialise gird with NaN everywhere
     tgt_weights = np.zeros([898, 398, 4])
