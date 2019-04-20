@@ -171,7 +171,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     boxes_found = 1 +  boxes_found
             
             # case 2: //
-            elif i <= i_max-3:
+            if i <= i_max-3:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j
                 vert3_i, vert3_j = i+2, j-1
@@ -210,7 +210,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                         boxes_found = 1 +  boxes_found
             
             # case 3: \\
-            elif i != 0:
+            if i != 0:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j-1
                 vert3_i, vert3_j = i, j-1
@@ -249,7 +249,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                             )
                         boxes_found = 1 + boxes_found
             # case 4: |//|
-            elif j >= 1:
+            if j >= 1:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j-1
                 vert3_i, vert3_j = i+1, j-2
@@ -287,7 +287,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                             )
                         boxes_found = 1 + boxes_found
             # case 5: |\\|
-            elif j <= j_max - 2:
+            if j <= j_max - 2:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j+1
                 vert3_i, vert3_j = i+1, j
