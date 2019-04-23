@@ -60,7 +60,7 @@ def timer(func):
         return rv
     return f
 
-def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1, mask = mask):
+def salishseacast_paths(timestart, timeend, path, outpath, oscar = False, compression_level = 1, mask = mask):
     """Generate paths for Salish Seacast forcing 
 
     :arg timestart: date from when to start concatenating
@@ -151,7 +151,7 @@ def salishseacast_paths(timestart, timeend, path, outpath, compression_level = 1
     
     print(f'\nSalish SeaCast output directory {dirname} created\n')
     return (
-        (U_files, V_files, W_files, dirname, compression_level),
+        (U_files, V_files, W_files, dirname, oscar, compression_level),
         (T_files, dirname, compression_level),
         (e3t_files, dirname, compression_level, mask),
         )
@@ -297,7 +297,7 @@ def ww3_paths(timestart, timeend, path, outpath, compression_level = 1):
     return (wave_files, dirname, compression_level)
 
 @timer  
-def create_currents_hdf5(U_files, V_files, W_files, dirname, compression_level = 1):
+def create_currents_hdf5(U_files, V_files, W_files, dirname, oscar= False, compression_level = 1):
     """Generate currents forcing file for MOHID
 
     :arg U_files: listofString; Salish SeaCast U netcdf file paths
@@ -344,6 +344,10 @@ def create_currents_hdf5(U_files, V_files, W_files, dirname, compression_level =
         U  = viz_tools.unstagger_xarray(U_raw.vozocrtx, 'x')
         V  = viz_tools.unstagger_xarray(V_raw.vomecrty, 'y')
         W  = W_raw.vovecrtz #!!! 
+        
+        if oscar:
+            # rotate to N-S for OSCAR
+            U, V = viz_tools.rotate_vel2(U, V, 'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn2DMeshMaskV17-02')
 
         # convert xarray DataArrays to numpy arrays and cut off grid edges
         current_u = U.values[...,:,1:897:,1:397]
@@ -1133,4 +1137,14 @@ def init():
         run_choice()
     return
 
-init()
+#init()
+
+####-------------This is added to rotate to true north orientation for oscar ---------------###
+timestart = timestart()
+timeend = timeend()
+# since oscar option is set to True, it will use rotate_vel2 to rotate the currents to true North Orientation
+salishseacast = salishseacast_paths(
+                timestart, timeend, nemoinput, outpath, oscar = True, compression_level = 1
+                )
+create_currents_hdf5(*salishseacast[0])
+
