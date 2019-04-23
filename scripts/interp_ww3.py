@@ -130,13 +130,13 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
     box_attrs = []
     i_max, j_max = src_lons.shape[1], src_lats.shape[0]
     # focal point i,j is index of (1)
-    for j in range(1, j_max):
+    for j in range(j_max-1):
         for i in range(i_max-1):
             # case 1: []
             vert1_i, vert1_j = i, j
             vert2_i, vert2_j = i+1, j
-            vert3_i, vert3_j = i+1, j-1
-            vert4_i, vert4_j = i, j-1
+            vert3_i, vert3_j = i+1, j+1
+            vert4_i, vert4_j = i, j+1
 
             if _all_vertex_on_water(
                 vert1_i, vert1_j,
@@ -174,8 +174,8 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
             if i <= i_max-3:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j
-                vert3_i, vert3_j = i+2, j-1
-                vert4_i, vert4_j = i+1, j-1
+                vert3_i, vert3_j = i+2, j+1
+                vert4_i, vert4_j = i+1, j+1
             
                 if _all_vertex_on_water(
                     vert1_i, vert1_j,
@@ -212,9 +212,9 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
             # case 3: \\
             if i != 0:
                 vert1_i, vert1_j = i, j
-                vert2_i, vert2_j = i+1, j-1
-                vert3_i, vert3_j = i, j-1
-                vert4_i, vert4_j = i-1, j-1
+                vert2_i, vert2_j = i+1, j
+                vert3_i, vert3_j = i, j+1
+                vert4_i, vert4_j = i-1, j+1
 
                 if _all_vertex_on_water(
                     vert1_i, vert1_j,
@@ -229,8 +229,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
                     vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
             
-                    is_point_bounded = _check_bound
-                    (
+                    is_point_bounded = _check_bound(
                         tgt_lat, tgt_lon,
                         vert1_lat, vert1_lon,
                         vert2_lat, vert2_lon,
@@ -249,11 +248,11 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                             )
                         boxes_found = 1 + boxes_found
             # case 4: |//|
-            if j >= 1:
+            if j <= j_max-2:
                 vert1_i, vert1_j = i, j
-                vert2_i, vert2_j = i+1, j-1
-                vert3_i, vert3_j = i+1, j-2
-                vert4_i, vert4_j = i, j-1
+                vert2_i, vert2_j = i+1, j+1
+                vert3_i, vert3_j = i+1, j+2
+                vert4_i, vert4_j = i, j+1
 
                 if _all_vertex_on_water(
                     vert1_i, vert1_j,
@@ -289,9 +288,9 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
             # case 5: |\\|
             if j <= j_max - 2:
                 vert1_i, vert1_j = i, j
-                vert2_i, vert2_j = i+1, j+1
+                vert2_i, vert2_j = i+1, j-1
                 vert3_i, vert3_j = i+1, j
-                vert4_i, vert4_j = i, j-1
+                vert4_i, vert4_j = i, j+1
 
                 if _all_vertex_on_water(
                     vert1_i, vert1_j,
@@ -305,8 +304,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                     vert2_lat, vert2_lon = src_lats[vert2_j][vert1_i], src_lons[vert1_j][vert2_i]
                     vert3_lat, vert3_lon = src_lats[vert3_j][vert1_i], src_lons[vert1_j][vert3_i]
                     vert4_lat, vert4_lon = src_lats[vert4_j][vert1_i], src_lons[vert1_j][vert4_i]
-                    is_point_bounded = _check_bound
-                    (
+                    is_point_bounded = _check_bound(
                         tgt_lat, tgt_lon,
                         vert1_lat, vert1_lon,
                         vert2_lat, vert2_lon,
