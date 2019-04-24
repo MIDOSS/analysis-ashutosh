@@ -493,10 +493,10 @@ def _check_bound(
     # check if the point is contained within the bounding box
 
     # point cannot be contained if lat is lower than bouding box bottom edges
-    if (tgt_lat > vert2_lat) and (tgt_lat > vert1_lat):
+    if (tgt_lat < vert2_lat) and (tgt_lat < vert1_lat):
         return False
     # point cannot be contained if lat is greater than bounding box top edges
-    if (tgt_lat < vert3_lat) and (tgt_lat < vert4_lat):
+    if (tgt_lat > vert3_lat) and (tgt_lat > vert4_lat):
         return False
     # point cannot be contained if lon is less than bounding box left edges
     if (tgt_lon < vert4_lon) and (tgt_lon < vert1_lon):
