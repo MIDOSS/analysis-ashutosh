@@ -324,6 +324,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                         boxes_found = 1 + boxes_found
     # finally, check how many boxes we found
     if boxes_found == 0:
+        print('a')
         return _distance_avg(tgt_lat, tgt_lon, src_lats, src_lons, src_mask)
     else:
         print(boxes_found)
@@ -404,6 +405,7 @@ def _find_weights_bounding_box(tgt_lat, tgt_lon, latitudes, longitudes):
             w3 = i_iter*j_iter
             w4 = j_iter*(1 - i_iter)
             weights = np.array([w1,w2,w3,w4])
+            print('b')
             return weights
 
 @jit
