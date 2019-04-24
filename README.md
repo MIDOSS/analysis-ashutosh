@@ -134,6 +134,12 @@ Descriptions under the links below are from the first cell of the notebooks
 
 * ##[Pick grid points.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//Pick grid points.ipynb)  
     
+* ##[HDF5 File Creation and Conventions.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//HDF5 File Creation and Conventions.ipynb)  
+    
+    **HDF5 File Creation and Conventions Documentation**  
+      
+    **Based on my experience with using the __[h5py](http://docs.h5py.org/en/stable/)__ library to create forcing files for MOHID, this notebook documents the recommended way of creating HDF5 files with a tree structure, compression variables and metadata attributes for datasets.**  
+
 * ##[wind_climatology_maps.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/.//wind_climatology_maps.ipynb)  
     
     **Wind Climatology Maps**  
