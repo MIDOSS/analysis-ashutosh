@@ -248,7 +248,7 @@ def _search_bounding_box_ww3(tgt_lat, tgt_lon, src_lats, src_lons, src_mask):
                             )
                         boxes_found = 1 + boxes_found
             # case 4: |//|
-            if j <= j_max-2:
+            if j <= j_max-3:
                 vert1_i, vert1_j = i, j
                 vert2_i, vert2_j = i+1, j+1
                 vert3_i, vert3_j = i+1, j+2
@@ -516,7 +516,7 @@ def _check_bound(
 
         # if cross product is positive for any of these vectors, the point is not contained
         cross_product = vec1_lon*vec2_lat - vec2_lon*vec1_lat
-        if cross_product > 0:
+        if cross_product < 0:
             return False
 
     # the point is within the bounding box
