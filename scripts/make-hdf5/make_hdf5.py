@@ -31,7 +31,7 @@ def mung_array(SSC_gridded_array, array_slice_type):
     """
     shape = SSC_gridded_array.shape
     ndims = len(shape)
-    assert(ndims in  ('2D', '3D')), f"Invalid option {array_slice_type}. array_slice_type must be one of ('2D', '3D')"
+    assert(array_slice_type in  ('2D', '3D')), f"Invalid option {array_slice_type}. array_slice_type must be one of ('2D', '3D')"
     if array_slice_type is '2D':
         assert(ndims in (2,3)), f'The shape of the array given is {shape}, while the option chosen was {array_slice_type}'
         if ndims == 2:
@@ -193,19 +193,20 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
         write_grid(data, datearrays, metadata, filename, groupname, accumulator, compression_level)
         accumulator += len(datearrays)
 
-    
+# RuntimeError: Unable to create link (name already exists)
+
 def write_grid(data, datearrays, metadata, filename, groupname, accumulator, compression_level):
     shape = data[0].shape
-    with open(h5py.File(filename)) as f:
+    with h5py.File(filename) as f:
         time_group = f.get('/Time')
         if time_group is None:
-            f.create_group('/Time')
+            time_group = f.create_group('/Time')
         data_group_path = f'/Results/{groupname}'
         data_group = f.get(data_group_path)
         if data_group is None:
-            f.create_group(data_group_path)
+            data_group = f.create_group(data_group_path)
 
-        for i, datearray in datearrays:
+        for i, datearray in enumerate(datearrays):
             numeric_attribute = ((5 - len(str(i + accumulator))) * '0') + str(i + accumulator)
             child_name = 'Time_' + numeric_attribute
             timestamp = f.get(child_name)
@@ -230,11 +231,10 @@ def write_grid(data, datearrays, metadata, filename, groupname, accumulator, com
             child_name = groupname + '_' + numeric_attribute
             if data_group.get(child_name) is not None:
                 print(f'Dataset already exists at {child_name}')
-
             dataset = data_group.create_dataset(
                 child_name,
                 shape = shape,
-                data = dataset,
+                data = data[i],
                 chunks = shape,
                 compression = 'gzip',
                 compression_opts = compression_level
@@ -340,7 +340,7 @@ def create_hdf5():
                 wave_weights = mohid_interpolate.weighting_matrix(wave_weights_path)
 
     try:
-        compression_level = int(run_description.get('compression_level', 4))
+        compression_level = int(run_description.get('hdf5_compression_level', 4))
         if not (1 <= compression_level <= 9):
             print('Invalid compression level: {} provided. Compression level is int[1,9]. Default is 4'); return
     except ValueError:
