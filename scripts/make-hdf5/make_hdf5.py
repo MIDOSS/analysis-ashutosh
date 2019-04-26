@@ -443,3 +443,5 @@ def create_hdf5():
         process_grid(mean_wave_period_list, 'mean_wave_period', dirname+mean_wave_period, 'mean wave period', compression_level, wave_weights)
     if significant_wave_height is not None:
         process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
+
+create_hdf5()
