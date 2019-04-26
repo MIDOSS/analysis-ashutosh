@@ -35,7 +35,7 @@ def salishseacast_paths(timestart, timeend, path, filetype):
             return False
         filelist.append(file_path)
         
-    return file_path
+    return filelist
 
 def hrdps_paths(timestart, timeend, path):
     """Generate wind input file paths
