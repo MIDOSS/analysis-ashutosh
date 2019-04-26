@@ -23,7 +23,7 @@ def salishseacast_paths(timestart, timeend, path, filetype):
 
     # append all filename strings within daterange to lists
     filelist = []
-    for day in range(numpy.diff(daterange)[0].days + timedelta(days =1)):
+    for day in range(numpy.diff(daterange)[0].days + 1):
         datestamp = daterange[0] + timedelta(days = day)
         datestr1 = datestamp.strftime('%d%b%y').lower()
         datestr2 = datestamp.strftime('%Y%m%d')
@@ -58,7 +58,7 @@ def hrdps_paths(timestart, timeend, path):
 
     # append all filename strings within daterange to list
     wind_files = []
-    for day in range(numpy.diff(daterange)[0].days + timedelta(days =1)):
+    for day in range(numpy.diff(daterange)[0].days + 1):
         datestamp = daterange[0] + timedelta(days=day)
         
         month = datestamp.month
@@ -101,7 +101,7 @@ def ww3_paths(timestart, timeend, path):
 
     # append all filename strings within daterange to list
     wave_files = []
-    for day in range(numpy.diff(daterange)[0].days + timedelta(days =1)):
+    for day in range(numpy.diff(daterange)[0].days + 1):
         datestamp = daterange[0] + timedelta(days=day)
         datestr2 = datestamp.strftime('%Y%m%d').lower()
         monthnm = months[datestamp.month]
