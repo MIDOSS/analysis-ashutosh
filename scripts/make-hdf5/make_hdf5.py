@@ -368,10 +368,6 @@ def create_hdf5():
 
     # Make sure all the source files are available
     if salish_seacast_forcing is not None:
-        if e3t is not None:
-            e3t_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'carp_T')
-            if not e3t_list:
-                return
         if currents_u is not None:
             currents_u_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_U')
             if not currents_u_list:
@@ -396,30 +392,32 @@ def create_hdf5():
             sea_surface_height_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
             if not sea_surface_height_list:
                 return
-#        if e3t is not None:
-#            e3t_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'carp_T')
-#            if not e3t_list:
-#                return
-    if wind_u is not None:
-        wind_u_list = forcing_paths.hrdps_paths(date_begin, date_end, hrdps_path)
-        if not wind_u_list:
-            return
-    if wind_v is not None:
-        wind_v_list = forcing_paths.hrdps_paths(date_begin, date_end, hrdps_path)
-        if not wind_v_list:
-            return
-    if whitecap_coverage is not None:
-        whitecap_coverage_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
-        if not whitecap_coverage_list:
-            return
-    if mean_wave_period is not None:
-        mean_wave_period_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
-        if not mean_wave_period_list:
-            return
-    if significant_wave_height is not None:
-        significant_wave_height_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
-        if not significant_wave_height_list:
-            return
+        if e3t is not None:
+            e3t_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'carp_T')
+            if not e3t_list:
+                return
+    if hrdps_forcing is not None:
+        if wind_u is not None:
+            wind_u_list = forcing_paths.hrdps_paths(date_begin, date_end, hrdps_path)
+            if not wind_u_list:
+                return
+        if wind_v is not None:
+            wind_v_list = forcing_paths.hrdps_paths(date_begin, date_end, hrdps_path)
+            if not wind_v_list:
+                return
+    if wavewatch3_forcing is not None:
+        if whitecap_coverage is not None:
+            whitecap_coverage_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
+            if not whitecap_coverage_list:
+                return
+        if mean_wave_period is not None:
+            mean_wave_period_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
+            if not mean_wave_period_list:
+                return
+        if significant_wave_height is not None:
+            significant_wave_height_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
+            if not significant_wave_height_list:
+                return
     
     if output_path is None:
         print('No output file path provided'); return
@@ -445,8 +443,6 @@ def create_hdf5():
 
     # Now that everything is in place, we can start generating the .hdf5 files
     if salish_seacast_forcing is not None:
-        if e3t is not None:
-            process_grid(e3t_list, 'e3t', dirname+e3t, 'vvl', compression_level) 
         if currents_u is not None:
             process_grid(currents_u_list, 'ocean_velocity_u', dirname+currents_u, 'velocity U', compression_level)
         if currents_v is not None:
@@ -459,17 +455,19 @@ def create_hdf5():
             process_grid(salinity_list, 'salinity', dirname+salinity, 'salinity', compression_level)
         if sea_surface_height is not None:
             process_grid(sea_surface_height_list, 'sea_surface_height', dirname+sea_surface_height, 'water level', compression_level)
-#        if e3t is not None:
-#            process_grid(e3t_list, 'e3t', dirname+e3t, 'vvl', compression_level)
-    if wind_u is not None:
-        process_grid(wind_u_list, 'wind_velocity_u', dirname+wind_u, 'wind velocity X', compression_level, wind_weights)
-    if wind_v is not None:
-        process_grid(wind_v_list, 'wind_velocity_v', dirname+wind_v, 'wind velocity Y', compression_level, wind_weights)
-    if whitecap_coverage is not None:
-        process_grid(whitecap_coverage_list, 'whitecap_coverage', dirname+whitecap_coverage, 'whitecap coverage', compression_level, wave_weights)
-    if mean_wave_period is not None:
-        process_grid(mean_wave_period_list, 'mean_wave_period', dirname+mean_wave_period, 'mean wave period', compression_level, wave_weights)
-    if significant_wave_height is not None:
-        process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
+        if e3t is not None:
+            process_grid(e3t_list, 'e3t', dirname+e3t, 'vvl', compression_level)
+    if hrdps_forcing is not None:
+        if wind_u is not None:
+            process_grid(wind_u_list, 'wind_velocity_u', dirname+wind_u, 'wind velocity X', compression_level, wind_weights)
+        if wind_v is not None:
+            process_grid(wind_v_list, 'wind_velocity_v', dirname+wind_v, 'wind velocity Y', compression_level, wind_weights)
+    if wavewatch3_forcing is not None:
+        if whitecap_coverage is not None:
+            process_grid(whitecap_coverage_list, 'whitecap_coverage', dirname+whitecap_coverage, 'whitecap coverage', compression_level, wave_weights)
+        if mean_wave_period is not None:
+            process_grid(mean_wave_period_list, 'mean_wave_period', dirname+mean_wave_period, 'mean wave period', compression_level, wave_weights)
+        if significant_wave_height is not None:
+            process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
 
 create_hdf5()
