@@ -6,9 +6,9 @@ class weighting_matrix:
     def __init__(self, path):
         weights_file = xarray.open_dataset(path)
         y, x, weights = weights_file.y, weights_file.x, weights_file.weights
-        y1,y2,y3,y4 = y.isel(index=0), y.isel(index=1), y.isel(index=2), y.isel(index=3)
-        x1,x2,x3,x4 = x.isel(index=0), x.isel(index=1), x.isel(index=2), x.isel(index=3)
-        w1,w2,w3,w4 = weights.isel(index=0), weights.isel(index=1), weights.isel(index=2), weights.isel(index=3)
+        y1,y2,y3,y4 = y.isel(index=0).values.astype(int), y.isel(index=1).values.astype(int), y.isel(index=2).values.astype(int), y.isel(index=3).values.astype(int)
+        x1,x2,x3,x4 = x.isel(index=0).values.astype(int), x.isel(index=1).values.astype(int), x.isel(index=2).values.astype(int), x.isel(index=3).values.astype(int)
+        w1,w2,w3,w4 = weights.isel(index=0).values, weights.isel(index=1).values, weights.isel(index=2).values, weights.isel(index=3).values
         self.y_indices = (y1,y2,y3,y4)
         self.x_indices = (x1,x2,x3,x4)
         self.weights = (w1,w2,w3,w4)
@@ -46,7 +46,7 @@ def wavewatch(wavewatcharr, weighting_matrix_obj):
         new_grid = numpy.zeros([898,398, shape[0]])
     elif ndims == 2:
         new_grid = numpy.zeros([898,398])
-    new_grid[::]=numpy.nan
+    new_grid[:]=numpy.nan
     # do the inteprolation
     wave_y01,wave_y02,wave_y03,wave_y04 = weighting_matrix_obj.y_indices
     wave_x01,wave_x02,wave_x03,wave_x04 = weighting_matrix_obj.x_indices
