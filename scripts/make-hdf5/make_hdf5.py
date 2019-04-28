@@ -4,12 +4,28 @@ import mohid_interpolate
 import h5py
 import numpy
 import os
+import time
 import xarray
 from datetime import datetime, timedelta
 from dateutil.parser import parse
-from numba import jit
 from salishsea_tools import utilities, viz_tools
 import yaml
+
+mask = mung_array(xarray.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn3DMeshMaskV17-02').isel(time = 0).tmask.values, '3D')
+
+def timer(func):
+    """Decorator function for timing function calls
+    """
+    def f(*args, **kwargs):
+        beganat = time.time()
+        rv = func(*args, *kwargs)
+        elapsed = time.time() - beganat
+        hours = int(elapsed / 3600)
+        mins = int((elapsed - (hours*3600))/60)
+        secs = int((elapsed - (hours*3600) - (mins*60)))
+        print('\nTime elapsed: {}:{}:{}\n'.format(hours, mins, secs))
+        return rv
+    return f
 
 def mung_array(SSC_gridded_array, array_slice_type):
     """Transform an array containing SalishSeaCast-gridded data and transform it 
@@ -69,7 +85,8 @@ def produce_datearray(datetimelist):
 
 def process_grid(file_paths, datatype, filename, groupname, compression_level, weighting_matrix_obj=None):
     accumulator = 1
-    bar = utilities.statusbar(f'Writing {groupname} to {filename}...', maxval = len(file_paths))
+    print(f'Writing {groupname} to {filename}...')
+    bar = utilities.statusbar(f'Loading...', maxval = len(file_paths))
     for file_path in bar(file_paths):
         data = xarray.open_dataset(file_path)
         if datatype in ('mean_wave_period', 'significant_wave_height', 'whitecap_coverage'):
@@ -126,6 +143,7 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
         elif datatype is 'e3t':
             data = data.e3t.values
             data = mung_array(data, '3D')
+            data = data*mask
             metadata = {
                 'FillValue' : numpy.array([0.]),
                 'Units' : b'?C'
@@ -209,7 +227,7 @@ def write_grid(data, datearrays, metadata, filename, groupname, accumulator, com
         for i, datearray in enumerate(datearrays):
             numeric_attribute = ((5 - len(str(i + accumulator))) * '0') + str(i + accumulator)
             child_name = 'Time_' + numeric_attribute
-            timestamp = f.get(child_name)
+            timestamp = time_group.get(child_name)
             if timestamp is None:
                 dataset = time_group.create_dataset(
                     child_name,
@@ -231,16 +249,17 @@ def write_grid(data, datearrays, metadata, filename, groupname, accumulator, com
             child_name = groupname + '_' + numeric_attribute
             if data_group.get(child_name) is not None:
                 print(f'Dataset already exists at {child_name}')
-            dataset = data_group.create_dataset(
-                child_name,
-                shape = shape,
-                data = data[i],
-                chunks = shape,
-                compression = 'gzip',
-                compression_opts = compression_level
-                )
-            dataset.attrs.update(metadata)
-
+            else:
+                dataset = data_group.create_dataset(
+                    child_name,
+                    shape = shape,
+                    data = data[i],
+                    chunks = shape,
+                    compression = 'gzip',
+                    compression_opts = compression_level
+                    )
+                dataset.attrs.update(metadata)
+@timer
 def create_hdf5():
     with open('./make-hdf5.yaml', 'r') as f:
         run_description = yaml.safe_load(f)
@@ -285,20 +304,21 @@ def create_hdf5():
     hrdps_forcing = run_description.get('hrdps_forcing')
     wavewatch3_forcing = run_description.get('wavewatch3_forcing')
     
-    currents_u = salish_seacast_forcing.get('currents').get('currents_u_hdf5_filename')
-    currents_v = salish_seacast_forcing.get('currents').get('currents_v_hdf5_filename')
-    vertical_velocity = salish_seacast_forcing.get('vertical_velocity').get('hdf5_filename')
-    salinity = salish_seacast_forcing.get('salinity').get('hdf5_filename')
-    temperature = salish_seacast_forcing.get('temperature').get('hdf5_filename')
-    sea_surface_height = salish_seacast_forcing.get('sea_surface_height').get('hdf5_filename')
-    e3t = salish_seacast_forcing.get('e3t').get('hdf5_filename')
+    if salish_seacast_forcing is not None:
+        currents_u = salish_seacast_forcing.get('currents').get('currents_u_hdf5_filename')
+        currents_v = salish_seacast_forcing.get('currents').get('currents_v_hdf5_filename')
+        vertical_velocity = salish_seacast_forcing.get('vertical_velocity').get('hdf5_filename')
+        salinity = salish_seacast_forcing.get('salinity').get('hdf5_filename')
+        temperature = salish_seacast_forcing.get('temperature').get('hdf5_filename')
+        sea_surface_height = salish_seacast_forcing.get('sea_surface_height').get('hdf5_filename')
+        e3t = salish_seacast_forcing.get('e3t').get('hdf5_filename')
 
-    for parameter in (currents_u, currents_v, vertical_velocity, salinity, temperature, sea_surface_height, e3t):
-        if ((parameter is not None) and (salishseacast_path is None)):
-            print('Path to SalishSeacast forcing not provided'); return
-        elif (parameter is not None):
-            if not os.path.exists(os.path.dirname(salishseacast_path)):
-                print(f'SalishSeaCast path {salishseacast_path} does not exist'); return
+        for parameter in (currents_u, currents_v, vertical_velocity, salinity, temperature, sea_surface_height, e3t):
+            if ((parameter is not None) and (salishseacast_path is None)):
+                print('Path to SalishSeacast forcing not provided'); return
+            elif (parameter is not None):
+                if not os.path.exists(os.path.dirname(salishseacast_path)):
+                    print(f'SalishSeaCast path {salishseacast_path} does not exist'); return
     
     wind_u = hrdps_forcing.get('winds').get('wind_u_hdf5_filename')
     wind_v = hrdps_forcing.get('winds').get('wind_v_hdf5_filename')
@@ -347,34 +367,39 @@ def create_hdf5():
         print('Invalid compression level: {} provided. Compression level is int[1,9]. Default is 4'); return
 
     # Make sure all the source files are available
-    if currents_u is not None:
-        currents_u_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_U')
-        if not currents_u_list:
-            return
-    if currents_v is not None:
-        currents_v_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_V')
-        if not currents_v_list:
-            return
-    if vertical_velocity is not None:
-        vertical_velocity_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_W')
-        if not vertical_velocity_list:
-            return
-    if temperature is not None:
-        temperature_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
-        if not temperature_list:
-            return
-    if salinity is not None:
-        salinity_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
-        if not salinity_list:
-            return
-    if sea_surface_height is not None:
-        sea_surface_height_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
-        if not sea_surface_height_list:
-            return
-    if e3t is not None:
-        e3t_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'carp_T')
-        if not e3t_list:
-            return
+    if salish_seacast_forcing is not None:
+        if e3t is not None:
+            e3t_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'carp_T')
+            if not e3t_list:
+                return
+        if currents_u is not None:
+            currents_u_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_U')
+            if not currents_u_list:
+                return
+        if currents_v is not None:
+            currents_v_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_V')
+            if not currents_v_list:
+                return
+        if vertical_velocity is not None:
+            vertical_velocity_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_W')
+            if not vertical_velocity_list:
+                return
+        if temperature is not None:
+            temperature_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
+            if not temperature_list:
+                return
+        if salinity is not None:
+            salinity_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
+            if not salinity_list:
+                return
+        if sea_surface_height is not None:
+            sea_surface_height_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
+            if not sea_surface_height_list:
+                return
+#        if e3t is not None:
+#            e3t_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'carp_T')
+#            if not e3t_list:
+#                return
     if wind_u is not None:
         wind_u_list = forcing_paths.hrdps_paths(date_begin, date_end, hrdps_path)
         if not wind_u_list:
@@ -399,7 +424,7 @@ def create_hdf5():
     if output_path is None:
         print('No output file path provided'); return
 
-    startfolder, endfolder = date_begin, date_end - timedelta(1)
+    startfolder, endfolder = date_begin, date_end
     folder = str(
         datetime(startfolder.year, startfolder.month, startfolder.day).strftime('%d%b%y').lower()
         ) + '-' + str(
@@ -419,26 +444,29 @@ def create_hdf5():
     print(f'\nOutput directory {dirname} created\n')
 
     # Now that everything is in place, we can start generating the .hdf5 files
-    if currents_u is not None:
-        process_grid(currents_u_list, 'ocean_velocity_u', dirname+currents_u, 'velocity U', compression_level)
-    if currents_v is not None:
-        process_grid(currents_v_list, 'ocean_velocity_v', dirname+currents_v, 'velocity V', compression_level)
-    if vertical_velocity is not None:
-        process_grid(vertical_velocity_list, 'ocean_velocity_w', dirname+vertical_velocity, 'velocity W', compression_level)
-    if temperature is not None:
-        process_grid(temperature_list, 'temperature', dirname+temperature, 'temperature', compression_level)
-    if salinity is not None:
-        process_grid(salinity_list, 'salinity', dirname+salinity, 'salinity', compression_level)
-    if sea_surface_height is not None:
-        process_grid(sea_surface_height_list, 'sea_surface_height', dirname+sea_surface_height, 'water level', compression_level)
-    if e3t is not None:
-        process_grid(e3t_list, 'e3t', dirname+e3t, 'vvl', compression_level)
+    if salish_seacast_forcing is not None:
+        if e3t is not None:
+            process_grid(e3t_list, 'e3t', dirname+e3t, 'vvl', compression_level) 
+        if currents_u is not None:
+            process_grid(currents_u_list, 'ocean_velocity_u', dirname+currents_u, 'velocity U', compression_level)
+        if currents_v is not None:
+            process_grid(currents_v_list, 'ocean_velocity_v', dirname+currents_v, 'velocity V', compression_level)
+        if vertical_velocity is not None:
+            process_grid(vertical_velocity_list, 'ocean_velocity_w', dirname+vertical_velocity, 'velocity W', compression_level)
+        if temperature is not None:
+            process_grid(temperature_list, 'temperature', dirname+temperature, 'temperature', compression_level)
+        if salinity is not None:
+            process_grid(salinity_list, 'salinity', dirname+salinity, 'salinity', compression_level)
+        if sea_surface_height is not None:
+            process_grid(sea_surface_height_list, 'sea_surface_height', dirname+sea_surface_height, 'water level', compression_level)
+#        if e3t is not None:
+#            process_grid(e3t_list, 'e3t', dirname+e3t, 'vvl', compression_level)
     if wind_u is not None:
         process_grid(wind_u_list, 'wind_velocity_u', dirname+wind_u, 'wind velocity X', compression_level, wind_weights)
     if wind_v is not None:
         process_grid(wind_v_list, 'wind_velocity_v', dirname+wind_v, 'wind velocity Y', compression_level, wind_weights)
     if whitecap_coverage is not None:
-        process_grid(whitecap_coverage_list, 'whitecap_coverage', dirname+whitecap_coverage_list, 'whitecap coverage', compression_level, wave_weights)
+        process_grid(whitecap_coverage_list, 'whitecap_coverage', dirname+whitecap_coverage, 'whitecap coverage', compression_level, wave_weights)
     if mean_wave_period is not None:
         process_grid(mean_wave_period_list, 'mean_wave_period', dirname+mean_wave_period, 'mean wave period', compression_level, wave_weights)
     if significant_wave_height is not None:
