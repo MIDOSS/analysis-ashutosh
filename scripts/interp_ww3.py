@@ -21,6 +21,7 @@ import xarray as xr
 from salishsea_tools import geo_tools, utilities
 from time import time
 from numba import jit
+import pickle
 
 def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, src_mask):
     """Produce the weighting matrix for regridding from a source grid to a target grid.
@@ -90,14 +91,17 @@ def produce_weighting_matrix(tgt_lats, tgt_lons, tgt_mask, src_lats, src_lons, s
                 which_arr[j][i] = which
             else:
                 continue
-    with open('weights.pickle', 'wb') as f:
-        pickle.dump(tgt_weights, f)
-    with open('x.pickle', 'wb') as f:
-        pickle.dump(tgt_x_indices, f)
-    with open('y.pickle', 'wb') as f:
-        pickle.dump(tgt_y_indices, f)
-    with open('which.pickle', 'wb') as f:
-        pickle.dump(which_arr, f)
+    try:
+        with open('weights.pickle', 'wb') as f:
+            pickle.dump(tgt_weights, f)
+        with open('x.pickle', 'wb') as f:
+            pickle.dump(tgt_x_indices, f)
+        with open('y.pickle', 'wb') as f:
+            pickle.dump(tgt_y_indices, f)
+        with open('which.pickle', 'wb') as f:
+            pickle.dump(which_arr, f)
+    except:
+        pass
     grid_x = np.arange(398)
     grid_y = np.arange(898)
     corners = np.arange(4) + 1

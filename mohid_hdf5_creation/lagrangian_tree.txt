@@ -1,0 +1,34 @@
+
+                                        Root
+                                         |
+        ________________________________________________________________________________________________________________
+        |                                   |                                   |                                       |
+       -Time                           Results                                Grid                                     Group_1
+                                           |                                    |                                       |
+                                           |                                  - OpenPoints                          -Beached
+        _________________________________________                             - VerticalZ                           -Latitude
+        |                         |             |                                                                   -Latitude average
+    -Percentage Contaminated   -Number      OilSpill                                                                -Longitude
+                                                |                                                                   -Longitude average
+                                                |                                                                   -Model ID
+                                                |                                                                   -Origin ID
+                    __________________________________________________                                              -Particle State
+                    |                      |                         |                                              -Surface state
+                OilSpill                 Data_3D                  Data_2D                                           -Thickness
+                   |                       |                         |                                              -Volume
+                -Beached                  -OilConcentration_3D    -Beaching Time                                    -X Pos
+                -Freazed                  -Dissolution_3D         -Oil arrival Time                                 -Y Pos
+                -Latitude                                         -OilConcentration_2D                              -Z Pos
+                -Latitude average                                 -Thickness_2D                                     -oil
+                -Longitude
+                -Longitude average
+                -Model ID
+                -Origin ID
+                -Particle State
+                -Surface State
+                -Thickness
+                -Volume
+                -X Pos
+                -Y Pos
+                -Z Pos
+                -oil
