@@ -15,6 +15,10 @@ Descriptions under the links below are from the first cell of the notebooks
     
     **Compare Lagrangian Output files**  
 
+* ##[visualise_mohid_output.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_diagnostic_tools/.//visualise_mohid_output.ipynb)  
+    
+    **This Notebook Provides Examples of Usage of the plotting tools in mohid_viz.py**  
+
 * ##[Compare_output_files_vvl.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_diagnostic_tools/.//Compare_output_files_vvl.ipynb)  
     
     **Compare Lagrangian Output files for VVL test cases**  
