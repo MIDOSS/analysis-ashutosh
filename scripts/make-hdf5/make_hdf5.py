@@ -11,7 +11,6 @@ from dateutil.parser import parse
 from salishsea_tools import utilities, viz_tools
 import yaml
 
-mask = mung_array(xarray.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn3DMeshMaskV17-02').isel(time = 0).tmask.values, '3D')
 
 def timer(func):
     """Decorator function for timing function calls
@@ -259,6 +258,9 @@ def write_grid(data, datearrays, metadata, filename, groupname, accumulator, com
                     compression_opts = compression_level
                     )
                 dataset.attrs.update(metadata)
+
+mask = mung_array(xarray.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSn3DMeshMaskV17-02').isel(time = 0).tmask.values, '3D')
+
 @timer
 def create_hdf5():
     with open('./make-hdf5.yaml', 'r') as f:
