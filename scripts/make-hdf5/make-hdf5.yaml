@@ -9,8 +9,8 @@ paths:
   hrdps: /results/forcing/atmospheric/GEM2.5/operational/
   wavewatch3: /opp/wwatch3/nowcast/
   output: /results2/MIDOSS/forcing/SalishSeaCast/
-  wind_weights: ./MOHID_winds_weights.nc
-  wave_weights: ./ww3_weighting_matrix.nc
+  wind_weights: ../../midoss-mohid-grid/hrdps_interpolation_weights.nc
+  wave_weights: ../../midoss-mohid-grid/wavewatch3_interpolation_weights.nc
 
 salish_seacast_forcing:
   currents:
