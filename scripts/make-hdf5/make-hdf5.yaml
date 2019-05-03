@@ -10,7 +10,7 @@ paths:
   wavewatch3: /opp/wwatch3/nowcast/
   output: /results2/MIDOSS/forcing/SalishSeaCast/
   wind_weights: ./MOHID_winds_weights.nc
-  wave_weights: ./ww3_weighting_matrix_hake.nc
+  wave_weights: ./ww3_weighting_matrix.nc
 
 salish_seacast_forcing:
   currents:
