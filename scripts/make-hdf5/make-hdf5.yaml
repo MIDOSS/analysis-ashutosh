@@ -1,0 +1,50 @@
+
+
+timerange:
+  date_begin: 1 jan 2018
+  date_end: 7 jan 2018
+
+paths:
+  salishseacast: /results2/SalishSea/nowcast-green.201806/
+  hrdps: /results/forcing/atmospheric/GEM2.5/operational/
+  wavewatch3: /opp/wwatch3/nowcast/
+  output: /results2/MIDOSS/forcing/SalishSeaCast/
+  wind_weights: ./MOHID_winds_weights.nc
+  wave_weights: ./ww3_weighting_matrix_hake.nc
+
+salish_seacast_forcing:
+  currents:
+    currents_u_hdf5_filename: currents.hdf5
+    currents_v_hdf5_filename: currents.hdf5
+
+  vertical_velocity:
+    hdf5_filename: currents.hdf5
+
+  salinity:
+    hdf5_filename: t.hdf5
+
+  temperature:
+    hdf5_filename: t.hdf5
+
+  sea_surface_height:
+    hdf5_filename: t.hdf5
+  
+  e3t:
+    hdf5_filename: e3t.hdf5
+
+hrdps_forcing:
+  winds:
+    wind_u_hdf5_filename: winds.hdf5
+    wind_v_hdf5_filename: winds.hdf5
+
+wavewatch3_forcing:
+  whitecap_coverage:
+    hdf5_filename: waves.hdf5
+
+  mean_wave_period:
+    hdf5_filename: waves.hdf5
+  
+  significant_wave_height:
+    hdf5_filename: waves.hdf5
+  
+hdf5_compression_level: 1
