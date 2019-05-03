@@ -8,7 +8,7 @@ import time
 import xarray
 from datetime import datetime, timedelta
 from dateutil.parser import parse
-from salishsea_tools import utilities, viz_tools
+from salishsea_tools import viz_tools
 import yaml
 
 
@@ -85,8 +85,7 @@ def produce_datearray(datetimelist):
 def process_grid(file_paths, datatype, filename, groupname, compression_level, weighting_matrix_obj=None):
     accumulator = 1
     print(f'Writing {groupname} to {filename}...')
-    bar = utilities.statusbar(f'Loading...', maxval = len(file_paths))
-    for file_path in bar(file_paths):
+    for file_path in file_paths:
         data = xarray.open_dataset(file_path)
         if datatype in ('mean_wave_period', 'significant_wave_height', 'whitecap_coverage'):
             datetimelist = data.time.values.astype('datetime64[s]').astype(datetime)
