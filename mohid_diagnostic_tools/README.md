@@ -5,6 +5,10 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
+* ##[Transform_bathy_dat_to_nc.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_diagnostic_tools/.//Transform_bathy_dat_to_nc.ipynb)  
+    
+    **Transform Bathymetry.dat to netcdf**  
+
 * ##[constant_field.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_diagnostic_tools/.//constant_field.ipynb)  
     
 * ##[compare_lagrangian.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_diagnostic_tools/.//compare_lagrangian.ipynb)  
