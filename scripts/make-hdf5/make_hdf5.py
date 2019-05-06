@@ -4,6 +4,7 @@ import mohid_interpolate
 import h5py
 import numpy
 import os
+import sys
 import time
 import xarray
 from datetime import datetime, timedelta
@@ -262,7 +263,9 @@ mask = mung_array(xarray.open_dataset('https://salishsea.eos.ubc.ca/erddap/gridd
 
 @timer
 def create_hdf5():
-    with open('./make-hdf5.yaml', 'r') as f:
+    script = sys.argv[0]
+    yaml_filename = sys.argv[1]
+    with open(yaml_filename, 'r') as f:
         run_description = yaml.safe_load(f)
     try:
         timerange = run_description['timerange']
@@ -471,4 +474,5 @@ def create_hdf5():
         if significant_wave_height is not None:
             process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
 
-create_hdf5()
+if __name__ == __main__:
+    create_hdf5()
