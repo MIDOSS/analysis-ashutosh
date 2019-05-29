@@ -5,7 +5,7 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[explore_pytables_h5py.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/src/default/mohid_hdf5_creation/.//explore_pytables_h5py.ipynb)  
+* ##[explore_pytables_h5py.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_hdf5_creation/explore_pytables_h5py.ipynb)  
     
     <h1>Exploration of use of pytables and h5py libraries for creating forcing files for MOHID<h1>  
         <ol>  
@@ -32,13 +32,13 @@ Descriptions under the links below are from the first cell of the notebooks
             </li>  
         </ol>  
 
-* ##[HDF5 File Creation and Conventions.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/src/default/mohid_hdf5_creation/.//HDF5 File Creation and Conventions.ipynb)  
+* ##[HDF5 File Creation and Conventions.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_hdf5_creation/HDF5 File Creation and Conventions.ipynb)  
     
     **HDF5 File Creation and Conventions Documentation**  
       
     **Based on my experience with using the __[h5py](http://docs.h5py.org/en/stable/)__ library to create forcing files for MOHID, this notebook documents the recommended way of creating HDF5 files with a tree structure, compression variables and metadata attributes for datasets.**  
 
-* ##[Hdf5_to_nc.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/src/default/mohid_hdf5_creation/.//Hdf5_to_nc.ipynb)  
+* ##[Hdf5_to_nc.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/midoss/analysis-ashutosh/raw/default/mohid_hdf5_creation/Hdf5_to_nc.ipynb)  
     
 
 ##License
