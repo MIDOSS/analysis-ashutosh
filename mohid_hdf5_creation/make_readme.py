@@ -23,8 +23,8 @@ import re
 
 
 NBVIEWER = 'https://nbviewer.jupyter.org/urls'
-REPO = 'bitbucket.org/midoss/analysis-ashutosh/src/default/mohid_hdf5_creation/'
-REPO_DIR = './'
+REPO = 'bitbucket.org/midoss/analysis-ashutosh/raw/default/'
+REPO_DIR = 'mohid_hdf5_creation'
 TITLE_PATTERN = re.compile('#{1,6} ?')
 
 
