@@ -474,5 +474,5 @@ def create_hdf5():
         if significant_wave_height is not None:
             process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
 
-if __name__ == __main__:
+if __name__ == "__main__":
     create_hdf5()
