@@ -112,7 +112,7 @@ def ww3_paths(timestart, timeend, path):
         
         year = str(datestamp.year)[2:4]
         if hindcast:
-            wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_tab.nc'
+            wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}.nc'
         else:
             wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_{datestr2}.nc'
         if not os.path.exists(wave_path):
