@@ -112,7 +112,8 @@ def ww3_paths(timestart, timeend, path):
         
         year = str(datestamp.year)[2:4]
 
-        wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_{datestr2}.nc'
+     #   wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_{datestr2}.nc'
+        wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}.nc'
         if not os.path.exists(wave_path):
             print(f'File {wave_path} not found. Check Directory and/or Date Range.')
             return False
