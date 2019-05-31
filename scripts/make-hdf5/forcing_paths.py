@@ -98,7 +98,7 @@ def ww3_paths(timestart, timeend, path):
     # generate list of dates from daterange given
     months = {1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5 : 'may', 6: 'jun', 7: 'jul', 8: 'aug', 9 : 'sep', 10: 'oct', 11 :'nov',12: 'dec'}
     daterange = [timestart, timeend]
-
+    hindcast = "hindcast" in path
     # append all filename strings within daterange to list
     wave_files = []
     for day in range(numpy.diff(daterange)[0].days + 1):
@@ -111,9 +111,10 @@ def ww3_paths(timestart, timeend, path):
             day = f'0{str(day)}'
         
         year = str(datestamp.year)[2:4]
-
-     #   wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_{datestr2}.nc'
-        wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}.nc'
+        if hindcast:
+            wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_tab.nc'
+        else:
+            wave_path = f'{path}{day}{monthnm}{year}/SoG_ww3_fields_{datestr2}_{datestr2}.nc'
         if not os.path.exists(wave_path):
             print(f'File {wave_path} not found. Check Directory and/or Date Range.')
             return False
