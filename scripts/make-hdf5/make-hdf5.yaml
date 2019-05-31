@@ -2,14 +2,14 @@
 
 timerange:
   date_begin: 5 june 2015
-  date_end:   6 june 2015
+  date_end:   15 june 2015
 
 
 paths:
   salishseacast: /results2/SalishSea/nowcast-green.201806/
   hrdps: /results/forcing/atmospheric/GEM2.5/operational/
   wavewatch3: /opp/wwatch3/hindcast/
-  output: /results2/MIDOSS/forcing/SalishSeaCast/05june2015_15june2015/
+  output: /results2/MIDOSS/forcing/SalishSeaCast/
   wind_weights: ../../../MIDOSS-MOHID-grid/hrdps_interpolation_weights.nc
   wave_weights: ../../../MIDOSS-MOHID-grid/wavewatch3_interpolation_weights.nc
 
