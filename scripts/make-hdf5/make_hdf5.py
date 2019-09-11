@@ -88,7 +88,7 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
     print(f'Writing {groupname} to {filename}...')
     for file_path in file_paths:
         data = xarray.open_dataset(file_path)
-        if datatype in ('mean_wave_period', 'significant_wave_height', 'whitecap_coverage'):
+        if datatype in ('mean_wave_period', 'significant_wave_height', 'whitecap_coverage', 'stokesU', 'stokesV'):
             datetimelist = data.time.values.astype('datetime64[s]').astype(datetime)
         else:
             datetimelist = data.time_counter.values.astype('datetime64[s]').astype(datetime)
@@ -206,6 +206,26 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
                 'Maximum' : numpy.array([1.]),
                 'Minimum' : numpy.array([0.]),
                 'Units' : b'1'
+                }
+        elif datatype is 'stokesU':
+            data = data.uuss.values
+            data = mohid_interpolate.wavewatch(data, weighting_matrix_obj)
+            data = mung_array(data, '2D')
+            metadata = {
+                'FillValue' : numpy.array([0.]),
+                'Maximum' : numpy.array([9900.]),
+                'Minimum' : numpy.array([-9900.]),
+                'Units' : b'm s-1'
+                }
+        elif datatype is 'stokesV':
+            data = data.vuss.values
+            data = mohid_interpolate.wavewatch(data, weighting_matrix_obj)
+            data = mung_array(data, '2D')
+            metadata = {
+                'FillValue' : numpy.array([0.]),
+                'Maximum' : numpy.array([9900.]),
+                'Minimum' : numpy.array([-9900.]),
+                'Units' : b'm s-1'
                 }
         write_grid(data, datearrays, metadata, filename, groupname, accumulator, compression_level)
         accumulator += len(datearrays)
@@ -346,8 +366,10 @@ def create_hdf5():
     whitecap_coverage = wavewatch3_forcing.get('whitecap_coverage').get('hdf5_filename')
     mean_wave_period = wavewatch3_forcing.get('mean_wave_period').get('hdf5_filename')
     significant_wave_height = wavewatch3_forcing.get('significant_wave_height').get('hdf5_filename')
+    stokesU = wavewatch3_forcing.get('stokesU').get('hdf5_filename')
+    stokesV = wavewatch3_forcing.get('stokesV').get('hdf5_filename')
 
-    for parameter in  (whitecap_coverage, mean_wave_period, significant_wave_height):
+    for parameter in  (whitecap_coverage, mean_wave_period, significant_wave_height, stokesU, stokesV):
         if (parameter is not None):
             if (wavewatch3_path is None):
                 print('Path to WaveWatch3 forcing not provided'); return
@@ -422,6 +444,14 @@ def create_hdf5():
             significant_wave_height_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
             if not significant_wave_height_list:
                 return
+        if stokesU is not None:
+            stokesU_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
+            if not stokesU_list:
+                return
+        if stokesV is not None:
+            stokesV_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
+            if not stokesV_list:
+                return
     
     if output_path is None:
         print('No output file path provided'); return
@@ -473,6 +503,10 @@ def create_hdf5():
             process_grid(mean_wave_period_list, 'mean_wave_period', dirname+mean_wave_period, 'mean wave period', compression_level, wave_weights)
         if significant_wave_height is not None:
             process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
+        if stokesU is not None:
+            process_grid(stokesU_list, 'stokesU', dirname+stokesU, 'stokesU', compression_level, wave_weights)
+        if stokesV is not None:
+            process_grid(stokesV_list, 'stokesV', dirname+stokesV, 'stokesV', compression_level, wave_weights)
 
 if __name__ == "__main__":
     create_hdf5()
