@@ -504,9 +504,9 @@ def create_hdf5():
         if significant_wave_height is not None:
             process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
         if stokesU is not None:
-            process_grid(stokesU_list, 'Stokes U', dirname+stokesU, 'Stokes U', compression_level, wave_weights)
+            process_grid(stokesU_list, 'stokesU', dirname+stokesU, 'Stokes U', compression_level, wave_weights)
         if stokesV is not None:
-            process_grid(stokesV_list, 'Stokes V', dirname+stokesV, 'Stokes V', compression_level, wave_weights)
+            process_grid(stokesV_list, 'stokesV', dirname+stokesV, 'Stokes V', compression_level, wave_weights)
 
 if __name__ == "__main__":
     create_hdf5()
