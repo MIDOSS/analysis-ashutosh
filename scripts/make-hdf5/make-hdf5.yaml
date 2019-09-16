@@ -2,7 +2,7 @@
 
 timerange:
   date_begin: 5 june 2015
-  date_end:   6 june 2015
+  date_end:   12 june 2015
 
 
 paths:
@@ -10,8 +10,8 @@ paths:
   hrdps: /results/forcing/atmospheric/GEM2.5/operational/
   wavewatch3: /opp/wwatch3/hindcast/
   output: /results2/MIDOSS/forcing/SalishSeaCast/
-  wind_weights: /ocean/$USER/MIDOSS/MIDOSS-MOHID-grid/hrdps_interpolation_weights.nc
-  wave_weights: /ocean/$USER/MIDOSS/MIDOSS-MOHID-grid/wavewatch3_interpolation_weights.nc
+  wind_weights: /home/rmueller/Projects/MIDOSS/MIDOSS-MOHID-grid/hrdps_interpolation_weights.nc
+  wave_weights: /home/rmueller/Projects/MIDOSS/MIDOSS-MOHID-grid/wavewatch3_interpolation_weights.nc
 
 salish_seacast_forcing:
   currents:
