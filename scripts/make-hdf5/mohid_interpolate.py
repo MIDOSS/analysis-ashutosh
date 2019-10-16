@@ -1,6 +1,5 @@
 import numpy
 import xarray
-from numba import jit
 
 class weighting_matrix:
     def __init__(self, path):
@@ -13,7 +12,6 @@ class weighting_matrix:
         self.x_indices = (x1,x2,x3,x4)
         self.weights = (w1,w2,w3,w4)
 
-@jit(cache=True)
 def hrdps(windarr, weighting_matrix_obj):
     shape = windarr.shape
     if len(shape) == 3:
@@ -37,7 +35,6 @@ def hrdps(windarr, weighting_matrix_obj):
     new_grid = numpy.transpose(new_grid, [2,0,1])
     return new_grid
 
-@jit(cache=True)
 def wavewatch(wavewatcharr, weighting_matrix_obj):
     shape = wavewatcharr.shape
     ndims = len(shape)

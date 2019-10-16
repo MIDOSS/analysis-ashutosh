@@ -6,7 +6,7 @@ timerange:
 
 
 paths:
-  salishseacast: /results2/SalishSea/nowcast-green.201806/
+  salishseacast: /results/SalishSea/hincast.201905/
   hrdps: /results/forcing/atmospheric/GEM2.5/operational/
   wavewatch3: /opp/wwatch3/hindcast/
   output: /results2/MIDOSS/forcing/SalishSeaCast/
