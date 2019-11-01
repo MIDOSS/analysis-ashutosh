@@ -597,7 +597,7 @@ def create_hdf5():
             timeseries_sv = numpy.array([])
             with h5py.File(dirname + '/' + stokesV, 'r') as f:
                 for key in list(f['Results']['Stokes V'].keys()):
-                    timeseries_sv = numpy.append(timeseries_sv, f['Results']['Stokes V'][key][-SSGridX-1,SSGridY-1])
+                    timeseries_sv = numpy.append(timeseries_sv, f['Results']['Stokes V'][key][SSGridX-1,SSGridY-1])
             stats.write('\nstokes V,'+ "%.4g" % numpy.mean(timeseries_sv) + ',' + "%.4g" % numpy.min(timeseries_sv) + ',' + "%.4g" % numpy.max(timeseries_sv) + ',' + "%.4g" % numpy.std(timeseries_sv))
 
 if __name__ == "__main__":
