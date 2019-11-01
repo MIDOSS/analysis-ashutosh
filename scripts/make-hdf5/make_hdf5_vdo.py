@@ -9,7 +9,6 @@ import time
 import xarray
 from datetime import datetime, timedelta
 from dateutil.parser import parse
-from salishsea_tools import viz_tools
 import yaml
 
 
@@ -82,6 +81,26 @@ def produce_datearray(datetimelist):
         ).astype('float64') for d in datetimelist]
     return datearrays
 
+def unstagger_xarray(qty, index):
+    """Interpolate u, v, or w component values to values at grid cell centres.
+    
+    Named indexing requires that input arrays are XArray DataArrays.
+
+    :arg qty: u, v, or w component values
+    :type qty: :py:class:`xarray.DataArray`
+    
+    :arg index: index name along which to centre
+        (generally one of 'gridX', 'gridY', or 'depth')
+    :type index: str
+
+    :returns qty: u, v, or w component values at grid cell centres
+    :rtype: :py:class:`xarray.DataArray`
+    """
+
+    qty = (qty + qty.shift(**{index: 1})) / 2
+
+    return qty
+
 
 def process_grid(file_paths, datatype, filename, groupname, compression_level, weighting_matrix_obj=None):
     accumulator = 1
@@ -94,7 +113,7 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
             datetimelist = data.time_counter.values.astype('datetime64[s]').astype(datetime)
         datearrays = produce_datearray(datetimelist); del(datetimelist)
         if datatype is 'ocean_velocity_u':
-            data = viz_tools.unstagger_xarray(data.vozocrtx, 'x').values
+            data = unstagger_xarray(data.vozocrtx, 'x').values
             data = mung_array(data, '3D')
             metadata = {
                 'FillValue' : numpy.array([0.]),
@@ -103,7 +122,7 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
                 'Units' : b'm/s'
                 }
         elif datatype is 'ocean_velocity_v':
-            data = viz_tools.unstagger_xarray(data.vomecrty, 'y').values
+            data = unstagger_xarray(data.vomecrty, 'y').values
             data = mung_array(data, '3D')
             metadata = {
                 'FillValue' : numpy.array([0.]),
