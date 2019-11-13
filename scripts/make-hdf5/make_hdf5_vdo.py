@@ -107,7 +107,7 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
     print(f'Writing {groupname} to {filename}...')
     for file_path in file_paths:
         data = xarray.open_dataset(file_path)
-        if datatype in ('mean_wave_period', 'significant_wave_height', 'whitecap_coverage', 'stokesU', 'stokesV'):
+        if datatype in ('mean_wave_period','mean_wave_length','significant_wave_height', 'whitecap_coverage', 'stokesU', 'stokesV'):
             datetimelist = data.time.values.astype('datetime64[s]').astype(datetime)
         else:
             datetimelist = data.time_counter.values.astype('datetime64[s]').astype(datetime)
@@ -139,6 +139,15 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
                 'Minimum' : numpy.array([-5.]),
                 'Units' : b'm/s'
                 }
+        elif datatype is "vert_eddy_diff":
+            data = data.vert_eddy_diff.values
+            data = mung_array(data, "3D")
+            metadata = {
+                "FillValue": numpy.array([0.0]),
+                "Maximum": numpy.array([5.0]),
+                "Minimum": numpy.array([0.0]),
+                "Units": b"m2/s",
+            }
         elif datatype is 'salinity':
             data = data.vosaline.values
             data = mung_array(data, '3D')
@@ -206,6 +215,16 @@ def process_grid(file_paths, datatype, filename, groupname, compression_level, w
                 'Minimum' : numpy.array([0.]),
                 'Units' : b's'
                 }
+        elif datatype is "mean_wave_length":
+            data = data.lm.values
+            data = mohid_interpolate.wavewatch(data, weighting_matrix_obj)
+            data = mung_array(data, "2D")
+            metadata = {
+                "FillValue": numpy.array([0.0]),
+                "Maximum": numpy.array([3200.0]),
+                "Minimum": numpy.array([0.0]),
+                "Units": b"m",
+            }
         elif datatype is 'significant_wave_height':
             data = data.hs.values
             data = mohid_interpolate.wavewatch(data, weighting_matrix_obj)
@@ -351,12 +370,15 @@ def create_hdf5():
         currents_u = salish_seacast_forcing.get('currents').get('currents_u_hdf5_filename')
         currents_v = salish_seacast_forcing.get('currents').get('currents_v_hdf5_filename')
         vertical_velocity = salish_seacast_forcing.get('vertical_velocity').get('hdf5_filename')
+        diffusivity = salish_seacast_forcing.get("diffusivity").get(
+            "hdf5_filename"
+        )
         salinity = salish_seacast_forcing.get('salinity').get('hdf5_filename')
         temperature = salish_seacast_forcing.get('temperature').get('hdf5_filename')
         sea_surface_height = salish_seacast_forcing.get('sea_surface_height').get('hdf5_filename')
         e3t = salish_seacast_forcing.get('e3t').get('hdf5_filename')
 
-        for parameter in (currents_u, currents_v, vertical_velocity, salinity, temperature, sea_surface_height, e3t):
+        for parameter in (currents_u, currents_v, vertical_velocity, diffusivity, salinity, temperature, sea_surface_height, e3t):
             if ((parameter is not None) and (salishseacast_path is None)):
                 print('Path to SalishSeacast forcing not provided'); return
             elif (parameter is not None):
@@ -384,11 +406,12 @@ def create_hdf5():
 
     whitecap_coverage = wavewatch3_forcing.get('whitecap_coverage').get('hdf5_filename')
     mean_wave_period = wavewatch3_forcing.get('mean_wave_period').get('hdf5_filename')
+    mean_wave_length = wavewatch3_forcing.get("mean_wave_length").get("hdf5_filename")
     significant_wave_height = wavewatch3_forcing.get('significant_wave_height').get('hdf5_filename')
     stokesU = wavewatch3_forcing.get('stokesU').get('hdf5_filename')
     stokesV = wavewatch3_forcing.get('stokesV').get('hdf5_filename')
 
-    for parameter in  (whitecap_coverage, mean_wave_period, significant_wave_height, stokesU, stokesV):
+    for parameter in  (whitecap_coverage, mean_wave_period, mean_wave_length, significant_wave_height, stokesU, stokesV):
         if (parameter is not None):
             if (wavewatch3_path is None):
                 print('Path to WaveWatch3 forcing not provided'); return
@@ -425,6 +448,12 @@ def create_hdf5():
             vertical_velocity_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_W')
             if not vertical_velocity_list:
                 return
+        if diffusivity is not None:
+            diffusivity_list = forcing_paths.salishseacast_paths(
+                date_begin, date_end, salishseacast_path, "grid_W"
+            )
+            if not diffusivity_list:
+                return
         if temperature is not None:
             temperature_list = forcing_paths.salishseacast_paths(date_begin, date_end, salishseacast_path, 'grid_T')
             if not temperature_list:
@@ -458,6 +487,12 @@ def create_hdf5():
         if mean_wave_period is not None:
             mean_wave_period_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
             if not mean_wave_period_list:
+                return
+        if mean_wave_length is not None:
+            mean_wave_length_list = forcing_paths.ww3_paths(
+                date_begin, date_end, wavewatch3_path
+            )
+            if not mean_wave_length_list:
                 return
         if significant_wave_height is not None:
             significant_wave_height_list = forcing_paths.ww3_paths(date_begin, date_end, wavewatch3_path)
@@ -494,64 +529,39 @@ def create_hdf5():
 
     print(f'\nOutput directory {dirname} created\n')
 
-    stats = open(dirname + '/stats.txt', 'w+')
-    SSGridY = 343
-    SSGridX = 250
-    stats.write('Salish Sea Y X ='+ str(SSGridY) + ' ' + str(SSGridX) + ',mean,min,max,std') 
 
     # Now that everything is in place, we can start generating the .hdf5 files
     if salish_seacast_forcing is not None:
         if currents_u is not None:
             process_grid(currents_u_list, 'ocean_velocity_u', dirname+currents_u, 'velocity U', compression_level)
-            timeseries_vu = numpy.array([])
-            with h5py.File(dirname + '/' + currents_u, 'r') as f:
-                for key in list(f['Results']['velocity U'].keys()):
-                    timeseries_vu = numpy.append(timeseries_vu, f['Results']['velocity U'][key][-1,SSGridX-1,SSGridY-1])
-            stats.write('\ncurrents U,'+ '%.4g' % numpy.mean(timeseries_vu) + ','+ '%.4g' % numpy.min(timeseries_vu) + ','+ '%.4g' % numpy.max(timeseries_vu) + ','+ '%.4g' % numpy.std(timeseries_vu))
 
         if currents_v is not None:
             process_grid(currents_v_list, 'ocean_velocity_v', dirname+currents_v, 'velocity V', compression_level)
-            timeseries_vv = numpy.array([])
-            with h5py.File(dirname + '/' + currents_v, 'r') as f:
-                for key in list(f['Results']['velocity V'].keys()):
-                    timeseries_vv = numpy.append(timeseries_vv, f['Results']['velocity V'][key][-1,SSGridX-1,SSGridY-1])
-            stats.write('\ncurrents V,'+ "%.4g" % numpy.mean(timeseries_vv) + ',' + "%.4g" % numpy.min(timeseries_vv) + ',' + "%.4g" % numpy.max(timeseries_vv) + ',' + "%.4g" % numpy.std(timeseries_vv))
 
         if vertical_velocity is not None:
             process_grid(vertical_velocity_list, 'ocean_velocity_w', dirname+vertical_velocity, 'velocity W', compression_level)
 
-            timeseries_vw = numpy.array([])
-            with h5py.File(dirname + '/' + vertical_velocity, 'r') as f:
-                for key in list(f['Results']['velocity W'].keys()):
-                    timeseries_vw = numpy.append(timeseries_vw, f['Results']['velocity W'][key][-1,SSGridX-1,SSGridY-1])
-            stats.write('\ncurrents W,'+ "%.4g" % numpy.mean(timeseries_vw) + ',' + "%.4g" % numpy.min(timeseries_vw) + ',' + "%.4g" % numpy.max(timeseries_vw) + ',' + "%.4g" % numpy.std(timeseries_vw))
+        
+        if diffusivity is not None:
+            process_grid(
+                diffusivity_list,
+                "vert_eddy_diff",
+                dirname + diffusivity,
+                "Diffusivity",
+                compression_level,
+            )
 
         if temperature is not None:
             process_grid(temperature_list, 'temperature', dirname+temperature, 'temperature', compression_level)
 
-            timeseries_t = numpy.array([])
-            with h5py.File(dirname + '/' + temperature, 'r') as f:
-                for key in list(f['Results']['temperature'].keys()):
-                    timeseries_t = numpy.append(timeseries_t, f['Results']['temperature'][key][-1,SSGridX-1,SSGridY-1])
-            stats.write('\ntemperature,'+ "%.4g" % numpy.mean(timeseries_t) + ',' + "%.4g" % numpy.min(timeseries_t) + ',' + "%.4g" % numpy.max(timeseries_t) + ',' + "%.4g" % numpy.std(timeseries_t))
 
         if salinity is not None:
             process_grid(salinity_list, 'salinity', dirname+salinity, 'salinity', compression_level)
 
-            timeseries_s = numpy.array([])
-            with h5py.File(dirname + '/' + salinity, 'r') as f:
-                for key in list(f['Results']['salinity'].keys()):
-                    timeseries_s = numpy.append(timeseries_s, f['Results']['salinity'][key][-1,SSGridX-1,SSGridY-1])
-            stats.write('\nsalinity,'+ "%.4g" % numpy.mean(timeseries_s) + ',' + "%.4g" % numpy.min(timeseries_s) + ',' + "%.4g" % numpy.max(timeseries_s) + ',' + "%.4g" % numpy.std(timeseries_s))
 
         if sea_surface_height is not None:
             process_grid(sea_surface_height_list, 'sea_surface_height', dirname+sea_surface_height, 'water level', compression_level)
 
-            timeseries_ssh = numpy.array([])
-            with h5py.File(dirname + '/' + sea_surface_height, 'r') as f:
-                for key in list(f['Results']['water level'].keys()):
-                    timeseries_ssh = numpy.append(timeseries_ssh, f['Results']['water level'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nsea surface height,'+ "%.4g" % numpy.mean(timeseries_ssh) + ',' + "%.4g" % numpy.min(timeseries_ssh) + ',' + "%.4g" % numpy.max(timeseries_ssh) + ',' + "%.4g" % numpy.std(timeseries_ssh))
 
         if e3t is not None:
             process_grid(e3t_list, 'e3t', dirname+e3t, 'vvl', compression_level)
@@ -559,65 +569,39 @@ def create_hdf5():
         if wind_u is not None:
             process_grid(wind_u_list, 'wind_velocity_u', dirname+wind_u, 'wind velocity X', compression_level, wind_weights)
 
-            timeseries_wu = numpy.array([])
-            with h5py.File(dirname + '/' + wind_u, 'r') as f:
-                for key in list(f['Results']['wind velocity X'].keys()):
-                    timeseries_wu = numpy.append(timeseries_wu, f['Results']['wind velocity X'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nwinds u,'+ "%.4g" % numpy.mean(timeseries_wu) + ',' + "%.4g" % numpy.min(timeseries_wu) + ',' + "%.4g" % numpy.max(timeseries_wu) + ',' + "%.4g" % numpy.std(timeseries_wu)) 
 
         if wind_v is not None:
             process_grid(wind_v_list, 'wind_velocity_v', dirname+wind_v, 'wind velocity Y', compression_level, wind_weights)
 
-            timeseries_wv = numpy.array([])
-            with h5py.File(dirname + '/' + wind_v, 'r') as f:
-                for key in list(f['Results']['wind velocity Y'].keys()):
-                    timeseries_wv = numpy.append(timeseries_wv, f['Results']['wind velocity Y'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nwind V,'+ "%.4g" % numpy.mean(timeseries_wv) + ',' + "%.4g" % numpy.min(timeseries_wv) + ',' + "%.4g" % numpy.max(timeseries_wv) + ',' + "%.4g" % numpy.std(timeseries_wv))
 
     if wavewatch3_forcing is not None:
         if whitecap_coverage is not None:
             process_grid(whitecap_coverage_list, 'whitecap_coverage', dirname+whitecap_coverage, 'whitecap coverage', compression_level, wave_weights)
 
-            timeseries_wcc = numpy.array([])
-            with h5py.File(dirname + '/' + whitecap_coverage, 'r') as f:
-                for key in list(f['Results']['whitecap coverage'].keys()):
-                    timeseries_wcc = numpy.append(timeseries_wcc, f['Results']['whitecap coverage'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nwhitecap coverage,'+ "%.4g" % numpy.mean(timeseries_wcc) + ',' + "%.4g" % numpy.min(timeseries_wcc) + ',' + "%.4g" % numpy.max(timeseries_wcc) + ',' + "%.4g" % numpy.std(timeseries_wcc))
 
         if mean_wave_period is not None:
             process_grid(mean_wave_period_list, 'mean_wave_period', dirname+mean_wave_period, 'mean wave period', compression_level, wave_weights)
-
-            timeseries_mwp = numpy.array([])
-            with h5py.File(dirname + '/' + mean_wave_period, 'r') as f:
-                for key in list(f['Results']['mean wave period'].keys()):
-                    timeseries_mwp = numpy.append(timeseries_mwp, f['Results']['mean wave period'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nmean wave period,'+ "%.4g" % numpy.mean(timeseries_mwp) + ',' + "%.4g" % numpy.min(timeseries_mwp) + ',' + "%.4g" % numpy.max(timeseries_mwp) + ',' + "%.4g" % numpy.std(timeseries_mwp))
+       
+        if mean_wave_length is not None:
+            process_grid(
+                mean_wave_length_list,
+                "mean_wave_length",
+                dirname + mean_wave_length,
+                "mean wave length",
+                compression_level,
+                wave_weights,
+            )
 
         if significant_wave_height is not None:
             process_grid(significant_wave_height_list, 'significant_wave_height', dirname+significant_wave_height, 'significant wave height', compression_level, wave_weights)
 
-            timeseries_swh = numpy.array([])
-            with h5py.File(dirname + '/' + significant_wave_height, 'r') as f:
-                for key in list(f['Results']['significant wave height'].keys()):
-                    timeseries_swh = numpy.append(timeseries_swh, f['Results']['significant wave height'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nsignificant wave height,'+ "%.4g" % numpy.mean(timeseries_swh) + ',' + "%.4g" % numpy.min(timeseries_swh) + ',' + "%.4g" % numpy.max(timeseries_swh) + ',' + "%.4g" % numpy.std(timeseries_swh))
 
         if stokesU is not None:
             process_grid(stokesU_list, 'stokesU', dirname+stokesU, 'Stokes U', compression_level, wave_weights)
-            timeseries_su = numpy.array([])
-            with h5py.File(dirname + '/' + stokesU, 'r') as f:
-                for key in list(f['Results']['Stokes U'].keys()):
-                    timeseries_su = numpy.append(timeseries_su, f['Results']['Stokes U'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nstokes U,'+ "%.4g" % numpy.mean(timeseries_su) + ',' + "%.4g" % numpy.min(timeseries_su) + ',' + "%.4g" % numpy.max(timeseries_su) + ',' + "%.4g" % numpy.std(timeseries_su))
 
         if stokesV is not None:
             process_grid(stokesV_list, 'stokesV', dirname+stokesV, 'Stokes V', compression_level, wave_weights)
             
-            timeseries_sv = numpy.array([])
-            with h5py.File(dirname + '/' + stokesV, 'r') as f:
-                for key in list(f['Results']['Stokes V'].keys()):
-                    timeseries_sv = numpy.append(timeseries_sv, f['Results']['Stokes V'][key][SSGridX-1,SSGridY-1])
-            stats.write('\nstokes V,'+ "%.4g" % numpy.mean(timeseries_sv) + ',' + "%.4g" % numpy.min(timeseries_sv) + ',' + "%.4g" % numpy.max(timeseries_sv) + ',' + "%.4g" % numpy.std(timeseries_sv))
 
 if __name__ == "__main__":
     create_hdf5()
