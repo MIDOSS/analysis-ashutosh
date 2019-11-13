@@ -21,6 +21,9 @@ salish_seacast_forcing:
   vertical_velocity:
     hdf5_filename: currents.hdf5
 
+  diffusivity:
+    hdf5_filename: diff.hdf5
+
   salinity:
     hdf5_filename: t.hdf5
 
@@ -45,6 +48,9 @@ wavewatch3_forcing:
   mean_wave_period:
     hdf5_filename: waves.hdf5
   
+  mean_wave_length:
+    hdf5_filename: waves.hdf5
+
   significant_wave_height:
     hdf5_filename: waves.hdf5
 
